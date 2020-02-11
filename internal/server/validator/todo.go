@@ -1,7 +1,7 @@
 package validator
 
 import (
-	"github.com/pepeunlimited/rpc-starter-kit/pkg/todorpc"
+	"github.com/pepeunlimited/prices/pkg/todorpc"
 )
 
 type TodoServerValidator struct {}

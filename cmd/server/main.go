@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/pepeunlimited/microservice-kit/headers"
 	"github.com/pepeunlimited/microservice-kit/middleware"
-	"github.com/pepeunlimited/rpc-starter-kit/internal/server/twirp"
-	"github.com/pepeunlimited/rpc-starter-kit/pkg/todorpc"
+	"github.com/pepeunlimited/prices/internal/server/twirp"
+	"github.com/pepeunlimited/prices/pkg/todorpc"
 	"log"
 	"net/http"
 )
@@ -18,7 +18,7 @@ func init() {
 }
 
 func main() {
-	log.Printf("Starting the TodoServer... version=[%v]", Version)
+	log.Printf("Starting the PricesServer... version=[%v]", Version)
 
 	ts := todorpc.NewTodoServiceServer(twirp.NewTodoServer(), nil)
 

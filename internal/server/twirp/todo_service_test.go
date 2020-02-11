@@ -2,7 +2,7 @@ package twirp
 
 import (
 	"context"
-	"github.com/pepeunlimited/rpc-starter-kit/pkg/todorpc"
+	"github.com/pepeunlimited/prices/pkg/todorpc"
 	"testing"
 	"time"
 )

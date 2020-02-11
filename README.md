@@ -1,6 +1,6 @@
-# rpc-stater-kit
+# prices
 
-A starting point project to create `todo`-service
+A starting point project to create `prices`-service
 
 ## Go Directories
 

@@ -2,8 +2,8 @@ package twirp
 
 import (
 	"context"
-	"github.com/pepeunlimited/rpc-starter-kit/internal/server/validator"
-	"github.com/pepeunlimited/rpc-starter-kit/pkg/todorpc"
+	"github.com/pepeunlimited/prices/internal/server/validator"
+	"github.com/pepeunlimited/prices/pkg/todorpc"
 	"github.com/twitchtv/twirp"
 )
 
