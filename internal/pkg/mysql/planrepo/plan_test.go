@@ -2,7 +2,7 @@ package planrepo
 
 import (
 	"context"
-	"github.com/pepeunlimited/billing/internal/pkg/ent"
+	"github.com/pepeunlimited/prices/internal/pkg/ent"
 	"testing"
 	"time"
 )

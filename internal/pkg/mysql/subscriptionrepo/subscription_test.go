@@ -2,8 +2,8 @@ package subscriptionrepo
 
 import (
 	"context"
-	"github.com/pepeunlimited/billing/internal/pkg/ent"
-	"github.com/pepeunlimited/billing/internal/pkg/mysql/planrepo"
+	"github.com/pepeunlimited/prices/internal/pkg/ent"
+	"github.com/pepeunlimited/prices/internal/pkg/mysql/planrepo"
 	"testing"
 	"time"
 )

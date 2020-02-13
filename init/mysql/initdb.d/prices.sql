@@ -7,8 +7,7 @@ USE products;
 #  --------
 CREATE TABLE products (
     id                  BIGINT      NOT NULL AUTO_INCREMENT,
-    type                CHAR(40)    UNIQUE NOT NULL,
-    list_of_places_id   BIGINT      UNIQUE NULL,
+    sku                 CHAR(32)    UNIQUE NOT NULL,
     PRIMARY KEY (id)
 );
 #  -------------
@@ -21,7 +20,7 @@ CREATE TABLE plans (
    unit          CHAR(7)     NOT NULL, #days, weeks, months
    PRIMARY KEY (id)
 );
-# NOTE: not possible set same subscriptions at same time sequence
+# NOTE: not possible set same subscriptions at same time sequence for same plansId
 CREATE TABLE subscriptions (
    id                    BIGINT      NOT NULL AUTO_INCREMENT,
    user_id               BIGINT      NOT NULL,
@@ -34,26 +33,26 @@ CREATE TABLE subscriptions (
 #  ------
 # |prices|
 #  ------
-CREATE TABLE in_app_purchases (
+CREATE TABLE iap_source (
     id                          TINYINT     NOT NULL AUTO_INCREMENT,
-    apple_sku                   CHAR(7)     UNIQUE NULL,
-    google_sku                  CHAR(7)     UNIQUE NULL,
+    in_app_purchase_sku         CHAR(32)    UNIQUE NOT NULL,
+    google_billing_service_sku  CHAR(32)    UNIQUE NULL, # for the future
     start_at                    DATETIME(3) NOT NULL,
     end_at                      DATETIME(3) NOT NULL,
     PRIMARY KEY (id)
 );
-# NOTE: not possible set multiple prices at same time sequence
+# NOTE: not possible set multiple prices at same time sequence for same productId
 CREATE TABLE prices (
     id                                       BIGINT      NOT NULL AUTO_INCREMENT,
     start_at                                 DATETIME(3) NOT NULL,
     end_at                                   DATETIME(3) NOT NULL,
     price                                    MEDIUMINT   UNSIGNED DEFAULT 0,
     discount                                 MEDIUMINT   UNSIGNED DEFAULT 0,
-    product_id                               BIGINT      NULL, # actual product (required)
+    product_prices                           BIGINT      NOT NULL, # actual product
     plans_id                                 BIGINT      NULL, # if the price has option to subscriptions plans
     in_app_purchases_id                      TINYINT     NULL, # if the price has option for additional details of the in app purchases
     FOREIGN KEY (plans_id)                   REFERENCES  plans (id),
-    FOREIGN KEY (product_id)                 REFERENCES  products (id),
-    FOREIGN KEY (in_app_purchases_id)        REFERENCES  in_app_purchases (id),
+    FOREIGN KEY (product_prices)             REFERENCES  products (id),
+    FOREIGN KEY (in_app_purchases_id)        REFERENCES  iap_source (id),
     PRIMARY KEY (id)
 );

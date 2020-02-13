@@ -3,6 +3,9 @@ package planrepo
 import (
 	"context"
 	"errors"
+	"github.com/pepeunlimited/prices/internal/pkg/ent"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
 	"time"
 )
 
@@ -32,9 +35,7 @@ func (mysql planMySQL) GetPlans(ctx context.Context, active bool) ([]*ent.Plan, 
 	query := mysql.client.Plan.Query()
 	now := time.Now().UTC()
 	if active {
-		query.Where(plan.And(
-			plan.StartAtLTE(now),
-			plan.EndAtGTE(now)))
+		query.Where(plan.HasPricesWith(price.And(price.StartAtLTE(now), price.EndAtGTE(now), price.HasPlans())))
 	}
 	return query.All(ctx)
 }
@@ -91,8 +92,6 @@ func (mysql planMySQL) Create(ctx context.Context, startAt time.Time, endAt time
 		client.
 		Plan.
 		Create().
-		SetStartAt(startAt.UTC()).
-		SetEndAt(endAt.UTC()).
 		SetLength(length).
 		SetPriceID(priceId).
 		SetTitleI18nID(titleI18nId).

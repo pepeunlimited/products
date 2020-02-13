@@ -20,14 +20,13 @@ func (Price) Fields() []ent.Field {
 		field.Time("end_at"),
 		field.Uint16("price"),
 		field.Uint16("discount"),
-		field.String("sku").Optional().Unique(),
 	}
 }
 
 func (Price) Edges() []ent.Edge {
 	return []ent.Edge {
 		edge.From("products", Product.Type).Ref("prices").Unique(), // many-to-one
-		edge.From("in_app_purchases", InAppPurchase.Type).Ref("prices").Unique(), // many-to-one
+		edge.From("iap_source", IapSource.Type).Ref("prices").Unique(), // many-to-one
 		edge.From("plans", Plan.Type).Ref("prices").Unique(), // many-to-one
 	}
 }

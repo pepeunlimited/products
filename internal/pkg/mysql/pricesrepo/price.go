@@ -3,25 +3,20 @@ package pricesrepo
 import (
 	"context"
 	"errors"
+	"github.com/pepeunlimited/prices/internal/pkg/clock"
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
-	"math"
+	"log"
 	"time"
 )
 
 var (
-	ErrInvalidDay 		= errors.New("prices: invalid day")
-	ErrInvalidMonth 	= errors.New("prices: invalid month")
-	ErrPriceSkuExist   	= errors.New("prices: sku exist")
-	ErrPriceNotExist  	= errors.New("prices: not exist")
+	ErrPriceNotExist  					= errors.New("prices: not exist")
 )
 
 type PriceRepository interface {
-	GetPriceByID(ctx context.Context, id int) 							  (*ent.Price, error)
-	GetPriceBySku(ctx context.Context, sku string) 						  (*ent.Price, error)
-
-	CreateInitialPrice(ctx context.Context, price uint16, sku *string)    (*ent.Price, error)
-	EndPrice(ctx context.Context, month time.Month, day int, priceId int) (*ent.Price, error)
+	GetPriceByID(ctx context.Context, id int) 							  					  			  (*ent.Price, error)
+	CreateInitialPrice(ctx context.Context, price uint16, productId int, iapSourceId *int, plansId *int)  (*ent.Price, error)
+	EndPrice(ctx context.Context, month time.Month, day int, priceId int) 					  			  (*ent.Price, error)
 	Wipe(ctx context.Context)
 }
 
@@ -40,23 +35,12 @@ func (mysql priceMySQL) GetPriceByID(ctx context.Context, id int) (*ent.Price, e
 	return selected, nil
 }
 
-func (mysql priceMySQL) GetPriceBySku(ctx context.Context, sku string) (*ent.Price, error) {
-	selected, err := mysql.client.Price.Query().Where(price.Sku(sku)).Only(ctx)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return nil, ErrPriceNotExist
-		}
-		return nil, err
-	}
-	return selected, nil
-}
-
 func (mysql priceMySQL) EndPrice(ctx context.Context, month time.Month, day int, priceId int) (*ent.Price, error) {
 	prices, err := mysql.GetPriceByID(ctx, priceId)
 	if err != nil {
 		return nil, err
 	}
-	entAt, err := mysql.toMonthDate(month, day)
+	entAt, err := clock.ToMonthDate(month, day)
 	if err != nil {
 		return nil, err
 	}
@@ -69,22 +53,24 @@ func (mysql priceMySQL) EndPrice(ctx context.Context, month time.Month, day int,
 
 func (mysql priceMySQL) Wipe(ctx context.Context) {
 	mysql.client.Price.Delete().ExecX(ctx)
+	mysql.client.Product.Delete().ExecX(ctx)
 }
 
-func (mysql priceMySQL) CreateInitialPrice(ctx context.Context, price uint16, sku *string) (*ent.Price, error) {
+func (mysql priceMySQL) CreateInitialPrice(ctx context.Context, price uint16, productId int, iapSourceId *int, plansId *int) (*ent.Price, error) {
+	//TODO: check if already exist
 	prices, err := mysql.
 		client.
 		Price.
 		Create().
 		SetPrice(price).
 		SetDiscount(price).
-		SetNillableSku(sku).
-		SetStartAt(mysql.zeroAt()).
-		SetEndAt(mysql.infinityAt()).Save(ctx)
+		SetProductsID(productId).
+		SetStartAt(clock.ZeroAt()).
+		SetEndAt(clock.InfinityAt()).
+		SetNillablePlansID(plansId).
+		SetNillableIapSourceID(iapSourceId).
+		Save(ctx)
 	if err != nil {
-		if ent.IsConstraintError(err) {
-			return nil, ErrPriceSkuExist
-		}
 		return nil, err
 	}
 	return prices, nil
@@ -94,23 +80,16 @@ func NewPriceRepository(client *ent.Client) PriceRepository {
 	return &priceMySQL{client: client}
 }
 
-// 2106-02-07 06:28:15.000
-func (mysql priceMySQL) infinityAt() time.Time {
-	return time.Unix(math.MaxUint32, 0)
+func (mysql priceMySQL) rollback(tx *ent.Tx){
+	if err := tx.Rollback(); err != nil {
+		log.Print("prices: failed execute rollback.."+err.Error())
+	}
 }
 
-// 1970-01-01 00:00:00.000
-func (mysql priceMySQL) zeroAt() time.Time {
-	return time.Unix(0, 0)
-}
-
-func (mysql priceMySQL) toMonthDate(month time.Month, day int) (time.Time, error) {
-	if day <= 0 || day > 31 {
-		return time.Time{}, ErrInvalidDay
+func (mysql priceMySQL) commit(tx *ent.Tx) error {
+	if err := tx.Commit(); err != nil {
+		log.Print("prices: failed execute commit.."+err.Error())
+		return err
 	}
-	if month <= 0 || month > 12 {
-		return time.Time{}, ErrInvalidMonth
-	}
-	current := time.Now().UTC()
-	return time.Date(current.Year(), month, day, 0, 0,0,0, time.UTC), nil
+	return nil
 }

@@ -6,24 +6,24 @@ import (
 	"github.com/facebookincubator/ent/schema/field"
 )
 
-type InAppPurchase struct {
+type IapSource struct {
 	ent.Schema
 }
 
-func (InAppPurchase) Config() ent.Config {
-	return ent.Config{Table:"in_app_purchases"}
+func (IapSource) Config() ent.Config {
+	return ent.Config{Table:"iap_source"}
 }
 
-func (InAppPurchase) Fields() []ent.Field {
+func (IapSource) Fields() []ent.Field {
 	return []ent.Field {
-		field.Int64("apple_sku").Optional().Unique(),
-		field.Int64("google_sku").Optional().Unique(),
+		field.String("in_app_purchase_sku").MaxLen(32).Unique(),
+		field.String("google_billing_service_sku").Optional().MaxLen(32).Unique(),
 		field.Time("start_at"),
 		field.Time("end_at"),
 	}
 }
 
-func (InAppPurchase) Edges() []ent.Edge {
+func (IapSource) Edges() []ent.Edge {
 	return []ent.Edge {
 		edge.To("prices", Price.Type), // one-to-many
 	}

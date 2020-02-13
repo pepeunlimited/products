@@ -3,6 +3,8 @@ package subscriptionrepo
 import (
 	"context"
 	"errors"
+	"github.com/pepeunlimited/prices/internal/pkg/ent"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/subscription"
 	"time"
 )
 
