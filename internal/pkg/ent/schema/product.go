@@ -6,26 +6,25 @@ import (
 	"github.com/facebookincubator/ent/schema/field"
 )
 
-type Price struct {
+type Product struct {
 	ent.Schema
 }
 
-func (Price) Config() ent.Config {
-	return ent.Config{Table:"prices"}
+func (Product) Config() ent.Config {
+	return ent.Config{Table:"products"}
 }
 
-func (Price) Fields() []ent.Field {
+func (Product) Fields() []ent.Field {
 	return []ent.Field {
 		field.Time("start_at"),
 		field.Time("end_at"),
 		field.Uint16("price"),
 		field.Uint16("discount"),
-		field.String("sku").Optional().Unique(),
 	}
 }
 
-func (Price) Edges() []ent.Edge {
+func (Product) Edges() []ent.Edge {
 	return []ent.Edge {
-		edge.From("products", Product.Type).Ref("prices").Unique(), // many-to-one
+		edge.To("prices", Price.Type),     // one-to-many
 	}
 }

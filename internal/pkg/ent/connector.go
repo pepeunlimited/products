@@ -15,7 +15,7 @@ func NewEntClient() *Client {
 	password 	:= misc.GetEnv(sqlz.MysqlRootPassword, "root")
 	host 		:= misc.GetEnv(sqlz.MysqlHost, "localhost")
 	port, _ 	:= strconv.Atoi(misc.GetEnv(sqlz.MysqlPort, "3306"))
-	database 	:= misc.GetEnv(sqlz.MysqlDatabase, "prices")  // <- change this
+	database 	:= misc.GetEnv(sqlz.MysqlDatabase, "products")  // <- change this
 	uri 		:= sqlz.MySQLURI(username, password, host, port, database)
 	client, err := Open(dialect.MySQL, uri)
 	if err != nil {

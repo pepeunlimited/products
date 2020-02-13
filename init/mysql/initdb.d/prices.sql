@@ -1,29 +1,59 @@
-CREATE DATABASE IF NOT EXISTS prices CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS products CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-USE prices;
+USE products;
 
+#  --------
+# |products|
+#  --------
+CREATE TABLE products (
+    id                  BIGINT      NOT NULL AUTO_INCREMENT,
+    type                CHAR(40)    UNIQUE NOT NULL,
+    list_of_places_id   BIGINT      UNIQUE NULL,
+    PRIMARY KEY (id)
+);
+#  -------------
+# |subscriptions|
+#  -------------
+CREATE TABLE plans (
+   id            BIGINT      NOT NULL AUTO_INCREMENT,
+   title_i18n_id BIGINT      NOT NULL,
+   start_at      DATETIME(3) NOT NULL,
+   end_at        DATETIME(3) NOT NULL,
+   length        TINYINT     UNSIGNED NOT NULL,
+   unit          CHAR(7)     NOT NULL, #days, weeks, months, years
+   PRIMARY KEY (id)
+);
+CREATE TABLE subscriptions (
+   id                    BIGINT      NOT NULL AUTO_INCREMENT,
+   user_id               BIGINT      NOT NULL,
+   plan_subscriptions    BIGINT,
+   start_at              DATETIME(3) NOT NULL,
+   end_at                DATETIME(3) NOT NULL,
+   FOREIGN KEY (plan_subscriptions) REFERENCES plans (id),
+   PRIMARY KEY (id)
+);
 #  ------
 # |prices|
 #  ------
-CREATE TABLE google_iap (
-    sku        CHAR(100) NOT NULL,
-    created_at DATETIME(3) NOT NULL,
-    PRIMARY KEY (sku)
-);
-CREATE TABLE apple_iap (
-    sku        CHAR(100) NOT NULL,
-    created_at DATETIME(3) NOT NULL,
-    PRIMARY KEY (sku)
+CREATE TABLE in_app_purchases (
+    id                          TINYINT     NOT NULL AUTO_INCREMENT,
+    apple_sku                   CHAR(7)     UNIQUE NULL,
+    google_sku                  CHAR(7)     UNIQUE NULL,
+    start_at                    DATETIME(3) NOT NULL,
+    end_at                      DATETIME(3) NOT NULL,
+    PRIMARY KEY (id)
 );
 CREATE TABLE prices (
-    id                BIGINT NOT NULL AUTO_INCREMENT,
-    google_iap_prices CHAR(100) NULL,
-    apple_iap_prices  CHAR(100) NULL,
-    start_at          DATETIME(3) NOT NULL,
-    end_at            DATETIME(3) NOT NULL,
-    cost              MEDIUMINT UNSIGNED DEFAULT 0,
-    discount          MEDIUMINT UNSIGNED DEFAULT 0,
-    FOREIGN KEY (google_iap_prices) REFERENCES google_iap (sku),
-    FOREIGN KEY (apple_iap_prices) REFERENCES apple_iap (sku),
+    id                                       BIGINT      NOT NULL AUTO_INCREMENT,
+    start_at                                 DATETIME(3) NOT NULL,
+    end_at                                   DATETIME(3) NOT NULL,
+    price                                    MEDIUMINT   UNSIGNED DEFAULT 0,
+    discount                                 MEDIUMINT   UNSIGNED DEFAULT 0,
+    product_id                               BIGINT      NULL, # actual product
+    plans_id                                 BIGINT      NULL, # if the price has option to subscriptions plans
+    in_app_purchases_id                      TINYINT     NULL, # if the price has additional details of the in app purchases
+    FOREIGN KEY (plans_id)                   REFERENCES  plans (id),
+    FOREIGN KEY (product_id)                 REFERENCES  products (id),
+    FOREIGN KEY (in_app_purchases_id)        REFERENCES  in_app_purchases (id),
     PRIMARY KEY (id)
 );
