@@ -17,12 +17,11 @@ CREATE TABLE products (
 CREATE TABLE plans (
    id            BIGINT      NOT NULL AUTO_INCREMENT,
    title_i18n_id BIGINT      NOT NULL,
-   start_at      DATETIME(3) NOT NULL,
-   end_at        DATETIME(3) NOT NULL,
    length        TINYINT     UNSIGNED NOT NULL,
-   unit          CHAR(7)     NOT NULL, #days, weeks, months, years
+   unit          CHAR(7)     NOT NULL, #days, weeks, months
    PRIMARY KEY (id)
 );
+# NOTE: not possible set same subscriptions at same time sequence
 CREATE TABLE subscriptions (
    id                    BIGINT      NOT NULL AUTO_INCREMENT,
    user_id               BIGINT      NOT NULL,
@@ -43,15 +42,16 @@ CREATE TABLE in_app_purchases (
     end_at                      DATETIME(3) NOT NULL,
     PRIMARY KEY (id)
 );
+# NOTE: not possible set multiple prices at same time sequence
 CREATE TABLE prices (
     id                                       BIGINT      NOT NULL AUTO_INCREMENT,
     start_at                                 DATETIME(3) NOT NULL,
     end_at                                   DATETIME(3) NOT NULL,
     price                                    MEDIUMINT   UNSIGNED DEFAULT 0,
     discount                                 MEDIUMINT   UNSIGNED DEFAULT 0,
-    product_id                               BIGINT      NULL, # actual product
+    product_id                               BIGINT      NULL, # actual product (required)
     plans_id                                 BIGINT      NULL, # if the price has option to subscriptions plans
-    in_app_purchases_id                      TINYINT     NULL, # if the price has additional details of the in app purchases
+    in_app_purchases_id                      TINYINT     NULL, # if the price has option for additional details of the in app purchases
     FOREIGN KEY (plans_id)                   REFERENCES  plans (id),
     FOREIGN KEY (product_id)                 REFERENCES  products (id),
     FOREIGN KEY (in_app_purchases_id)        REFERENCES  in_app_purchases (id),

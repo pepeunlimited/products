@@ -14,5 +14,5 @@ VERSION_SLUG="${VERSION#v}"
 echo "-- Pushing tags $VERSION_SLUG and latest up to dockerhub --"
 echo ""
 
-docker push "pepeunlimited/prices:$VERSION_SLUG"
-docker push "pepeunlimited/prices:latest"
+docker push "pepeunlimited/products:$VERSION_SLUG"
+docker push "pepeunlimited/products:latest"

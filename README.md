@@ -1,6 +1,6 @@
 # prices
 
-A starting point project to create `prices`-service
+A starting point project to create `products`-service
 
 ## Go Directories
 

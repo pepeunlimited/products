@@ -16,10 +16,7 @@ func (Product) Config() ent.Config {
 
 func (Product) Fields() []ent.Field {
 	return []ent.Field {
-		field.Time("start_at"),
-		field.Time("end_at"),
-		field.Uint16("price"),
-		field.Uint16("discount"),
+		field.String("name"),
 	}
 }
 

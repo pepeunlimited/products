@@ -18,7 +18,7 @@ func init() {
 }
 
 func main() {
-	log.Printf("Starting the PricesServer... version=[%v]", Version)
+	log.Printf("Starting the ProductsServer... version=[%v]", Version)
 
 	ts := todorpc.NewTodoServiceServer(twirp.NewTodoServer(), nil)
 
