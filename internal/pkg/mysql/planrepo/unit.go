@@ -28,6 +28,6 @@ func PlanUnitFromString(types string) Unit {
 	case "years":
 		return 5
 	default:
-		return 0
+		return 1
 	}
 }
