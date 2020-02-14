@@ -1,10 +1,11 @@
-package pricesrepo
+package pricerepo
 
 import (
 	"context"
 	"errors"
 	"github.com/pepeunlimited/prices/internal/pkg/clock"
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
 	"log"
@@ -22,6 +23,7 @@ type PriceRepository interface {
 	GetPriceByProductIDAndTime(ctx context.Context, productId int, now time.Time) 						  (*ent.Price, error)
 	GetPricesByProductID(ctx context.Context, productId int) 							  				  ([]*ent.Price, error)
 	GetPriceByID(ctx context.Context, id int) 							  					  			  (*ent.Price, error)
+	GetPricesByPlanId(ctx context.Context, planId int) 							  					  	  ([]*ent.Price, error)
 
 	CreateNewPrice(ctx context.Context, price uint16, productId int, iapSourceId *int, plansId *int)  	  (*ent.Price, error)
 	CreatePrice(ctx context.Context, price uint16, productId int, startAt time.Time, endAt time.Time, iapSourceId *int, plansId *int)  (*ent.Price, error)
@@ -32,6 +34,14 @@ type PriceRepository interface {
 
 type priceMySQL struct {
 	client *ent.Client
+}
+
+func (mysql priceMySQL) GetPricesByPlanId(ctx context.Context, planId int) ([]*ent.Price, error) {
+	plans, err := mysql.client.Price.Query().Where(price.HasPlansWith(plan.ID(planId))).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return plans, nil
 }
 
 func (mysql priceMySQL) GetPriceByProductID(ctx context.Context, productId int) (*ent.Price, error) {
@@ -77,7 +87,24 @@ func (mysql priceMySQL) CreatePrice(ctx context.Context, price uint16, productId
 		SetNillablePlansID(plansId).
 		SetNillableIapSourceID(iapSourceId)
 	// check collision with month and day with existing price
-	if len(prices) > 0 {
+	if plansId != nil {
+		// subscription plans..
+		subscriptionPlans, err := mysql.GetPricesByPlanId(ctx, *plansId)
+		log.Print(len(subscriptionPlans))
+		if err != nil {
+			return nil, err
+		}
+		if len(subscriptionPlans) > 0 {
+			index := len(subscriptionPlans) - 1
+			latestEndAt := subscriptionPlans[index].EndAt
+			if startAt.Unix() < latestEndAt.Unix() {
+				return nil, ErrInvalidStartAt
+			}
+		} else {
+			build.SetStartAt(startAt.Add(1 * time.Second)).SetEndAt(endAt)
+		}
+	} else if len(prices) > 0 {
+		// other products..
 		index := len(prices) - 1
 		latestEndAt := prices[index].EndAt
 		if startAt.Unix() < latestEndAt.Unix() {
@@ -85,6 +112,7 @@ func (mysql priceMySQL) CreatePrice(ctx context.Context, price uint16, productId
 		}
 		build.SetStartAt(startAt.Add(1 * time.Second)).SetEndAt(endAt)
 	} else {
+		// initial..
 		build.SetStartAt(startAt).SetEndAt(endAt)
 	}
 	created, err := build.Save(ctx)
@@ -130,8 +158,9 @@ func (mysql priceMySQL) EndAt(ctx context.Context, month time.Month, day int, pr
 }
 
 func (mysql priceMySQL) Wipe(ctx context.Context) {
-	mysql.client.IapSource.Delete().ExecX(ctx)
+	mysql.client.Plan.Delete().ExecX(ctx)
 	mysql.client.Price.Delete().ExecX(ctx)
+	mysql.client.IapSource.Delete().ExecX(ctx)
 	mysql.client.Product.Delete().ExecX(ctx)
 }
 

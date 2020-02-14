@@ -49,9 +49,9 @@ CREATE TABLE prices (
     price                                    MEDIUMINT   UNSIGNED DEFAULT 0,
     discount                                 MEDIUMINT   UNSIGNED DEFAULT 0,
     product_prices                           BIGINT      NOT NULL, # actual product
-    plans_id                                 BIGINT      NULL, # if the price has option to subscriptions plans
+    plan_prices                              BIGINT      NULL, # if the price has option to subscriptions plans
     iap_source_prices                        TINYINT     NULL, # if the price has option for additional details of the in app purchases
-    FOREIGN KEY (plans_id)                   REFERENCES  plans (id),
+    FOREIGN KEY (plan_prices)                REFERENCES  plans (id),
     FOREIGN KEY (product_prices)             REFERENCES  products (id),
     FOREIGN KEY (iap_source_prices)          REFERENCES  iap_source (id),
     PRIMARY KEY (id)

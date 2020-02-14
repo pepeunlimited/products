@@ -17,8 +17,6 @@ type Plan struct {
 	ID int `json:"id,omitempty"`
 	// TitleI18nID holds the value of the "title_i18n_id" field.
 	TitleI18nID int64 `json:"title_i18n_id,omitempty"`
-	// PriceID holds the value of the "price_id" field.
-	PriceID int64 `json:"price_id,omitempty"`
 	// Length holds the value of the "length" field.
 	Length uint8 `json:"length,omitempty"`
 	// Unit holds the value of the "unit" field.
@@ -62,7 +60,6 @@ func (*Plan) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{},  // id
 		&sql.NullInt64{},  // title_i18n_id
-		&sql.NullInt64{},  // price_id
 		&sql.NullInt64{},  // length
 		&sql.NullString{}, // unit
 	}
@@ -86,17 +83,12 @@ func (pl *Plan) assignValues(values ...interface{}) error {
 		pl.TitleI18nID = value.Int64
 	}
 	if value, ok := values[1].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field price_id", values[1])
-	} else if value.Valid {
-		pl.PriceID = value.Int64
-	}
-	if value, ok := values[2].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field length", values[2])
+		return fmt.Errorf("unexpected type %T for field length", values[1])
 	} else if value.Valid {
 		pl.Length = uint8(value.Int64)
 	}
-	if value, ok := values[3].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field unit", values[3])
+	if value, ok := values[2].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field unit", values[2])
 	} else if value.Valid {
 		pl.Unit = value.String
 	}
@@ -138,8 +130,6 @@ func (pl *Plan) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", pl.ID))
 	builder.WriteString(", title_i18n_id=")
 	builder.WriteString(fmt.Sprintf("%v", pl.TitleI18nID))
-	builder.WriteString(", price_id=")
-	builder.WriteString(fmt.Sprintf("%v", pl.PriceID))
 	builder.WriteString(", length=")
 	builder.WriteString(fmt.Sprintf("%v", pl.Length))
 	builder.WriteString(", unit=")

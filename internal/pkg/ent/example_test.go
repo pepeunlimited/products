@@ -89,7 +89,6 @@ func ExamplePlan() {
 	pl := client.Plan.
 		Create().
 		SetTitleI18nID(1).
-		SetPriceID(1).
 		SetLength(1).
 		SetUnit("string").
 		AddSubscriptions(s0).

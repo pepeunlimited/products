@@ -18,7 +18,6 @@ func (Plan) Config() ent.Config {
 func (Plan) Fields() []ent.Field {
 	return []ent.Field {
 		field.Int64("title_i18n_id"),
-		field.Int64("price_id").Unique(),
 		field.Uint8("length"),
 		field.String("unit").MaxLen(7),
 	}

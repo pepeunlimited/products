@@ -27,7 +27,6 @@ var (
 	PlansColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "title_i18n_id", Type: field.TypeInt64},
-		{Name: "price_id", Type: field.TypeInt64, Unique: true},
 		{Name: "length", Type: field.TypeUint8},
 		{Name: "unit", Type: field.TypeString, Size: 7},
 	}

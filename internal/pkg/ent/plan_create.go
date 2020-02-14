@@ -18,7 +18,6 @@ import (
 type PlanCreate struct {
 	config
 	title_i18n_id *int64
-	price_id      *int64
 	length        *uint8
 	unit          *string
 	subscriptions map[int]struct{}
@@ -28,12 +27,6 @@ type PlanCreate struct {
 // SetTitleI18nID sets the title_i18n_id field.
 func (pc *PlanCreate) SetTitleI18nID(i int64) *PlanCreate {
 	pc.title_i18n_id = &i
-	return pc
-}
-
-// SetPriceID sets the price_id field.
-func (pc *PlanCreate) SetPriceID(i int64) *PlanCreate {
-	pc.price_id = &i
 	return pc
 }
 
@@ -94,9 +87,6 @@ func (pc *PlanCreate) Save(ctx context.Context) (*Plan, error) {
 	if pc.title_i18n_id == nil {
 		return nil, errors.New("ent: missing required field \"title_i18n_id\"")
 	}
-	if pc.price_id == nil {
-		return nil, errors.New("ent: missing required field \"price_id\"")
-	}
 	if pc.length == nil {
 		return nil, errors.New("ent: missing required field \"length\"")
 	}
@@ -136,14 +126,6 @@ func (pc *PlanCreate) sqlSave(ctx context.Context) (*Plan, error) {
 			Column: plan.FieldTitleI18nID,
 		})
 		pl.TitleI18nID = *value
-	}
-	if value := pc.price_id; value != nil {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  *value,
-			Column: plan.FieldPriceID,
-		})
-		pl.PriceID = *value
 	}
 	if value := pc.length; value != nil {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

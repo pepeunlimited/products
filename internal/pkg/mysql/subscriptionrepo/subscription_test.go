@@ -23,11 +23,10 @@ func TestSubscriptionMySQL_Create(t *testing.T) {
 	endAt   	:= time.Now().Add(5 * time.Second).UTC()
 	userID  	:= int64(1)
 	titleI18 	:= int64(1)
-	priceID 	:= int64(1)
 	length 		:= uint8(1)
 	unit  		:= planrepo.PlanUnitFromString("days")
 
-	plan, err := plans.Create(ctx, startAt, endAt, titleI18, priceID, length, unit)
+	plan, err := plans.Create(ctx, titleI18, length, unit)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

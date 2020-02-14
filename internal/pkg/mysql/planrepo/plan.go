@@ -16,13 +16,14 @@ var (
 )
 
 type PlanRepository interface {
-	Create(ctx context.Context, startAt time.Time, endAt time.Time, titleI18nId int64, priceId int64, length uint8, unit Unit) (*ent.Plan, error)
+	Create(ctx context.Context, titleI18nId int64, length uint8, unit Unit) (*ent.Plan, error)
 
 	LengthByPlansID(ctx context.Context, startAt time.Time, plansID int) (time.Time, error)
 
 	GetPlansByID(ctx context.Context, plansID int) 						 (*ent.Plan, error)
 	GetPlansByPriceID(ctx context.Context, priceID int64)				 (*ent.Plan, error)
-	GetPlans(ctx context.Context, active bool) 							 ([]*ent.Plan, error)
+	GetPlans(ctx context.Context) 							 			 ([]*ent.Plan, error)
+	GetPlansByTime(ctx context.Context, time time.Time) 				 ([]*ent.Plan, error)
 
 	Wipe(ctx context.Context)
 }
@@ -31,24 +32,25 @@ type planMySQL struct {
 	client *ent.Client
 }
 
-func (mysql planMySQL) GetPlans(ctx context.Context, active bool) ([]*ent.Plan, error) {
-	query := mysql.client.Plan.Query()
+func (mysql planMySQL) GetPlans(ctx context.Context) ([]*ent.Plan, error) {
 	now := time.Now().UTC()
-	if active {
-		query.Where(plan.HasPricesWith(price.And(price.StartAtLTE(now), price.EndAtGTE(now), price.HasPlans())))
-	}
-	return query.All(ctx)
+	return mysql.GetPlansByTime(ctx, now)
+}
+
+func (mysql planMySQL) GetPlansByTime(ctx context.Context, now time.Time) ([]*ent.Plan, error) {
+	return mysql.client.Plan.Query().Where(plan.HasPricesWith(price.And(price.StartAtLTE(now), price.EndAtGTE(now), price.HasPlans()))).All(ctx)
 }
 
 func (mysql planMySQL) GetPlansByPriceID(ctx context.Context, plansID int64) (*ent.Plan, error) {
-	plan, err := mysql.client.Plan.Query().Where(plan.PriceID(plansID)).Only(ctx)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return nil, ErrPlanNotExist
-		}
-		return nil, err
-	}
-	return plan, nil
+	//plan, err := mysql.client.Plan.Query().Where(plan.HasPricesWith().PriceID(plansID)).Only(ctx)
+	//if err != nil {
+	//	if ent.IsNotFound(err) {
+	//		return nil, ErrPlanNotExist
+	//	}
+	//	return nil, err
+	//}
+	//return plan, nil
+	panic("not implemented")
 }
 
 func (mysql planMySQL) GetPlansByID(ctx context.Context, plansID int) (*ent.Plan, error) {
@@ -83,24 +85,22 @@ func (mysql planMySQL) LengthByPlansID(ctx context.Context, startAt time.Time, p
 }
 
 func (mysql planMySQL) Wipe(ctx context.Context) {
-	mysql.client.Subscription.Delete().ExecX(ctx)
+	mysql.client.IapSource.Delete().ExecX(ctx)
+	mysql.client.Price.Delete().ExecX(ctx)
 	mysql.client.Plan.Delete().ExecX(ctx)
+	mysql.client.Product.Delete().ExecX(ctx)
 }
 
-func (mysql planMySQL) Create(ctx context.Context, startAt time.Time, endAt time.Time, titleI18nId int64, priceId int64, length uint8, unit Unit) (*ent.Plan, error) {
+func (mysql planMySQL) Create(ctx context.Context, titleI18nId int64, length uint8, unit Unit) (*ent.Plan, error) {
 	plans, err := mysql.
 		client.
 		Plan.
 		Create().
 		SetLength(length).
-		SetPriceID(priceId).
 		SetTitleI18nID(titleI18nId).
 		SetUnit(unit.String()).
 		Save(ctx)
 	if err != nil {
-		if ent.IsConstraintError(err) {
-			return nil, ErrPriceIDAlreadyExist
-		}
 		return nil, err
 	}
 	return plans, nil

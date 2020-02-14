@@ -3,6 +3,8 @@ package planrepo
 import (
 	"context"
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
+	"github.com/pepeunlimited/prices/internal/pkg/mysql/pricerepo"
+	"github.com/pepeunlimited/prices/internal/pkg/mysql/productrepo"
 	"testing"
 	"time"
 )
@@ -11,14 +13,11 @@ func TestPlanMySQL_Create(t *testing.T) {
 	ctx := context.TODO()
 	repo := NewPlanRepository(ent.NewEntClient())
 
-	startAt := time.Now()
-	endAt 	:= time.Now()
 	titleI18nId := int64(2)
-	priceId := int64(3)
 	length 	:= uint8(2)
 	unit 	:= PlanUnitFromString("weeks")
 
-	plan0, err := repo.Create(ctx, startAt, endAt, titleI18nId, priceId, length, unit)
+	plan0, err := repo.Create(ctx, titleI18nId, length, unit)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -35,12 +34,11 @@ func TestPlanMySQL_LengthByPlansID(t *testing.T) {
 	startAt := time.Now()
 	endAt 	:= time.Now()
 	titleI18nId := int64(2)
-	priceId := int64(3)
 	length 	:= uint8(1)
 
 	// one day
 	unit 	:= PlanUnitFromString("days")
-	planOneDay, err := plans.Create(ctx, startAt, endAt, titleI18nId, priceId, length, unit)
+	planOneDay, err := plans.Create(ctx, titleI18nId, length, unit)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -59,7 +57,7 @@ func TestPlanMySQL_LengthByPlansID(t *testing.T) {
 
 	// one week
 	unit 	= PlanUnitFromString("weeks")
-	planOneWeek, err := plans.Create(ctx, startAt, endAt, titleI18nId, priceId, length, unit)
+	planOneWeek, err := plans.Create(ctx, titleI18nId, length, unit)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -75,7 +73,7 @@ func TestPlanMySQL_LengthByPlansID(t *testing.T) {
 
 	// one month
 	unit 	= PlanUnitFromString("months")
-	planOneMonth, err := plans.Create(ctx, startAt, endAt, titleI18nId, priceId, length, unit)
+	planOneMonth, err := plans.Create(ctx, titleI18nId, length, unit)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -91,7 +89,7 @@ func TestPlanMySQL_LengthByPlansID(t *testing.T) {
 
 	// one year
 	unit 	= PlanUnitFromString("years")
-	planOneYear, err := plans.Create(ctx, startAt, endAt, titleI18nId, priceId, length, unit)
+	planOneYear, err := plans.Create(ctx, titleI18nId, length, unit)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -109,39 +107,30 @@ func TestPlanMySQL_LengthByPlansID(t *testing.T) {
 
 func TestPlanMySQL_GetPlans(t *testing.T) {
 	ctx := context.TODO()
-	plansrepo := NewPlanRepository(ent.NewEntClient())
+	client := ent.NewEntClient()
+	productrepo := productrepo.NewProductRepository(client)
+	pricerepo 	:= pricerepo.NewPriceRepository(client)
+	plansrepo 	:= NewPlanRepository(client)
 	plansrepo.Wipe(ctx)
 
-	now := time.Now()
+	titleI18nId1 	:= int64(1)
+	length 			:= uint8(1)
+	unit 			:= PlanUnitFromString("days")
+	product1,_ 		:= productrepo.CreateProduct(ctx, "sku-1")
 
-	titleI18nId1 := int64(1)
-	titleI18nId2 := int64(2)
-	titleI18nId3 := int64(3)
-	priceId1 := int64(1)
-	priceId2 := int64(2)
-	priceId3 := int64(3)
-	length 	:= uint8(1)
-	unit 	:= PlanUnitFromString("days")
+	plan1,_ := plansrepo.Create(ctx, titleI18nId1, length, unit)
+	plan2,_ := plansrepo.Create(ctx, titleI18nId1, length, unit)
 
-	// active
-	startAt := now
-	endAt 	:= now.Add(10 * time.Second)
-	plansrepo.Create(ctx, startAt, endAt, titleI18nId1, priceId1, length, unit)
-	// before
-	startAt = now.Add(-20 * time.Second)
-	endAt 	= now.Add(-1 * time.Second)
-	plansrepo.Create(ctx, startAt, endAt, titleI18nId2, priceId2, length, unit)
-	// after
-	startAt = now.Add(20 * time.Second)
-	endAt 	= now.Add(30 * time.Second)
-	plansrepo.Create(ctx, startAt, endAt, titleI18nId3, priceId3, length, unit)
+	pricerepo.CreateNewPrice(ctx, uint16(0), product1.ID, nil, &plan1.ID)
+	pricerepo.CreateNewPrice(ctx, uint16(2), product1.ID, nil, &plan2.ID)
+	pricerepo.CreateNewPrice(ctx, uint16(2), product1.ID, nil, &plan2.ID)
 
-	plans, err := plansrepo.GetPlans(ctx, true)
+	plans, err := plansrepo.GetPlans(ctx)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	if len(plans) != 1 {
+	if len(plans) != 2 {
 		t.FailNow()
 	}
 	if plans[0].TitleI18nID != 1 {

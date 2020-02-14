@@ -1,4 +1,4 @@
-package pricesrepo
+package pricerepo
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
 	"github.com/pepeunlimited/prices/internal/pkg/mysql/iapsourcerepo"
 	"github.com/pepeunlimited/prices/internal/pkg/mysql/productrepo"
+	"log"
 	"testing"
 )
 
@@ -85,4 +86,12 @@ func TestPriceMySQL_GetPricesByProductID(t *testing.T) {
 	if selectedCurrent.ID != createCurrent.ID {
 		t.FailNow()
 	}
+
+	id, err := pricerepo.GetPriceByProductID(ctx, product.ID)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	log.Print(id)
+
 }

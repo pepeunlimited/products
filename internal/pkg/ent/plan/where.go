@@ -98,13 +98,6 @@ func TitleI18nID(v int64) predicate.Plan {
 	})
 }
 
-// PriceID applies equality check predicate on the "price_id" field. It's identical to PriceIDEQ.
-func PriceID(v int64) predicate.Plan {
-	return predicate.Plan(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPriceID), v))
-	})
-}
-
 // Length applies equality check predicate on the "length" field. It's identical to LengthEQ.
 func Length(v uint8) predicate.Plan {
 	return predicate.Plan(func(s *sql.Selector) {
@@ -192,82 +185,6 @@ func TitleI18nIDLT(v int64) predicate.Plan {
 func TitleI18nIDLTE(v int64) predicate.Plan {
 	return predicate.Plan(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldTitleI18nID), v))
-	})
-}
-
-// PriceIDEQ applies the EQ predicate on the "price_id" field.
-func PriceIDEQ(v int64) predicate.Plan {
-	return predicate.Plan(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPriceID), v))
-	})
-}
-
-// PriceIDNEQ applies the NEQ predicate on the "price_id" field.
-func PriceIDNEQ(v int64) predicate.Plan {
-	return predicate.Plan(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldPriceID), v))
-	})
-}
-
-// PriceIDIn applies the In predicate on the "price_id" field.
-func PriceIDIn(vs ...int64) predicate.Plan {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Plan(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldPriceID), v...))
-	})
-}
-
-// PriceIDNotIn applies the NotIn predicate on the "price_id" field.
-func PriceIDNotIn(vs ...int64) predicate.Plan {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Plan(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(vs) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldPriceID), v...))
-	})
-}
-
-// PriceIDGT applies the GT predicate on the "price_id" field.
-func PriceIDGT(v int64) predicate.Plan {
-	return predicate.Plan(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldPriceID), v))
-	})
-}
-
-// PriceIDGTE applies the GTE predicate on the "price_id" field.
-func PriceIDGTE(v int64) predicate.Plan {
-	return predicate.Plan(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldPriceID), v))
-	})
-}
-
-// PriceIDLT applies the LT predicate on the "price_id" field.
-func PriceIDLT(v int64) predicate.Plan {
-	return predicate.Plan(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldPriceID), v))
-	})
-}
-
-// PriceIDLTE applies the LTE predicate on the "price_id" field.
-func PriceIDLTE(v int64) predicate.Plan {
-	return predicate.Plan(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldPriceID), v))
 	})
 }
 

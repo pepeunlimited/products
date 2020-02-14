@@ -20,8 +20,6 @@ type PlanUpdate struct {
 	config
 	title_i18n_id        *int64
 	addtitle_i18n_id     *int64
-	price_id             *int64
-	addprice_id          *int64
 	length               *uint8
 	addlength            *uint8
 	unit                 *string
@@ -51,23 +49,6 @@ func (pu *PlanUpdate) AddTitleI18nID(i int64) *PlanUpdate {
 		pu.addtitle_i18n_id = &i
 	} else {
 		*pu.addtitle_i18n_id += i
-	}
-	return pu
-}
-
-// SetPriceID sets the price_id field.
-func (pu *PlanUpdate) SetPriceID(i int64) *PlanUpdate {
-	pu.price_id = &i
-	pu.addprice_id = nil
-	return pu
-}
-
-// AddPriceID adds i to price_id.
-func (pu *PlanUpdate) AddPriceID(i int64) *PlanUpdate {
-	if pu.addprice_id == nil {
-		pu.addprice_id = &i
-	} else {
-		*pu.addprice_id += i
 	}
 	return pu
 }
@@ -239,20 +220,6 @@ func (pu *PlanUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: plan.FieldTitleI18nID,
 		})
 	}
-	if value := pu.price_id; value != nil {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  *value,
-			Column: plan.FieldPriceID,
-		})
-	}
-	if value := pu.addprice_id; value != nil {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  *value,
-			Column: plan.FieldPriceID,
-		})
-	}
 	if value := pu.length; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUint8,
@@ -365,8 +332,6 @@ type PlanUpdateOne struct {
 	id                   int
 	title_i18n_id        *int64
 	addtitle_i18n_id     *int64
-	price_id             *int64
-	addprice_id          *int64
 	length               *uint8
 	addlength            *uint8
 	unit                 *string
@@ -389,23 +354,6 @@ func (puo *PlanUpdateOne) AddTitleI18nID(i int64) *PlanUpdateOne {
 		puo.addtitle_i18n_id = &i
 	} else {
 		*puo.addtitle_i18n_id += i
-	}
-	return puo
-}
-
-// SetPriceID sets the price_id field.
-func (puo *PlanUpdateOne) SetPriceID(i int64) *PlanUpdateOne {
-	puo.price_id = &i
-	puo.addprice_id = nil
-	return puo
-}
-
-// AddPriceID adds i to price_id.
-func (puo *PlanUpdateOne) AddPriceID(i int64) *PlanUpdateOne {
-	if puo.addprice_id == nil {
-		puo.addprice_id = &i
-	} else {
-		*puo.addprice_id += i
 	}
 	return puo
 }
@@ -569,20 +517,6 @@ func (puo *PlanUpdateOne) sqlSave(ctx context.Context) (pl *Plan, err error) {
 			Type:   field.TypeInt64,
 			Value:  *value,
 			Column: plan.FieldTitleI18nID,
-		})
-	}
-	if value := puo.price_id; value != nil {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  *value,
-			Column: plan.FieldPriceID,
-		})
-	}
-	if value := puo.addprice_id; value != nil {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  *value,
-			Column: plan.FieldPriceID,
 		})
 	}
 	if value := puo.length; value != nil {

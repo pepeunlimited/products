@@ -14,15 +14,21 @@ var (
 
 type ProductRepository interface {
 	CreateProduct(ctx context.Context, sku string) 		(*ent.Product, error)
-
 	GetProductBySku(ctx context.Context, sku string) 	(*ent.Product, error)
 	GetProductByID(ctx context.Context, id int) 		(*ent.Product, error)
+	GetProducts(ctx context.Context)
 
 	Wipe(ctx context.Context)
 }
 
 type productMySQL struct {
 	client *ent.Client
+}
+// subscribable 	=> true : false => [plans] => query prices from external service
+// is_iap_source 	=> true : false => [iapsource] => query prices from external service
+//
+func (mysql productMySQL) GetProducts(ctx context.Context) {
+	panic("implement me")
 }
 
 func (mysql productMySQL) GetProductByID(ctx context.Context, id int) (*ent.Product, error) {
@@ -48,8 +54,9 @@ func (mysql productMySQL) GetProductBySku(ctx context.Context, sku string) (*ent
 }
 
 func (mysql productMySQL) Wipe(ctx context.Context) {
-	mysql.client.IapSource.Delete().ExecX(ctx)
+	mysql.client.Plan.Delete().ExecX(ctx)
 	mysql.client.Price.Delete().ExecX(ctx)
+	mysql.client.IapSource.Delete().ExecX(ctx)
 	mysql.client.Product.Delete().ExecX(ctx)
 }
 

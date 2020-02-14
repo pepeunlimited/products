@@ -13,8 +13,6 @@ const (
 	FieldID = "id"
 	// FieldTitleI18nID holds the string denoting the title_i18n_id vertex property in the database.
 	FieldTitleI18nID = "title_i18n_id"
-	// FieldPriceID holds the string denoting the price_id vertex property in the database.
-	FieldPriceID = "price_id"
 	// FieldLength holds the string denoting the length vertex property in the database.
 	FieldLength = "length"
 	// FieldUnit holds the string denoting the unit vertex property in the database.
@@ -42,7 +40,6 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldTitleI18nID,
-	FieldPriceID,
 	FieldLength,
 	FieldUnit,
 }
@@ -51,7 +48,7 @@ var (
 	fields = schema.Plan{}.Fields()
 
 	// descUnit is the schema descriptor for unit field.
-	descUnit = fields[3].Descriptor()
+	descUnit = fields[2].Descriptor()
 	// UnitValidator is a validator for the "unit" field. It is called by the builders before save.
 	UnitValidator = descUnit.Validators[0].(func(string) error)
 )

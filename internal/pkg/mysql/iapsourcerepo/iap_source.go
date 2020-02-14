@@ -22,7 +22,7 @@ type IapSourceRepository interface {
 	Create(ctx context.Context, iapsku string, billingsku *string)  							(*ent.IapSource, error)
 	EndAt(ctx context.Context, month time.Month, day int, id int)								(*ent.IapSource, error)
 	GetSources(ctx context.Context) 										  					([]*ent.IapSource, error)
-	GetSourcesByTime(ctx context.Context, now time.Time) 										  					([]*ent.IapSource, error)
+	GetSourcesByTime(ctx context.Context, now time.Time) 										([]*ent.IapSource, error)
 	Wipe(ctx context.Context)
 }
 
@@ -41,6 +41,7 @@ func (mysql iapSourceMySQL) GetSourcesByTime(ctx context.Context, now time.Time)
 func (mysql iapSourceMySQL) Wipe(ctx context.Context) {
 	mysql.client.IapSource.Delete().ExecX(ctx)
 	mysql.client.Price.Delete().ExecX(ctx)
+	mysql.client.Plan.Delete().ExecX(ctx)
 	mysql.client.Product.Delete().ExecX(ctx)
 }
 
