@@ -20,7 +20,7 @@ CREATE TABLE plans (
    unit          CHAR(7)     NOT NULL, #days, weeks, months
    PRIMARY KEY (id)
 );
-# NOTE: not possible set same subscriptions at same time sequence for same plansId
+# NOTE: not possible set same subscription's time sequence for plansId
 CREATE TABLE subscriptions (
    id                    BIGINT      NOT NULL AUTO_INCREMENT,
    user_id               BIGINT      NOT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE iap_source (
     end_at                      DATETIME(3) NOT NULL,
     PRIMARY KEY (id)
 );
-# NOTE: not possible set multiple prices at same time sequence for same productId
+# NOTE: not possible set multiple price's time sequence for productId
 CREATE TABLE prices (
     id                                       BIGINT      NOT NULL AUTO_INCREMENT,
     start_at                                 DATETIME(3) NOT NULL,
