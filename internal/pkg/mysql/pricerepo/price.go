@@ -26,7 +26,7 @@ type PriceRepository interface {
 	GetPricesByPlanId(ctx context.Context, planId int) 							  					  	  ([]*ent.Price, error)
 
 	CreateNewPrice(ctx context.Context, price uint16, productId int, iapSourceId *int, plansId *int)  	  (*ent.Price, error)
-	CreatePrice(ctx context.Context, price uint16, productId int, startAt time.Time, endAt time.Time, iapSourceId *int, plansId *int)  (*ent.Price, error)
+	CreatePrice(ctx context.Context, price uint16, productId int, startAt time.Time, endAt time.Time, iapSourceId *int, plansId *int) (*ent.Price, error)
 
 	EndAt(ctx context.Context, month time.Month, day int, priceId int) 					  			  (*ent.Price, error)
 	Wipe(ctx context.Context)
@@ -158,9 +158,10 @@ func (mysql priceMySQL) EndAt(ctx context.Context, month time.Month, day int, pr
 }
 
 func (mysql priceMySQL) Wipe(ctx context.Context) {
-	mysql.client.Plan.Delete().ExecX(ctx)
-	mysql.client.Price.Delete().ExecX(ctx)
+	mysql.client.Subscription.Delete().ExecX(ctx)
 	mysql.client.IapSource.Delete().ExecX(ctx)
+	mysql.client.Price.Delete().ExecX(ctx)
+	mysql.client.Plan.Delete().ExecX(ctx)
 	mysql.client.Product.Delete().ExecX(ctx)
 }
 

@@ -18,10 +18,22 @@ type SubscriptionRepository interface {
 	GetSubscriptionByID(ctx context.Context, subscriptionID int) (*ent.Subscription, error)
 	GetSubscriptionPlanByID(ctx context.Context, subscriptionID int) (*ent.Subscription, *ent.Plan, error)
 	GetSubscriptionByUserID(ctx context.Context, userID int64, pageToken int64, pageSize int32) ([]*ent.Subscription, int64, error)
+
+	Wipe(ctx context.Context)
 }
+
+
 
 type subscriptionMySQL struct {
 	client *ent.Client
+}
+
+func (mysql subscriptionMySQL) Wipe(ctx context.Context) {
+	mysql.client.Subscription.Delete().ExecX(ctx)
+	mysql.client.IapSource.Delete().ExecX(ctx)
+	mysql.client.Price.Delete().ExecX(ctx)
+	mysql.client.Plan.Delete().ExecX(ctx)
+	mysql.client.Product.Delete().ExecX(ctx)
 }
 
 func (mysql subscriptionMySQL) GetSubscriptionByID(ctx context.Context, subscriptionID int) (*ent.Subscription, error) {

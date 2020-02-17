@@ -39,8 +39,9 @@ func (mysql iapSourceMySQL) GetSourcesByTime(ctx context.Context, now time.Time)
 }
 
 func (mysql iapSourceMySQL) Wipe(ctx context.Context) {
-	mysql.client.IapSource.Delete().ExecX(ctx)
+	mysql.client.Subscription.Delete().ExecX(ctx)
 	mysql.client.Price.Delete().ExecX(ctx)
+	mysql.client.IapSource.Delete().ExecX(ctx)
 	mysql.client.Plan.Delete().ExecX(ctx)
 	mysql.client.Product.Delete().ExecX(ctx)
 }

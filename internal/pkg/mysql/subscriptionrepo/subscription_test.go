@@ -10,22 +10,18 @@ import (
 
 func TestSubscriptionMySQL_Create(t *testing.T) {
 	client := ent.NewEntClient()
-
 	ctx := context.TODO()
 	subscriptionrepo := NewSubscriptionRepository(client)
 	plans 		 	 := planrepo.NewPlanRepository(client)
 	plans.Wipe(ctx)
-
 	// create the plan
 	// and assign it to subscriptions
-
 	startAt 	:= time.Now().UTC()
 	endAt   	:= time.Now().Add(5 * time.Second).UTC()
 	userID  	:= int64(1)
 	titleI18 	:= int64(1)
 	length 		:= uint8(1)
 	unit  		:= planrepo.PlanUnitFromString("days")
-
 	plan, err := plans.Create(ctx, titleI18, length, unit)
 	if err != nil {
 		t.Error(err)
@@ -37,7 +33,6 @@ func TestSubscriptionMySQL_Create(t *testing.T) {
 		t.FailNow()
 	}
 	subscription, err := subscriptionrepo.Create(ctx, userID, startAt, endAt, plan.ID)
-
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

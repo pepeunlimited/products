@@ -6,7 +6,6 @@ import (
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
 	"github.com/pepeunlimited/prices/internal/pkg/mysql/iapsourcerepo"
 	"github.com/pepeunlimited/prices/internal/pkg/mysql/productrepo"
-	"log"
 	"testing"
 )
 
@@ -43,6 +42,14 @@ func TestPriceMySQL_CreatePrice(t *testing.T) {
 	}
 	endAt,_ := clock.ToMonthDate(2, 12)
 	if !ended.EndAt.Equal(endAt) {
+		t.FailNow()
+	}
+	isSubscribable, err := products.IsSubscribableByID(ctx, product.ID)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	if *isSubscribable {
 		t.FailNow()
 	}
 }
@@ -92,6 +99,15 @@ func TestPriceMySQL_GetPricesByProductID(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	log.Print(id)
-
+	if id == nil {
+		t.FailNow()
+	}
+	isSubscribable, err := productrepo.IsSubscribableByID(ctx, product.ID)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	if *isSubscribable {
+		t.FailNow()
+	}
 }

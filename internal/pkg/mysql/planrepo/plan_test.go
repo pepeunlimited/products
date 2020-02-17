@@ -30,12 +30,10 @@ func TestPlanMySQL_LengthByPlansID(t *testing.T) {
 	ctx := context.TODO()
 	plans := NewPlanRepository(ent.NewEntClient())
 	plans.Wipe(ctx)
-
 	startAt := time.Now()
 	endAt 	:= time.Now()
 	titleI18nId := int64(2)
 	length 	:= uint8(1)
-
 	// one day
 	unit 	:= PlanUnitFromString("days")
 	planOneDay, err := plans.Create(ctx, titleI18nId, length, unit)
@@ -54,7 +52,6 @@ func TestPlanMySQL_LengthByPlansID(t *testing.T) {
 	if !startAt.AddDate(0,0,1).UTC().Equal(endAt) {
 		t.FailNow()
 	}
-
 	// one week
 	unit 	= PlanUnitFromString("weeks")
 	planOneWeek, err := plans.Create(ctx, titleI18nId, length, unit)
@@ -70,7 +67,6 @@ func TestPlanMySQL_LengthByPlansID(t *testing.T) {
 	if !startAt.AddDate(0,0,7).UTC().Equal(endAt) {
 		t.FailNow()
 	}
-
 	// one month
 	unit 	= PlanUnitFromString("months")
 	planOneMonth, err := plans.Create(ctx, titleI18nId, length, unit)
@@ -86,7 +82,6 @@ func TestPlanMySQL_LengthByPlansID(t *testing.T) {
 	if !startAt.AddDate(0,1,0).UTC().Equal(endAt) {
 		t.FailNow()
 	}
-
 	// one year
 	unit 	= PlanUnitFromString("years")
 	planOneYear, err := plans.Create(ctx, titleI18nId, length, unit)
@@ -104,7 +99,6 @@ func TestPlanMySQL_LengthByPlansID(t *testing.T) {
 	}
 }
 
-
 func TestPlanMySQL_GetPlans(t *testing.T) {
 	ctx := context.TODO()
 	client := ent.NewEntClient()
@@ -112,7 +106,6 @@ func TestPlanMySQL_GetPlans(t *testing.T) {
 	pricerepo 	:= pricerepo.NewPriceRepository(client)
 	plansrepo 	:= NewPlanRepository(client)
 	plansrepo.Wipe(ctx)
-
 	titleI18nId1 	:= int64(1)
 	length 			:= uint8(1)
 	unit 			:= PlanUnitFromString("days")
@@ -134,6 +127,14 @@ func TestPlanMySQL_GetPlans(t *testing.T) {
 		t.FailNow()
 	}
 	if plans[0].TitleI18nID != 1 {
+		t.FailNow()
+	}
+	is, err := productrepo.IsSubscribableByID(ctx, product1.ID)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	if !*is {
 		t.FailNow()
 	}
 }
