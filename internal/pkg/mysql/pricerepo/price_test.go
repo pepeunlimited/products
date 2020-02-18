@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/pepeunlimited/prices/internal/pkg/clock"
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/iapsourcerepo"
+	"github.com/pepeunlimited/prices/internal/pkg/mysql/thirdpartyrepo"
 	"github.com/pepeunlimited/prices/internal/pkg/mysql/productrepo"
 	"testing"
 )
@@ -18,8 +18,8 @@ func TestPriceMySQL_CreatePrice(t *testing.T) {
 	repo := NewPriceRepository(client)
 	price := uint16(0)
 
-	iapsource := iapsourcerepo.NewIapSourceRepository(client)
-	iap, err := iapsource.Create(ctx, "apple-sku", nil)
+	thirdParty := thirdpartyrepo.NewThirdPartyRepository(client)
+	iap, err := thirdParty.Create(ctx, "apple-sku", nil)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

@@ -97,7 +97,7 @@ func (mysql productMySQL) GetProductBySku(ctx context.Context, sku string) (*ent
 func (mysql productMySQL) Wipe(ctx context.Context) {
 	mysql.client.Subscription.Delete().ExecX(ctx)
 	mysql.client.Price.Delete().ExecX(ctx)
-	mysql.client.IapSource.Delete().ExecX(ctx)
+	mysql.client.ThirdParty.Delete().ExecX(ctx)
 	mysql.client.Plan.Delete().ExecX(ctx)
 	mysql.client.Product.Delete().ExecX(ctx)
 }

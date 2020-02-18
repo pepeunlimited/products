@@ -26,7 +26,7 @@ func (Price) Fields() []ent.Field {
 func (Price) Edges() []ent.Edge {
 	return []ent.Edge {
 		edge.From("products", Product.Type).Ref("prices").Unique(), // many-to-one
-		edge.From("iap_source", IapSource.Type).Ref("prices").Unique(), // many-to-one
+		edge.From("third_parties", ThirdParty.Type).Ref("prices").Unique(), // many-to-one
 		edge.From("plans", Plan.Type).Ref("prices").Unique(), // many-to-one
 	}
 }

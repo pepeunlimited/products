@@ -453,25 +453,25 @@ func HasProductsWith(preds ...predicate.Product) predicate.Price {
 	})
 }
 
-// HasIapSource applies the HasEdge predicate on the "iap_source" edge.
-func HasIapSource() predicate.Price {
+// HasThirdParties applies the HasEdge predicate on the "third_parties" edge.
+func HasThirdParties() predicate.Price {
 	return predicate.Price(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(IapSourceTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, IapSourceTable, IapSourceColumn),
+			sqlgraph.To(ThirdPartiesTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ThirdPartiesTable, ThirdPartiesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasIapSourceWith applies the HasEdge predicate on the "iap_source" edge with a given conditions (other predicates).
-func HasIapSourceWith(preds ...predicate.IapSource) predicate.Price {
+// HasThirdPartiesWith applies the HasEdge predicate on the "third_parties" edge with a given conditions (other predicates).
+func HasThirdPartiesWith(preds ...predicate.ThirdParty) predicate.Price {
 	return predicate.Price(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(IapSourceInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, IapSourceTable, IapSourceColumn),
+			sqlgraph.To(ThirdPartiesInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ThirdPartiesTable, ThirdPartiesColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

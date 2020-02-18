@@ -9,22 +9,22 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/iapsource"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdparty"
 )
 
 // PriceCreate is the builder for creating a Price entity.
 type PriceCreate struct {
 	config
-	start_at   *time.Time
-	end_at     *time.Time
-	price      *uint16
-	discount   *uint16
-	products   map[int]struct{}
-	iap_source map[int]struct{}
-	plans      map[int]struct{}
+	start_at      *time.Time
+	end_at        *time.Time
+	price         *uint16
+	discount      *uint16
+	products      map[int]struct{}
+	third_parties map[int]struct{}
+	plans         map[int]struct{}
 }
 
 // SetStartAt sets the start_at field.
@@ -73,26 +73,26 @@ func (pc *PriceCreate) SetProducts(p *Product) *PriceCreate {
 	return pc.SetProductsID(p.ID)
 }
 
-// SetIapSourceID sets the iap_source edge to IapSource by id.
-func (pc *PriceCreate) SetIapSourceID(id int) *PriceCreate {
-	if pc.iap_source == nil {
-		pc.iap_source = make(map[int]struct{})
+// SetThirdPartiesID sets the third_parties edge to ThirdParty by id.
+func (pc *PriceCreate) SetThirdPartiesID(id int) *PriceCreate {
+	if pc.third_parties == nil {
+		pc.third_parties = make(map[int]struct{})
 	}
-	pc.iap_source[id] = struct{}{}
+	pc.third_parties[id] = struct{}{}
 	return pc
 }
 
-// SetNillableIapSourceID sets the iap_source edge to IapSource by id if the given value is not nil.
-func (pc *PriceCreate) SetNillableIapSourceID(id *int) *PriceCreate {
+// SetNillableThirdPartiesID sets the third_parties edge to ThirdParty by id if the given value is not nil.
+func (pc *PriceCreate) SetNillableThirdPartiesID(id *int) *PriceCreate {
 	if id != nil {
-		pc = pc.SetIapSourceID(*id)
+		pc = pc.SetThirdPartiesID(*id)
 	}
 	return pc
 }
 
-// SetIapSource sets the iap_source edge to IapSource.
-func (pc *PriceCreate) SetIapSource(i *IapSource) *PriceCreate {
-	return pc.SetIapSourceID(i.ID)
+// SetThirdParties sets the third_parties edge to ThirdParty.
+func (pc *PriceCreate) SetThirdParties(t *ThirdParty) *PriceCreate {
+	return pc.SetThirdPartiesID(t.ID)
 }
 
 // SetPlansID sets the plans edge to Plan by id.
@@ -134,8 +134,8 @@ func (pc *PriceCreate) Save(ctx context.Context) (*Price, error) {
 	if len(pc.products) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"products\"")
 	}
-	if len(pc.iap_source) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"iap_source\"")
+	if len(pc.third_parties) > 1 {
+		return nil, errors.New("ent: multiple assignments on a unique edge \"third_parties\"")
 	}
 	if len(pc.plans) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"plans\"")
@@ -214,17 +214,17 @@ func (pc *PriceCreate) sqlSave(ctx context.Context) (*Price, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pc.iap_source; len(nodes) > 0 {
+	if nodes := pc.third_parties; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   price.IapSourceTable,
-			Columns: []string{price.IapSourceColumn},
+			Table:   price.ThirdPartiesTable,
+			Columns: []string{price.ThirdPartiesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: iapsource.FieldID,
+					Column: thirdparty.FieldID,
 				},
 			},
 		}

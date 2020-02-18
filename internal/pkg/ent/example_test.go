@@ -16,47 +16,6 @@ import (
 //
 var dsn string
 
-func ExampleIapSource() {
-	if dsn == "" {
-		return
-	}
-	ctx := context.Background()
-	drv, err := sql.Open("mysql", dsn)
-	if err != nil {
-		log.Fatalf("failed creating database client: %v", err)
-	}
-	defer drv.Close()
-	client := NewClient(Driver(drv))
-	// creating vertices for the iapsource's edges.
-	pr0 := client.Price.
-		Create().
-		SetStartAt(time.Now()).
-		SetEndAt(time.Now()).
-		SetPrice(1).
-		SetDiscount(1).
-		SaveX(ctx)
-	log.Println("price created:", pr0)
-
-	// create iapsource vertex with its edges.
-	is := client.IapSource.
-		Create().
-		SetInAppPurchaseSku("string").
-		SetGoogleBillingServiceSku("string").
-		SetStartAt(time.Now()).
-		SetEndAt(time.Now()).
-		AddPrices(pr0).
-		SaveX(ctx)
-	log.Println("iapsource created:", is)
-
-	// query edges.
-	pr0, err = is.QueryPrices().First(ctx)
-	if err != nil {
-		log.Fatalf("failed querying prices: %v", err)
-	}
-	log.Println("prices found:", pr0)
-
-	// Output:
-}
 func ExamplePlan() {
 	if dsn == "" {
 		return
@@ -199,6 +158,47 @@ func ExampleSubscription() {
 	log.Println("subscription created:", s)
 
 	// query edges.
+
+	// Output:
+}
+func ExampleThirdParty() {
+	if dsn == "" {
+		return
+	}
+	ctx := context.Background()
+	drv, err := sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatalf("failed creating database client: %v", err)
+	}
+	defer drv.Close()
+	client := NewClient(Driver(drv))
+	// creating vertices for the thirdparty's edges.
+	pr0 := client.Price.
+		Create().
+		SetStartAt(time.Now()).
+		SetEndAt(time.Now()).
+		SetPrice(1).
+		SetDiscount(1).
+		SaveX(ctx)
+	log.Println("price created:", pr0)
+
+	// create thirdparty vertex with its edges.
+	tp := client.ThirdParty.
+		Create().
+		SetInAppPurchaseSku("string").
+		SetGoogleBillingServiceSku("string").
+		SetStartAt(time.Now()).
+		SetEndAt(time.Now()).
+		AddPrices(pr0).
+		SaveX(ctx)
+	log.Println("thirdparty created:", tp)
+
+	// query edges.
+	pr0, err = tp.QueryPrices().First(ctx)
+	if err != nil {
+		log.Fatalf("failed querying prices: %v", err)
+	}
+	log.Println("prices found:", pr0)
 
 	// Output:
 }

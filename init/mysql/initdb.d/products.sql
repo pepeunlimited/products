@@ -33,7 +33,7 @@ CREATE TABLE subscriptions (
 #  ------
 # |prices|
 #  ------
-CREATE TABLE iap_source (
+CREATE TABLE third_parties (
     id                          TINYINT     NOT NULL AUTO_INCREMENT,
     in_app_purchase_sku         CHAR(32)    UNIQUE NOT NULL,
     google_billing_service_sku  CHAR(32)    UNIQUE NULL, # for the future
@@ -50,9 +50,9 @@ CREATE TABLE prices (
     discount                                 MEDIUMINT   UNSIGNED DEFAULT 0,
     product_prices                           BIGINT      NOT NULL, # actual product
     plan_prices                              BIGINT      NULL, # if the price has option to subscriptions plans
-    iap_source_prices                        TINYINT     NULL, # if the price has option for additional details of the in app purchases
+    third_party_prices                       TINYINT     NULL, # if the price has option for additional details of the in app purchases
     FOREIGN KEY (plan_prices)                REFERENCES  plans (id),
     FOREIGN KEY (product_prices)             REFERENCES  products (id),
-    FOREIGN KEY (iap_source_prices)          REFERENCES  iap_source (id),
+    FOREIGN KEY (third_party_prices)         REFERENCES  third_parties (id),
     PRIMARY KEY (id)
 );

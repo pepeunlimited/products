@@ -25,13 +25,13 @@ const (
 	ProductsInverseTable = "products"
 	// ProductsColumn is the table column denoting the products relation/edge.
 	ProductsColumn = "product_prices"
-	// IapSourceTable is the table the holds the iap_source relation/edge.
-	IapSourceTable = "prices"
-	// IapSourceInverseTable is the table name for the IapSource entity.
-	// It exists in this package in order to avoid circular dependency with the "iapsource" package.
-	IapSourceInverseTable = "iap_source"
-	// IapSourceColumn is the table column denoting the iap_source relation/edge.
-	IapSourceColumn = "iap_source_prices"
+	// ThirdPartiesTable is the table the holds the third_parties relation/edge.
+	ThirdPartiesTable = "prices"
+	// ThirdPartiesInverseTable is the table name for the ThirdParty entity.
+	// It exists in this package in order to avoid circular dependency with the "thirdparty" package.
+	ThirdPartiesInverseTable = "third_parties"
+	// ThirdPartiesColumn is the table column denoting the third_parties relation/edge.
+	ThirdPartiesColumn = "third_party_prices"
 	// PlansTable is the table the holds the plans relation/edge.
 	PlansTable = "prices"
 	// PlansInverseTable is the table name for the Plan entity.
@@ -52,7 +52,7 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Price type.
 var ForeignKeys = []string{
-	"iap_source_prices",
 	"plan_prices",
 	"product_prices",
+	"third_party_prices",
 }

@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package pepeunlimited.products;
+option go_package = "thirdpartyrpc";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+// https://github.com/protocolbuffers/protobuf/blob/master/src/google/protobuf/wrappers.proto
+
+service ThirdPartyPriceService {
+
+    rpc CreateThirdParty(CreateThirdPartyParams)              returns (ThirdParty);
+
+    rpc GetThirdParties(GetThirdPartiesParams)                returns (GetThirdPartiesResponse);
+
+    rpc GetThirdParty(GetThirdPartyParams)                    returns (ThirdParty);
+}
+
+message GetThirdPartyParams {
+    int32  id                          = 1; // at least one is required
+    string in_app_purchase_sku         = 2; // at least one is required
+    string google_billing_service_sku  = 3; // at least one is required
+}
+
+message CreateThirdPartyParams {
+    string in_app_purchase_sku          = 1;
+    string google_billing_service_sku   = 2;
+    int32  start_at_month               = 3; // optional
+    int32  start_at_day                 = 4; // optional
+}
+
+message GetThirdPartiesParams {}
+
+message ThirdParty {
+    int32  id                           = 1;
+    string in_app_purchase_sku          = 2;
+    string google_billing_service_sku   = 3;
+    string start_at                     = 4;
+    string end_at                       = 5;
+}
+
+message GetThirdPartiesResponse {
+    repeated ThirdParty third_parties = 1;
+}

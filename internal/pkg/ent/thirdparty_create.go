@@ -10,12 +10,12 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/iapsource"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdparty"
 )
 
-// IapSourceCreate is the builder for creating a IapSource entity.
-type IapSourceCreate struct {
+// ThirdPartyCreate is the builder for creating a ThirdParty entity.
+type ThirdPartyCreate struct {
 	config
 	in_app_purchase_sku        *string
 	google_billing_service_sku *string
@@ -25,137 +25,137 @@ type IapSourceCreate struct {
 }
 
 // SetInAppPurchaseSku sets the in_app_purchase_sku field.
-func (isc *IapSourceCreate) SetInAppPurchaseSku(s string) *IapSourceCreate {
-	isc.in_app_purchase_sku = &s
-	return isc
+func (tpc *ThirdPartyCreate) SetInAppPurchaseSku(s string) *ThirdPartyCreate {
+	tpc.in_app_purchase_sku = &s
+	return tpc
 }
 
 // SetGoogleBillingServiceSku sets the google_billing_service_sku field.
-func (isc *IapSourceCreate) SetGoogleBillingServiceSku(s string) *IapSourceCreate {
-	isc.google_billing_service_sku = &s
-	return isc
+func (tpc *ThirdPartyCreate) SetGoogleBillingServiceSku(s string) *ThirdPartyCreate {
+	tpc.google_billing_service_sku = &s
+	return tpc
 }
 
 // SetNillableGoogleBillingServiceSku sets the google_billing_service_sku field if the given value is not nil.
-func (isc *IapSourceCreate) SetNillableGoogleBillingServiceSku(s *string) *IapSourceCreate {
+func (tpc *ThirdPartyCreate) SetNillableGoogleBillingServiceSku(s *string) *ThirdPartyCreate {
 	if s != nil {
-		isc.SetGoogleBillingServiceSku(*s)
+		tpc.SetGoogleBillingServiceSku(*s)
 	}
-	return isc
+	return tpc
 }
 
 // SetStartAt sets the start_at field.
-func (isc *IapSourceCreate) SetStartAt(t time.Time) *IapSourceCreate {
-	isc.start_at = &t
-	return isc
+func (tpc *ThirdPartyCreate) SetStartAt(t time.Time) *ThirdPartyCreate {
+	tpc.start_at = &t
+	return tpc
 }
 
 // SetEndAt sets the end_at field.
-func (isc *IapSourceCreate) SetEndAt(t time.Time) *IapSourceCreate {
-	isc.end_at = &t
-	return isc
+func (tpc *ThirdPartyCreate) SetEndAt(t time.Time) *ThirdPartyCreate {
+	tpc.end_at = &t
+	return tpc
 }
 
 // AddPriceIDs adds the prices edge to Price by ids.
-func (isc *IapSourceCreate) AddPriceIDs(ids ...int) *IapSourceCreate {
-	if isc.prices == nil {
-		isc.prices = make(map[int]struct{})
+func (tpc *ThirdPartyCreate) AddPriceIDs(ids ...int) *ThirdPartyCreate {
+	if tpc.prices == nil {
+		tpc.prices = make(map[int]struct{})
 	}
 	for i := range ids {
-		isc.prices[ids[i]] = struct{}{}
+		tpc.prices[ids[i]] = struct{}{}
 	}
-	return isc
+	return tpc
 }
 
 // AddPrices adds the prices edges to Price.
-func (isc *IapSourceCreate) AddPrices(p ...*Price) *IapSourceCreate {
+func (tpc *ThirdPartyCreate) AddPrices(p ...*Price) *ThirdPartyCreate {
 	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return isc.AddPriceIDs(ids...)
+	return tpc.AddPriceIDs(ids...)
 }
 
-// Save creates the IapSource in the database.
-func (isc *IapSourceCreate) Save(ctx context.Context) (*IapSource, error) {
-	if isc.in_app_purchase_sku == nil {
+// Save creates the ThirdParty in the database.
+func (tpc *ThirdPartyCreate) Save(ctx context.Context) (*ThirdParty, error) {
+	if tpc.in_app_purchase_sku == nil {
 		return nil, errors.New("ent: missing required field \"in_app_purchase_sku\"")
 	}
-	if err := iapsource.InAppPurchaseSkuValidator(*isc.in_app_purchase_sku); err != nil {
+	if err := thirdparty.InAppPurchaseSkuValidator(*tpc.in_app_purchase_sku); err != nil {
 		return nil, fmt.Errorf("ent: validator failed for field \"in_app_purchase_sku\": %v", err)
 	}
-	if isc.google_billing_service_sku != nil {
-		if err := iapsource.GoogleBillingServiceSkuValidator(*isc.google_billing_service_sku); err != nil {
+	if tpc.google_billing_service_sku != nil {
+		if err := thirdparty.GoogleBillingServiceSkuValidator(*tpc.google_billing_service_sku); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"google_billing_service_sku\": %v", err)
 		}
 	}
-	if isc.start_at == nil {
+	if tpc.start_at == nil {
 		return nil, errors.New("ent: missing required field \"start_at\"")
 	}
-	if isc.end_at == nil {
+	if tpc.end_at == nil {
 		return nil, errors.New("ent: missing required field \"end_at\"")
 	}
-	return isc.sqlSave(ctx)
+	return tpc.sqlSave(ctx)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (isc *IapSourceCreate) SaveX(ctx context.Context) *IapSource {
-	v, err := isc.Save(ctx)
+func (tpc *ThirdPartyCreate) SaveX(ctx context.Context) *ThirdParty {
+	v, err := tpc.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return v
 }
 
-func (isc *IapSourceCreate) sqlSave(ctx context.Context) (*IapSource, error) {
+func (tpc *ThirdPartyCreate) sqlSave(ctx context.Context) (*ThirdParty, error) {
 	var (
-		is    = &IapSource{config: isc.config}
+		tp    = &ThirdParty{config: tpc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: iapsource.Table,
+			Table: thirdparty.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: iapsource.FieldID,
+				Column: thirdparty.FieldID,
 			},
 		}
 	)
-	if value := isc.in_app_purchase_sku; value != nil {
+	if value := tpc.in_app_purchase_sku; value != nil {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
-			Column: iapsource.FieldInAppPurchaseSku,
+			Column: thirdparty.FieldInAppPurchaseSku,
 		})
-		is.InAppPurchaseSku = *value
+		tp.InAppPurchaseSku = *value
 	}
-	if value := isc.google_billing_service_sku; value != nil {
+	if value := tpc.google_billing_service_sku; value != nil {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
-			Column: iapsource.FieldGoogleBillingServiceSku,
+			Column: thirdparty.FieldGoogleBillingServiceSku,
 		})
-		is.GoogleBillingServiceSku = *value
+		tp.GoogleBillingServiceSku = *value
 	}
-	if value := isc.start_at; value != nil {
+	if value := tpc.start_at; value != nil {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  *value,
-			Column: iapsource.FieldStartAt,
+			Column: thirdparty.FieldStartAt,
 		})
-		is.StartAt = *value
+		tp.StartAt = *value
 	}
-	if value := isc.end_at; value != nil {
+	if value := tpc.end_at; value != nil {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  *value,
-			Column: iapsource.FieldEndAt,
+			Column: thirdparty.FieldEndAt,
 		})
-		is.EndAt = *value
+		tp.EndAt = *value
 	}
-	if nodes := isc.prices; len(nodes) > 0 {
+	if nodes := tpc.prices; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   iapsource.PricesTable,
-			Columns: []string{iapsource.PricesColumn},
+			Table:   thirdparty.PricesTable,
+			Columns: []string{thirdparty.PricesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -169,13 +169,13 @@ func (isc *IapSourceCreate) sqlSave(ctx context.Context) (*IapSource, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, isc.driver, _spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, tpc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
 	id := _spec.ID.Value.(int64)
-	is.ID = int(id)
-	return is, nil
+	tp.ID = int(id)
+	return tp, nil
 }

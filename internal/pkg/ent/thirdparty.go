@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/iapsource"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdparty"
 )
 
-// IapSource is the model entity for the IapSource schema.
-type IapSource struct {
+// ThirdParty is the model entity for the ThirdParty schema.
+type ThirdParty struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -25,12 +25,12 @@ type IapSource struct {
 	// EndAt holds the value of the "end_at" field.
 	EndAt time.Time `json:"end_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the IapSourceQuery when eager-loading is set.
-	Edges IapSourceEdges `json:"edges"`
+	// The values are being populated by the ThirdPartyQuery when eager-loading is set.
+	Edges ThirdPartyEdges `json:"edges"`
 }
 
-// IapSourceEdges holds the relations/edges for other nodes in the graph.
-type IapSourceEdges struct {
+// ThirdPartyEdges holds the relations/edges for other nodes in the graph.
+type ThirdPartyEdges struct {
 	// Prices holds the value of the prices edge.
 	Prices []*Price
 	// loadedTypes holds the information for reporting if a
@@ -40,7 +40,7 @@ type IapSourceEdges struct {
 
 // PricesOrErr returns the Prices value or an error if the edge
 // was not loaded in eager-loading.
-func (e IapSourceEdges) PricesOrErr() ([]*Price, error) {
+func (e ThirdPartyEdges) PricesOrErr() ([]*Price, error) {
 	if e.loadedTypes[0] {
 		return e.Prices, nil
 	}
@@ -48,7 +48,7 @@ func (e IapSourceEdges) PricesOrErr() ([]*Price, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*IapSource) scanValues() []interface{} {
+func (*ThirdParty) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{},  // id
 		&sql.NullString{}, // in_app_purchase_sku
@@ -59,85 +59,85 @@ func (*IapSource) scanValues() []interface{} {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the IapSource fields.
-func (is *IapSource) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(iapsource.Columns); m < n {
+// to the ThirdParty fields.
+func (tp *ThirdParty) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(thirdparty.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)
 	if !ok {
 		return fmt.Errorf("unexpected type %T for field id", value)
 	}
-	is.ID = int(value.Int64)
+	tp.ID = int(value.Int64)
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullString); !ok {
 		return fmt.Errorf("unexpected type %T for field in_app_purchase_sku", values[0])
 	} else if value.Valid {
-		is.InAppPurchaseSku = value.String
+		tp.InAppPurchaseSku = value.String
 	}
 	if value, ok := values[1].(*sql.NullString); !ok {
 		return fmt.Errorf("unexpected type %T for field google_billing_service_sku", values[1])
 	} else if value.Valid {
-		is.GoogleBillingServiceSku = value.String
+		tp.GoogleBillingServiceSku = value.String
 	}
 	if value, ok := values[2].(*sql.NullTime); !ok {
 		return fmt.Errorf("unexpected type %T for field start_at", values[2])
 	} else if value.Valid {
-		is.StartAt = value.Time
+		tp.StartAt = value.Time
 	}
 	if value, ok := values[3].(*sql.NullTime); !ok {
 		return fmt.Errorf("unexpected type %T for field end_at", values[3])
 	} else if value.Valid {
-		is.EndAt = value.Time
+		tp.EndAt = value.Time
 	}
 	return nil
 }
 
-// QueryPrices queries the prices edge of the IapSource.
-func (is *IapSource) QueryPrices() *PriceQuery {
-	return (&IapSourceClient{is.config}).QueryPrices(is)
+// QueryPrices queries the prices edge of the ThirdParty.
+func (tp *ThirdParty) QueryPrices() *PriceQuery {
+	return (&ThirdPartyClient{tp.config}).QueryPrices(tp)
 }
 
-// Update returns a builder for updating this IapSource.
-// Note that, you need to call IapSource.Unwrap() before calling this method, if this IapSource
+// Update returns a builder for updating this ThirdParty.
+// Note that, you need to call ThirdParty.Unwrap() before calling this method, if this ThirdParty
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (is *IapSource) Update() *IapSourceUpdateOne {
-	return (&IapSourceClient{is.config}).UpdateOne(is)
+func (tp *ThirdParty) Update() *ThirdPartyUpdateOne {
+	return (&ThirdPartyClient{tp.config}).UpdateOne(tp)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,
 // so that all next queries will be executed through the driver which created the transaction.
-func (is *IapSource) Unwrap() *IapSource {
-	tx, ok := is.config.driver.(*txDriver)
+func (tp *ThirdParty) Unwrap() *ThirdParty {
+	tx, ok := tp.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: IapSource is not a transactional entity")
+		panic("ent: ThirdParty is not a transactional entity")
 	}
-	is.config.driver = tx.drv
-	return is
+	tp.config.driver = tx.drv
+	return tp
 }
 
 // String implements the fmt.Stringer.
-func (is *IapSource) String() string {
+func (tp *ThirdParty) String() string {
 	var builder strings.Builder
-	builder.WriteString("IapSource(")
-	builder.WriteString(fmt.Sprintf("id=%v", is.ID))
+	builder.WriteString("ThirdParty(")
+	builder.WriteString(fmt.Sprintf("id=%v", tp.ID))
 	builder.WriteString(", in_app_purchase_sku=")
-	builder.WriteString(is.InAppPurchaseSku)
+	builder.WriteString(tp.InAppPurchaseSku)
 	builder.WriteString(", google_billing_service_sku=")
-	builder.WriteString(is.GoogleBillingServiceSku)
+	builder.WriteString(tp.GoogleBillingServiceSku)
 	builder.WriteString(", start_at=")
-	builder.WriteString(is.StartAt.Format(time.ANSIC))
+	builder.WriteString(tp.StartAt.Format(time.ANSIC))
 	builder.WriteString(", end_at=")
-	builder.WriteString(is.EndAt.Format(time.ANSIC))
+	builder.WriteString(tp.EndAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// IapSources is a parsable slice of IapSource.
-type IapSources []*IapSource
+// ThirdParties is a parsable slice of ThirdParty.
+type ThirdParties []*ThirdParty
 
-func (is IapSources) config(cfg config) {
-	for _i := range is {
-		is[_i].config = cfg
+func (tp ThirdParties) config(cfg config) {
+	for _i := range tp {
+		tp[_i].config = cfg
 	}
 }

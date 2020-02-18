@@ -8,21 +8,6 @@ import (
 )
 
 var (
-	// IapSourceColumns holds the columns for the "iap_source" table.
-	IapSourceColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "in_app_purchase_sku", Type: field.TypeString, Unique: true, Size: 32},
-		{Name: "google_billing_service_sku", Type: field.TypeString, Unique: true, Nullable: true, Size: 32},
-		{Name: "start_at", Type: field.TypeTime},
-		{Name: "end_at", Type: field.TypeTime},
-	}
-	// IapSourceTable holds the schema information for the "iap_source" table.
-	IapSourceTable = &schema.Table{
-		Name:        "iap_source",
-		Columns:     IapSourceColumns,
-		PrimaryKey:  []*schema.Column{IapSourceColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
-	}
 	// PlansColumns holds the columns for the "plans" table.
 	PlansColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -44,9 +29,9 @@ var (
 		{Name: "end_at", Type: field.TypeTime},
 		{Name: "price", Type: field.TypeUint16},
 		{Name: "discount", Type: field.TypeUint16},
-		{Name: "iap_source_prices", Type: field.TypeInt, Nullable: true},
 		{Name: "plan_prices", Type: field.TypeInt, Nullable: true},
 		{Name: "product_prices", Type: field.TypeInt, Nullable: true},
+		{Name: "third_party_prices", Type: field.TypeInt, Nullable: true},
 	}
 	// PricesTable holds the schema information for the "prices" table.
 	PricesTable = &schema.Table{
@@ -55,24 +40,24 @@ var (
 		PrimaryKey: []*schema.Column{PricesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "prices_iap_source_prices",
-				Columns: []*schema.Column{PricesColumns[5]},
-
-				RefColumns: []*schema.Column{IapSourceColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
 				Symbol:  "prices_plans_prices",
-				Columns: []*schema.Column{PricesColumns[6]},
+				Columns: []*schema.Column{PricesColumns[5]},
 
 				RefColumns: []*schema.Column{PlansColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "prices_products_prices",
-				Columns: []*schema.Column{PricesColumns[7]},
+				Columns: []*schema.Column{PricesColumns[6]},
 
 				RefColumns: []*schema.Column{ProductsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "prices_third_parties_prices",
+				Columns: []*schema.Column{PricesColumns[7]},
+
+				RefColumns: []*schema.Column{ThirdPartiesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -112,19 +97,34 @@ var (
 			},
 		},
 	}
+	// ThirdPartiesColumns holds the columns for the "third_parties" table.
+	ThirdPartiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "in_app_purchase_sku", Type: field.TypeString, Unique: true, Size: 32},
+		{Name: "google_billing_service_sku", Type: field.TypeString, Unique: true, Nullable: true, Size: 32},
+		{Name: "start_at", Type: field.TypeTime},
+		{Name: "end_at", Type: field.TypeTime},
+	}
+	// ThirdPartiesTable holds the schema information for the "third_parties" table.
+	ThirdPartiesTable = &schema.Table{
+		Name:        "third_parties",
+		Columns:     ThirdPartiesColumns,
+		PrimaryKey:  []*schema.Column{ThirdPartiesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		IapSourceTable,
 		PlansTable,
 		PricesTable,
 		ProductsTable,
 		SubscriptionsTable,
+		ThirdPartiesTable,
 	}
 )
 
 func init() {
-	PricesTable.ForeignKeys[0].RefTable = IapSourceTable
-	PricesTable.ForeignKeys[1].RefTable = PlansTable
-	PricesTable.ForeignKeys[2].RefTable = ProductsTable
+	PricesTable.ForeignKeys[0].RefTable = PlansTable
+	PricesTable.ForeignKeys[1].RefTable = ProductsTable
+	PricesTable.ForeignKeys[2].RefTable = ThirdPartiesTable
 	SubscriptionsTable.ForeignKeys[0].RefTable = PlansTable
 }

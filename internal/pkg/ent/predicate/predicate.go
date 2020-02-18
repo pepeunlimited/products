@@ -6,9 +6,6 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 )
 
-// IapSource is the predicate function for iapsource builders.
-type IapSource func(*sql.Selector)
-
 // Plan is the predicate function for plan builders.
 type Plan func(*sql.Selector)
 
@@ -20,3 +17,6 @@ type Product func(*sql.Selector)
 
 // Subscription is the predicate function for subscription builders.
 type Subscription func(*sql.Selector)
+
+// ThirdParty is the predicate function for thirdparty builders.
+type ThirdParty func(*sql.Selector)

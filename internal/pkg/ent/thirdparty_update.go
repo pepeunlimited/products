@@ -10,13 +10,13 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/iapsource"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/predicate"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdparty"
 )
 
-// IapSourceUpdate is the builder for updating IapSource entities.
-type IapSourceUpdate struct {
+// ThirdPartyUpdate is the builder for updating ThirdParty entities.
+type ThirdPartyUpdate struct {
 	config
 	in_app_purchase_sku             *string
 	google_billing_service_sku      *string
@@ -25,112 +25,112 @@ type IapSourceUpdate struct {
 	end_at                          *time.Time
 	prices                          map[int]struct{}
 	removedPrices                   map[int]struct{}
-	predicates                      []predicate.IapSource
+	predicates                      []predicate.ThirdParty
 }
 
 // Where adds a new predicate for the builder.
-func (isu *IapSourceUpdate) Where(ps ...predicate.IapSource) *IapSourceUpdate {
-	isu.predicates = append(isu.predicates, ps...)
-	return isu
+func (tpu *ThirdPartyUpdate) Where(ps ...predicate.ThirdParty) *ThirdPartyUpdate {
+	tpu.predicates = append(tpu.predicates, ps...)
+	return tpu
 }
 
 // SetInAppPurchaseSku sets the in_app_purchase_sku field.
-func (isu *IapSourceUpdate) SetInAppPurchaseSku(s string) *IapSourceUpdate {
-	isu.in_app_purchase_sku = &s
-	return isu
+func (tpu *ThirdPartyUpdate) SetInAppPurchaseSku(s string) *ThirdPartyUpdate {
+	tpu.in_app_purchase_sku = &s
+	return tpu
 }
 
 // SetGoogleBillingServiceSku sets the google_billing_service_sku field.
-func (isu *IapSourceUpdate) SetGoogleBillingServiceSku(s string) *IapSourceUpdate {
-	isu.google_billing_service_sku = &s
-	return isu
+func (tpu *ThirdPartyUpdate) SetGoogleBillingServiceSku(s string) *ThirdPartyUpdate {
+	tpu.google_billing_service_sku = &s
+	return tpu
 }
 
 // SetNillableGoogleBillingServiceSku sets the google_billing_service_sku field if the given value is not nil.
-func (isu *IapSourceUpdate) SetNillableGoogleBillingServiceSku(s *string) *IapSourceUpdate {
+func (tpu *ThirdPartyUpdate) SetNillableGoogleBillingServiceSku(s *string) *ThirdPartyUpdate {
 	if s != nil {
-		isu.SetGoogleBillingServiceSku(*s)
+		tpu.SetGoogleBillingServiceSku(*s)
 	}
-	return isu
+	return tpu
 }
 
 // ClearGoogleBillingServiceSku clears the value of google_billing_service_sku.
-func (isu *IapSourceUpdate) ClearGoogleBillingServiceSku() *IapSourceUpdate {
-	isu.google_billing_service_sku = nil
-	isu.cleargoogle_billing_service_sku = true
-	return isu
+func (tpu *ThirdPartyUpdate) ClearGoogleBillingServiceSku() *ThirdPartyUpdate {
+	tpu.google_billing_service_sku = nil
+	tpu.cleargoogle_billing_service_sku = true
+	return tpu
 }
 
 // SetStartAt sets the start_at field.
-func (isu *IapSourceUpdate) SetStartAt(t time.Time) *IapSourceUpdate {
-	isu.start_at = &t
-	return isu
+func (tpu *ThirdPartyUpdate) SetStartAt(t time.Time) *ThirdPartyUpdate {
+	tpu.start_at = &t
+	return tpu
 }
 
 // SetEndAt sets the end_at field.
-func (isu *IapSourceUpdate) SetEndAt(t time.Time) *IapSourceUpdate {
-	isu.end_at = &t
-	return isu
+func (tpu *ThirdPartyUpdate) SetEndAt(t time.Time) *ThirdPartyUpdate {
+	tpu.end_at = &t
+	return tpu
 }
 
 // AddPriceIDs adds the prices edge to Price by ids.
-func (isu *IapSourceUpdate) AddPriceIDs(ids ...int) *IapSourceUpdate {
-	if isu.prices == nil {
-		isu.prices = make(map[int]struct{})
+func (tpu *ThirdPartyUpdate) AddPriceIDs(ids ...int) *ThirdPartyUpdate {
+	if tpu.prices == nil {
+		tpu.prices = make(map[int]struct{})
 	}
 	for i := range ids {
-		isu.prices[ids[i]] = struct{}{}
+		tpu.prices[ids[i]] = struct{}{}
 	}
-	return isu
+	return tpu
 }
 
 // AddPrices adds the prices edges to Price.
-func (isu *IapSourceUpdate) AddPrices(p ...*Price) *IapSourceUpdate {
+func (tpu *ThirdPartyUpdate) AddPrices(p ...*Price) *ThirdPartyUpdate {
 	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return isu.AddPriceIDs(ids...)
+	return tpu.AddPriceIDs(ids...)
 }
 
 // RemovePriceIDs removes the prices edge to Price by ids.
-func (isu *IapSourceUpdate) RemovePriceIDs(ids ...int) *IapSourceUpdate {
-	if isu.removedPrices == nil {
-		isu.removedPrices = make(map[int]struct{})
+func (tpu *ThirdPartyUpdate) RemovePriceIDs(ids ...int) *ThirdPartyUpdate {
+	if tpu.removedPrices == nil {
+		tpu.removedPrices = make(map[int]struct{})
 	}
 	for i := range ids {
-		isu.removedPrices[ids[i]] = struct{}{}
+		tpu.removedPrices[ids[i]] = struct{}{}
 	}
-	return isu
+	return tpu
 }
 
 // RemovePrices removes prices edges to Price.
-func (isu *IapSourceUpdate) RemovePrices(p ...*Price) *IapSourceUpdate {
+func (tpu *ThirdPartyUpdate) RemovePrices(p ...*Price) *ThirdPartyUpdate {
 	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return isu.RemovePriceIDs(ids...)
+	return tpu.RemovePriceIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
-func (isu *IapSourceUpdate) Save(ctx context.Context) (int, error) {
-	if isu.in_app_purchase_sku != nil {
-		if err := iapsource.InAppPurchaseSkuValidator(*isu.in_app_purchase_sku); err != nil {
+func (tpu *ThirdPartyUpdate) Save(ctx context.Context) (int, error) {
+	if tpu.in_app_purchase_sku != nil {
+		if err := thirdparty.InAppPurchaseSkuValidator(*tpu.in_app_purchase_sku); err != nil {
 			return 0, fmt.Errorf("ent: validator failed for field \"in_app_purchase_sku\": %v", err)
 		}
 	}
-	if isu.google_billing_service_sku != nil {
-		if err := iapsource.GoogleBillingServiceSkuValidator(*isu.google_billing_service_sku); err != nil {
+	if tpu.google_billing_service_sku != nil {
+		if err := thirdparty.GoogleBillingServiceSkuValidator(*tpu.google_billing_service_sku); err != nil {
 			return 0, fmt.Errorf("ent: validator failed for field \"google_billing_service_sku\": %v", err)
 		}
 	}
-	return isu.sqlSave(ctx)
+	return tpu.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (isu *IapSourceUpdate) SaveX(ctx context.Context) int {
-	affected, err := isu.Save(ctx)
+func (tpu *ThirdPartyUpdate) SaveX(ctx context.Context) int {
+	affected, err := tpu.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -138,76 +138,76 @@ func (isu *IapSourceUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (isu *IapSourceUpdate) Exec(ctx context.Context) error {
-	_, err := isu.Save(ctx)
+func (tpu *ThirdPartyUpdate) Exec(ctx context.Context) error {
+	_, err := tpu.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (isu *IapSourceUpdate) ExecX(ctx context.Context) {
-	if err := isu.Exec(ctx); err != nil {
+func (tpu *ThirdPartyUpdate) ExecX(ctx context.Context) {
+	if err := tpu.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (isu *IapSourceUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (tpu *ThirdPartyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table:   iapsource.Table,
-			Columns: iapsource.Columns,
+			Table:   thirdparty.Table,
+			Columns: thirdparty.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: iapsource.FieldID,
+				Column: thirdparty.FieldID,
 			},
 		},
 	}
-	if ps := isu.predicates; len(ps) > 0 {
+	if ps := tpu.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value := isu.in_app_purchase_sku; value != nil {
+	if value := tpu.in_app_purchase_sku; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
-			Column: iapsource.FieldInAppPurchaseSku,
+			Column: thirdparty.FieldInAppPurchaseSku,
 		})
 	}
-	if value := isu.google_billing_service_sku; value != nil {
+	if value := tpu.google_billing_service_sku; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
-			Column: iapsource.FieldGoogleBillingServiceSku,
+			Column: thirdparty.FieldGoogleBillingServiceSku,
 		})
 	}
-	if isu.cleargoogle_billing_service_sku {
+	if tpu.cleargoogle_billing_service_sku {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Column: iapsource.FieldGoogleBillingServiceSku,
+			Column: thirdparty.FieldGoogleBillingServiceSku,
 		})
 	}
-	if value := isu.start_at; value != nil {
+	if value := tpu.start_at; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  *value,
-			Column: iapsource.FieldStartAt,
+			Column: thirdparty.FieldStartAt,
 		})
 	}
-	if value := isu.end_at; value != nil {
+	if value := tpu.end_at; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  *value,
-			Column: iapsource.FieldEndAt,
+			Column: thirdparty.FieldEndAt,
 		})
 	}
-	if nodes := isu.removedPrices; len(nodes) > 0 {
+	if nodes := tpu.removedPrices; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   iapsource.PricesTable,
-			Columns: []string{iapsource.PricesColumn},
+			Table:   thirdparty.PricesTable,
+			Columns: []string{thirdparty.PricesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -221,12 +221,12 @@ func (isu *IapSourceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := isu.prices; len(nodes) > 0 {
+	if nodes := tpu.prices; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   iapsource.PricesTable,
-			Columns: []string{iapsource.PricesColumn},
+			Table:   thirdparty.PricesTable,
+			Columns: []string{thirdparty.PricesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -240,7 +240,7 @@ func (isu *IapSourceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, isu.driver, _spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, tpu.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
@@ -249,8 +249,8 @@ func (isu *IapSourceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return n, nil
 }
 
-// IapSourceUpdateOne is the builder for updating a single IapSource entity.
-type IapSourceUpdateOne struct {
+// ThirdPartyUpdateOne is the builder for updating a single ThirdParty entity.
+type ThirdPartyUpdateOne struct {
 	config
 	id                              int
 	in_app_purchase_sku             *string
@@ -263,173 +263,173 @@ type IapSourceUpdateOne struct {
 }
 
 // SetInAppPurchaseSku sets the in_app_purchase_sku field.
-func (isuo *IapSourceUpdateOne) SetInAppPurchaseSku(s string) *IapSourceUpdateOne {
-	isuo.in_app_purchase_sku = &s
-	return isuo
+func (tpuo *ThirdPartyUpdateOne) SetInAppPurchaseSku(s string) *ThirdPartyUpdateOne {
+	tpuo.in_app_purchase_sku = &s
+	return tpuo
 }
 
 // SetGoogleBillingServiceSku sets the google_billing_service_sku field.
-func (isuo *IapSourceUpdateOne) SetGoogleBillingServiceSku(s string) *IapSourceUpdateOne {
-	isuo.google_billing_service_sku = &s
-	return isuo
+func (tpuo *ThirdPartyUpdateOne) SetGoogleBillingServiceSku(s string) *ThirdPartyUpdateOne {
+	tpuo.google_billing_service_sku = &s
+	return tpuo
 }
 
 // SetNillableGoogleBillingServiceSku sets the google_billing_service_sku field if the given value is not nil.
-func (isuo *IapSourceUpdateOne) SetNillableGoogleBillingServiceSku(s *string) *IapSourceUpdateOne {
+func (tpuo *ThirdPartyUpdateOne) SetNillableGoogleBillingServiceSku(s *string) *ThirdPartyUpdateOne {
 	if s != nil {
-		isuo.SetGoogleBillingServiceSku(*s)
+		tpuo.SetGoogleBillingServiceSku(*s)
 	}
-	return isuo
+	return tpuo
 }
 
 // ClearGoogleBillingServiceSku clears the value of google_billing_service_sku.
-func (isuo *IapSourceUpdateOne) ClearGoogleBillingServiceSku() *IapSourceUpdateOne {
-	isuo.google_billing_service_sku = nil
-	isuo.cleargoogle_billing_service_sku = true
-	return isuo
+func (tpuo *ThirdPartyUpdateOne) ClearGoogleBillingServiceSku() *ThirdPartyUpdateOne {
+	tpuo.google_billing_service_sku = nil
+	tpuo.cleargoogle_billing_service_sku = true
+	return tpuo
 }
 
 // SetStartAt sets the start_at field.
-func (isuo *IapSourceUpdateOne) SetStartAt(t time.Time) *IapSourceUpdateOne {
-	isuo.start_at = &t
-	return isuo
+func (tpuo *ThirdPartyUpdateOne) SetStartAt(t time.Time) *ThirdPartyUpdateOne {
+	tpuo.start_at = &t
+	return tpuo
 }
 
 // SetEndAt sets the end_at field.
-func (isuo *IapSourceUpdateOne) SetEndAt(t time.Time) *IapSourceUpdateOne {
-	isuo.end_at = &t
-	return isuo
+func (tpuo *ThirdPartyUpdateOne) SetEndAt(t time.Time) *ThirdPartyUpdateOne {
+	tpuo.end_at = &t
+	return tpuo
 }
 
 // AddPriceIDs adds the prices edge to Price by ids.
-func (isuo *IapSourceUpdateOne) AddPriceIDs(ids ...int) *IapSourceUpdateOne {
-	if isuo.prices == nil {
-		isuo.prices = make(map[int]struct{})
+func (tpuo *ThirdPartyUpdateOne) AddPriceIDs(ids ...int) *ThirdPartyUpdateOne {
+	if tpuo.prices == nil {
+		tpuo.prices = make(map[int]struct{})
 	}
 	for i := range ids {
-		isuo.prices[ids[i]] = struct{}{}
+		tpuo.prices[ids[i]] = struct{}{}
 	}
-	return isuo
+	return tpuo
 }
 
 // AddPrices adds the prices edges to Price.
-func (isuo *IapSourceUpdateOne) AddPrices(p ...*Price) *IapSourceUpdateOne {
+func (tpuo *ThirdPartyUpdateOne) AddPrices(p ...*Price) *ThirdPartyUpdateOne {
 	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return isuo.AddPriceIDs(ids...)
+	return tpuo.AddPriceIDs(ids...)
 }
 
 // RemovePriceIDs removes the prices edge to Price by ids.
-func (isuo *IapSourceUpdateOne) RemovePriceIDs(ids ...int) *IapSourceUpdateOne {
-	if isuo.removedPrices == nil {
-		isuo.removedPrices = make(map[int]struct{})
+func (tpuo *ThirdPartyUpdateOne) RemovePriceIDs(ids ...int) *ThirdPartyUpdateOne {
+	if tpuo.removedPrices == nil {
+		tpuo.removedPrices = make(map[int]struct{})
 	}
 	for i := range ids {
-		isuo.removedPrices[ids[i]] = struct{}{}
+		tpuo.removedPrices[ids[i]] = struct{}{}
 	}
-	return isuo
+	return tpuo
 }
 
 // RemovePrices removes prices edges to Price.
-func (isuo *IapSourceUpdateOne) RemovePrices(p ...*Price) *IapSourceUpdateOne {
+func (tpuo *ThirdPartyUpdateOne) RemovePrices(p ...*Price) *ThirdPartyUpdateOne {
 	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return isuo.RemovePriceIDs(ids...)
+	return tpuo.RemovePriceIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
-func (isuo *IapSourceUpdateOne) Save(ctx context.Context) (*IapSource, error) {
-	if isuo.in_app_purchase_sku != nil {
-		if err := iapsource.InAppPurchaseSkuValidator(*isuo.in_app_purchase_sku); err != nil {
+func (tpuo *ThirdPartyUpdateOne) Save(ctx context.Context) (*ThirdParty, error) {
+	if tpuo.in_app_purchase_sku != nil {
+		if err := thirdparty.InAppPurchaseSkuValidator(*tpuo.in_app_purchase_sku); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"in_app_purchase_sku\": %v", err)
 		}
 	}
-	if isuo.google_billing_service_sku != nil {
-		if err := iapsource.GoogleBillingServiceSkuValidator(*isuo.google_billing_service_sku); err != nil {
+	if tpuo.google_billing_service_sku != nil {
+		if err := thirdparty.GoogleBillingServiceSkuValidator(*tpuo.google_billing_service_sku); err != nil {
 			return nil, fmt.Errorf("ent: validator failed for field \"google_billing_service_sku\": %v", err)
 		}
 	}
-	return isuo.sqlSave(ctx)
+	return tpuo.sqlSave(ctx)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (isuo *IapSourceUpdateOne) SaveX(ctx context.Context) *IapSource {
-	is, err := isuo.Save(ctx)
+func (tpuo *ThirdPartyUpdateOne) SaveX(ctx context.Context) *ThirdParty {
+	tp, err := tpuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return is
+	return tp
 }
 
 // Exec executes the query on the entity.
-func (isuo *IapSourceUpdateOne) Exec(ctx context.Context) error {
-	_, err := isuo.Save(ctx)
+func (tpuo *ThirdPartyUpdateOne) Exec(ctx context.Context) error {
+	_, err := tpuo.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (isuo *IapSourceUpdateOne) ExecX(ctx context.Context) {
-	if err := isuo.Exec(ctx); err != nil {
+func (tpuo *ThirdPartyUpdateOne) ExecX(ctx context.Context) {
+	if err := tpuo.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (isuo *IapSourceUpdateOne) sqlSave(ctx context.Context) (is *IapSource, err error) {
+func (tpuo *ThirdPartyUpdateOne) sqlSave(ctx context.Context) (tp *ThirdParty, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table:   iapsource.Table,
-			Columns: iapsource.Columns,
+			Table:   thirdparty.Table,
+			Columns: thirdparty.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Value:  isuo.id,
+				Value:  tpuo.id,
 				Type:   field.TypeInt,
-				Column: iapsource.FieldID,
+				Column: thirdparty.FieldID,
 			},
 		},
 	}
-	if value := isuo.in_app_purchase_sku; value != nil {
+	if value := tpuo.in_app_purchase_sku; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
-			Column: iapsource.FieldInAppPurchaseSku,
+			Column: thirdparty.FieldInAppPurchaseSku,
 		})
 	}
-	if value := isuo.google_billing_service_sku; value != nil {
+	if value := tpuo.google_billing_service_sku; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  *value,
-			Column: iapsource.FieldGoogleBillingServiceSku,
+			Column: thirdparty.FieldGoogleBillingServiceSku,
 		})
 	}
-	if isuo.cleargoogle_billing_service_sku {
+	if tpuo.cleargoogle_billing_service_sku {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Column: iapsource.FieldGoogleBillingServiceSku,
+			Column: thirdparty.FieldGoogleBillingServiceSku,
 		})
 	}
-	if value := isuo.start_at; value != nil {
+	if value := tpuo.start_at; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  *value,
-			Column: iapsource.FieldStartAt,
+			Column: thirdparty.FieldStartAt,
 		})
 	}
-	if value := isuo.end_at; value != nil {
+	if value := tpuo.end_at; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  *value,
-			Column: iapsource.FieldEndAt,
+			Column: thirdparty.FieldEndAt,
 		})
 	}
-	if nodes := isuo.removedPrices; len(nodes) > 0 {
+	if nodes := tpuo.removedPrices; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   iapsource.PricesTable,
-			Columns: []string{iapsource.PricesColumn},
+			Table:   thirdparty.PricesTable,
+			Columns: []string{thirdparty.PricesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -443,12 +443,12 @@ func (isuo *IapSourceUpdateOne) sqlSave(ctx context.Context) (is *IapSource, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := isuo.prices; len(nodes) > 0 {
+	if nodes := tpuo.prices; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   iapsource.PricesTable,
-			Columns: []string{iapsource.PricesColumn},
+			Table:   thirdparty.PricesTable,
+			Columns: []string{thirdparty.PricesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -462,14 +462,14 @@ func (isuo *IapSourceUpdateOne) sqlSave(ctx context.Context) (is *IapSource, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	is = &IapSource{config: isuo.config}
-	_spec.Assign = is.assignValues
-	_spec.ScanValues = is.scanValues()
-	if err = sqlgraph.UpdateNode(ctx, isuo.driver, _spec); err != nil {
+	tp = &ThirdParty{config: tpuo.config}
+	_spec.Assign = tp.assignValues
+	_spec.ScanValues = tp.scanValues()
+	if err = sqlgraph.UpdateNode(ctx, tpuo.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
 		return nil, err
 	}
-	return is, nil
+	return tp, nil
 }

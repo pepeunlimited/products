@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package pepeunlimited.billing;
+package pepeunlimited.products;
 option go_package = "planrpc";
 
 import "google/protobuf/empty.proto";

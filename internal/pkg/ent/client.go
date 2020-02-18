@@ -9,11 +9,11 @@ import (
 
 	"github.com/pepeunlimited/prices/internal/pkg/ent/migrate"
 
-	"github.com/pepeunlimited/prices/internal/pkg/ent/iapsource"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/subscription"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdparty"
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -25,8 +25,6 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// IapSource is the client for interacting with the IapSource builders.
-	IapSource *IapSourceClient
 	// Plan is the client for interacting with the Plan builders.
 	Plan *PlanClient
 	// Price is the client for interacting with the Price builders.
@@ -35,6 +33,8 @@ type Client struct {
 	Product *ProductClient
 	// Subscription is the client for interacting with the Subscription builders.
 	Subscription *SubscriptionClient
+	// ThirdParty is the client for interacting with the ThirdParty builders.
+	ThirdParty *ThirdPartyClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -44,11 +44,11 @@ func NewClient(opts ...Option) *Client {
 	return &Client{
 		config:       c,
 		Schema:       migrate.NewSchema(c.driver),
-		IapSource:    NewIapSourceClient(c),
 		Plan:         NewPlanClient(c),
 		Price:        NewPriceClient(c),
 		Product:      NewProductClient(c),
 		Subscription: NewSubscriptionClient(c),
+		ThirdParty:   NewThirdPartyClient(c),
 	}
 }
 
@@ -80,18 +80,18 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := config{driver: tx, log: c.log, debug: c.debug}
 	return &Tx{
 		config:       cfg,
-		IapSource:    NewIapSourceClient(cfg),
 		Plan:         NewPlanClient(cfg),
 		Price:        NewPriceClient(cfg),
 		Product:      NewProductClient(cfg),
 		Subscription: NewSubscriptionClient(cfg),
+		ThirdParty:   NewThirdPartyClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		IapSource.
+//		Plan.
 //		Query().
 //		Count(ctx)
 //
@@ -103,95 +103,17 @@ func (c *Client) Debug() *Client {
 	return &Client{
 		config:       cfg,
 		Schema:       migrate.NewSchema(cfg.driver),
-		IapSource:    NewIapSourceClient(cfg),
 		Plan:         NewPlanClient(cfg),
 		Price:        NewPriceClient(cfg),
 		Product:      NewProductClient(cfg),
 		Subscription: NewSubscriptionClient(cfg),
+		ThirdParty:   NewThirdPartyClient(cfg),
 	}
 }
 
 // Close closes the database connection and prevents new queries from starting.
 func (c *Client) Close() error {
 	return c.driver.Close()
-}
-
-// IapSourceClient is a client for the IapSource schema.
-type IapSourceClient struct {
-	config
-}
-
-// NewIapSourceClient returns a client for the IapSource from the given config.
-func NewIapSourceClient(c config) *IapSourceClient {
-	return &IapSourceClient{config: c}
-}
-
-// Create returns a create builder for IapSource.
-func (c *IapSourceClient) Create() *IapSourceCreate {
-	return &IapSourceCreate{config: c.config}
-}
-
-// Update returns an update builder for IapSource.
-func (c *IapSourceClient) Update() *IapSourceUpdate {
-	return &IapSourceUpdate{config: c.config}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *IapSourceClient) UpdateOne(is *IapSource) *IapSourceUpdateOne {
-	return c.UpdateOneID(is.ID)
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *IapSourceClient) UpdateOneID(id int) *IapSourceUpdateOne {
-	return &IapSourceUpdateOne{config: c.config, id: id}
-}
-
-// Delete returns a delete builder for IapSource.
-func (c *IapSourceClient) Delete() *IapSourceDelete {
-	return &IapSourceDelete{config: c.config}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *IapSourceClient) DeleteOne(is *IapSource) *IapSourceDeleteOne {
-	return c.DeleteOneID(is.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *IapSourceClient) DeleteOneID(id int) *IapSourceDeleteOne {
-	return &IapSourceDeleteOne{c.Delete().Where(iapsource.ID(id))}
-}
-
-// Create returns a query builder for IapSource.
-func (c *IapSourceClient) Query() *IapSourceQuery {
-	return &IapSourceQuery{config: c.config}
-}
-
-// Get returns a IapSource entity by its id.
-func (c *IapSourceClient) Get(ctx context.Context, id int) (*IapSource, error) {
-	return c.Query().Where(iapsource.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *IapSourceClient) GetX(ctx context.Context, id int) *IapSource {
-	is, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return is
-}
-
-// QueryPrices queries the prices edge of a IapSource.
-func (c *IapSourceClient) QueryPrices(is *IapSource) *PriceQuery {
-	query := &PriceQuery{config: c.config}
-	id := is.ID
-	step := sqlgraph.NewStep(
-		sqlgraph.From(iapsource.Table, iapsource.FieldID, id),
-		sqlgraph.To(price.Table, price.FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, iapsource.PricesTable, iapsource.PricesColumn),
-	)
-	query.sql = sqlgraph.Neighbors(is.driver.Dialect(), step)
-
-	return query
 }
 
 // PlanClient is a client for the Plan schema.
@@ -364,14 +286,14 @@ func (c *PriceClient) QueryProducts(pr *Price) *ProductQuery {
 	return query
 }
 
-// QueryIapSource queries the iap_source edge of a Price.
-func (c *PriceClient) QueryIapSource(pr *Price) *IapSourceQuery {
-	query := &IapSourceQuery{config: c.config}
+// QueryThirdParties queries the third_parties edge of a Price.
+func (c *PriceClient) QueryThirdParties(pr *Price) *ThirdPartyQuery {
+	query := &ThirdPartyQuery{config: c.config}
 	id := pr.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(price.Table, price.FieldID, id),
-		sqlgraph.To(iapsource.Table, iapsource.FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, price.IapSourceTable, price.IapSourceColumn),
+		sqlgraph.To(thirdparty.Table, thirdparty.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, price.ThirdPartiesTable, price.ThirdPartiesColumn),
 	)
 	query.sql = sqlgraph.Neighbors(pr.driver.Dialect(), step)
 
@@ -544,6 +466,84 @@ func (c *SubscriptionClient) QueryPlans(s *Subscription) *PlanQuery {
 		sqlgraph.Edge(sqlgraph.M2O, true, subscription.PlansTable, subscription.PlansColumn),
 	)
 	query.sql = sqlgraph.Neighbors(s.driver.Dialect(), step)
+
+	return query
+}
+
+// ThirdPartyClient is a client for the ThirdParty schema.
+type ThirdPartyClient struct {
+	config
+}
+
+// NewThirdPartyClient returns a client for the ThirdParty from the given config.
+func NewThirdPartyClient(c config) *ThirdPartyClient {
+	return &ThirdPartyClient{config: c}
+}
+
+// Create returns a create builder for ThirdParty.
+func (c *ThirdPartyClient) Create() *ThirdPartyCreate {
+	return &ThirdPartyCreate{config: c.config}
+}
+
+// Update returns an update builder for ThirdParty.
+func (c *ThirdPartyClient) Update() *ThirdPartyUpdate {
+	return &ThirdPartyUpdate{config: c.config}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ThirdPartyClient) UpdateOne(tp *ThirdParty) *ThirdPartyUpdateOne {
+	return c.UpdateOneID(tp.ID)
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ThirdPartyClient) UpdateOneID(id int) *ThirdPartyUpdateOne {
+	return &ThirdPartyUpdateOne{config: c.config, id: id}
+}
+
+// Delete returns a delete builder for ThirdParty.
+func (c *ThirdPartyClient) Delete() *ThirdPartyDelete {
+	return &ThirdPartyDelete{config: c.config}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ThirdPartyClient) DeleteOne(tp *ThirdParty) *ThirdPartyDeleteOne {
+	return c.DeleteOneID(tp.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ThirdPartyClient) DeleteOneID(id int) *ThirdPartyDeleteOne {
+	return &ThirdPartyDeleteOne{c.Delete().Where(thirdparty.ID(id))}
+}
+
+// Create returns a query builder for ThirdParty.
+func (c *ThirdPartyClient) Query() *ThirdPartyQuery {
+	return &ThirdPartyQuery{config: c.config}
+}
+
+// Get returns a ThirdParty entity by its id.
+func (c *ThirdPartyClient) Get(ctx context.Context, id int) (*ThirdParty, error) {
+	return c.Query().Where(thirdparty.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ThirdPartyClient) GetX(ctx context.Context, id int) *ThirdParty {
+	tp, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return tp
+}
+
+// QueryPrices queries the prices edge of a ThirdParty.
+func (c *ThirdPartyClient) QueryPrices(tp *ThirdParty) *PriceQuery {
+	query := &PriceQuery{config: c.config}
+	id := tp.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(thirdparty.Table, thirdparty.FieldID, id),
+		sqlgraph.To(price.Table, price.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, thirdparty.PricesTable, thirdparty.PricesColumn),
+	)
+	query.sql = sqlgraph.Neighbors(tp.driver.Dialect(), step)
 
 	return query
 }

@@ -10,29 +10,29 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/iapsource"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/predicate"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdparty"
 )
 
 // PriceUpdate is the builder for updating Price entities.
 type PriceUpdate struct {
 	config
-	start_at         *time.Time
-	end_at           *time.Time
-	price            *uint16
-	addprice         *uint16
-	discount         *uint16
-	adddiscount      *uint16
-	products         map[int]struct{}
-	iap_source       map[int]struct{}
-	plans            map[int]struct{}
-	clearedProducts  bool
-	clearedIapSource bool
-	clearedPlans     bool
-	predicates       []predicate.Price
+	start_at            *time.Time
+	end_at              *time.Time
+	price               *uint16
+	addprice            *uint16
+	discount            *uint16
+	adddiscount         *uint16
+	products            map[int]struct{}
+	third_parties       map[int]struct{}
+	plans               map[int]struct{}
+	clearedProducts     bool
+	clearedThirdParties bool
+	clearedPlans        bool
+	predicates          []predicate.Price
 }
 
 // Where adds a new predicate for the builder.
@@ -109,26 +109,26 @@ func (pu *PriceUpdate) SetProducts(p *Product) *PriceUpdate {
 	return pu.SetProductsID(p.ID)
 }
 
-// SetIapSourceID sets the iap_source edge to IapSource by id.
-func (pu *PriceUpdate) SetIapSourceID(id int) *PriceUpdate {
-	if pu.iap_source == nil {
-		pu.iap_source = make(map[int]struct{})
+// SetThirdPartiesID sets the third_parties edge to ThirdParty by id.
+func (pu *PriceUpdate) SetThirdPartiesID(id int) *PriceUpdate {
+	if pu.third_parties == nil {
+		pu.third_parties = make(map[int]struct{})
 	}
-	pu.iap_source[id] = struct{}{}
+	pu.third_parties[id] = struct{}{}
 	return pu
 }
 
-// SetNillableIapSourceID sets the iap_source edge to IapSource by id if the given value is not nil.
-func (pu *PriceUpdate) SetNillableIapSourceID(id *int) *PriceUpdate {
+// SetNillableThirdPartiesID sets the third_parties edge to ThirdParty by id if the given value is not nil.
+func (pu *PriceUpdate) SetNillableThirdPartiesID(id *int) *PriceUpdate {
 	if id != nil {
-		pu = pu.SetIapSourceID(*id)
+		pu = pu.SetThirdPartiesID(*id)
 	}
 	return pu
 }
 
-// SetIapSource sets the iap_source edge to IapSource.
-func (pu *PriceUpdate) SetIapSource(i *IapSource) *PriceUpdate {
-	return pu.SetIapSourceID(i.ID)
+// SetThirdParties sets the third_parties edge to ThirdParty.
+func (pu *PriceUpdate) SetThirdParties(t *ThirdParty) *PriceUpdate {
+	return pu.SetThirdPartiesID(t.ID)
 }
 
 // SetPlansID sets the plans edge to Plan by id.
@@ -159,9 +159,9 @@ func (pu *PriceUpdate) ClearProducts() *PriceUpdate {
 	return pu
 }
 
-// ClearIapSource clears the iap_source edge to IapSource.
-func (pu *PriceUpdate) ClearIapSource() *PriceUpdate {
-	pu.clearedIapSource = true
+// ClearThirdParties clears the third_parties edge to ThirdParty.
+func (pu *PriceUpdate) ClearThirdParties() *PriceUpdate {
+	pu.clearedThirdParties = true
 	return pu
 }
 
@@ -176,8 +176,8 @@ func (pu *PriceUpdate) Save(ctx context.Context) (int, error) {
 	if len(pu.products) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"products\"")
 	}
-	if len(pu.iap_source) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"iap_source\"")
+	if len(pu.third_parties) > 1 {
+		return 0, errors.New("ent: multiple assignments on a unique edge \"third_parties\"")
 	}
 	if len(pu.plans) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"plans\"")
@@ -302,33 +302,33 @@ func (pu *PriceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pu.clearedIapSource {
+	if pu.clearedThirdParties {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   price.IapSourceTable,
-			Columns: []string{price.IapSourceColumn},
+			Table:   price.ThirdPartiesTable,
+			Columns: []string{price.ThirdPartiesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: iapsource.FieldID,
+					Column: thirdparty.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pu.iap_source; len(nodes) > 0 {
+	if nodes := pu.third_parties; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   price.IapSourceTable,
-			Columns: []string{price.IapSourceColumn},
+			Table:   price.ThirdPartiesTable,
+			Columns: []string{price.ThirdPartiesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: iapsource.FieldID,
+					Column: thirdparty.FieldID,
 				},
 			},
 		}
@@ -384,19 +384,19 @@ func (pu *PriceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // PriceUpdateOne is the builder for updating a single Price entity.
 type PriceUpdateOne struct {
 	config
-	id               int
-	start_at         *time.Time
-	end_at           *time.Time
-	price            *uint16
-	addprice         *uint16
-	discount         *uint16
-	adddiscount      *uint16
-	products         map[int]struct{}
-	iap_source       map[int]struct{}
-	plans            map[int]struct{}
-	clearedProducts  bool
-	clearedIapSource bool
-	clearedPlans     bool
+	id                  int
+	start_at            *time.Time
+	end_at              *time.Time
+	price               *uint16
+	addprice            *uint16
+	discount            *uint16
+	adddiscount         *uint16
+	products            map[int]struct{}
+	third_parties       map[int]struct{}
+	plans               map[int]struct{}
+	clearedProducts     bool
+	clearedThirdParties bool
+	clearedPlans        bool
 }
 
 // SetStartAt sets the start_at field.
@@ -467,26 +467,26 @@ func (puo *PriceUpdateOne) SetProducts(p *Product) *PriceUpdateOne {
 	return puo.SetProductsID(p.ID)
 }
 
-// SetIapSourceID sets the iap_source edge to IapSource by id.
-func (puo *PriceUpdateOne) SetIapSourceID(id int) *PriceUpdateOne {
-	if puo.iap_source == nil {
-		puo.iap_source = make(map[int]struct{})
+// SetThirdPartiesID sets the third_parties edge to ThirdParty by id.
+func (puo *PriceUpdateOne) SetThirdPartiesID(id int) *PriceUpdateOne {
+	if puo.third_parties == nil {
+		puo.third_parties = make(map[int]struct{})
 	}
-	puo.iap_source[id] = struct{}{}
+	puo.third_parties[id] = struct{}{}
 	return puo
 }
 
-// SetNillableIapSourceID sets the iap_source edge to IapSource by id if the given value is not nil.
-func (puo *PriceUpdateOne) SetNillableIapSourceID(id *int) *PriceUpdateOne {
+// SetNillableThirdPartiesID sets the third_parties edge to ThirdParty by id if the given value is not nil.
+func (puo *PriceUpdateOne) SetNillableThirdPartiesID(id *int) *PriceUpdateOne {
 	if id != nil {
-		puo = puo.SetIapSourceID(*id)
+		puo = puo.SetThirdPartiesID(*id)
 	}
 	return puo
 }
 
-// SetIapSource sets the iap_source edge to IapSource.
-func (puo *PriceUpdateOne) SetIapSource(i *IapSource) *PriceUpdateOne {
-	return puo.SetIapSourceID(i.ID)
+// SetThirdParties sets the third_parties edge to ThirdParty.
+func (puo *PriceUpdateOne) SetThirdParties(t *ThirdParty) *PriceUpdateOne {
+	return puo.SetThirdPartiesID(t.ID)
 }
 
 // SetPlansID sets the plans edge to Plan by id.
@@ -517,9 +517,9 @@ func (puo *PriceUpdateOne) ClearProducts() *PriceUpdateOne {
 	return puo
 }
 
-// ClearIapSource clears the iap_source edge to IapSource.
-func (puo *PriceUpdateOne) ClearIapSource() *PriceUpdateOne {
-	puo.clearedIapSource = true
+// ClearThirdParties clears the third_parties edge to ThirdParty.
+func (puo *PriceUpdateOne) ClearThirdParties() *PriceUpdateOne {
+	puo.clearedThirdParties = true
 	return puo
 }
 
@@ -534,8 +534,8 @@ func (puo *PriceUpdateOne) Save(ctx context.Context) (*Price, error) {
 	if len(puo.products) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"products\"")
 	}
-	if len(puo.iap_source) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"iap_source\"")
+	if len(puo.third_parties) > 1 {
+		return nil, errors.New("ent: multiple assignments on a unique edge \"third_parties\"")
 	}
 	if len(puo.plans) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"plans\"")
@@ -654,33 +654,33 @@ func (puo *PriceUpdateOne) sqlSave(ctx context.Context) (pr *Price, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if puo.clearedIapSource {
+	if puo.clearedThirdParties {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   price.IapSourceTable,
-			Columns: []string{price.IapSourceColumn},
+			Table:   price.ThirdPartiesTable,
+			Columns: []string{price.ThirdPartiesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: iapsource.FieldID,
+					Column: thirdparty.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := puo.iap_source; len(nodes) > 0 {
+	if nodes := puo.third_parties; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   price.IapSourceTable,
-			Columns: []string{price.IapSourceColumn},
+			Table:   price.ThirdPartiesTable,
+			Columns: []string{price.ThirdPartiesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: iapsource.FieldID,
+					Column: thirdparty.FieldID,
 				},
 			},
 		}

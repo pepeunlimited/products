@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/iapsource"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdparty"
 )
 
 // Price is the model entity for the Price schema.
@@ -29,18 +29,18 @@ type Price struct {
 	Discount uint16 `json:"discount,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PriceQuery when eager-loading is set.
-	Edges             PriceEdges `json:"edges"`
-	iap_source_prices *int
-	plan_prices       *int
-	product_prices    *int
+	Edges              PriceEdges `json:"edges"`
+	plan_prices        *int
+	product_prices     *int
+	third_party_prices *int
 }
 
 // PriceEdges holds the relations/edges for other nodes in the graph.
 type PriceEdges struct {
 	// Products holds the value of the products edge.
 	Products *Product
-	// IapSource holds the value of the iap_source edge.
-	IapSource *IapSource
+	// ThirdParties holds the value of the third_parties edge.
+	ThirdParties *ThirdParty
 	// Plans holds the value of the plans edge.
 	Plans *Plan
 	// loadedTypes holds the information for reporting if a
@@ -62,18 +62,18 @@ func (e PriceEdges) ProductsOrErr() (*Product, error) {
 	return nil, &NotLoadedError{edge: "products"}
 }
 
-// IapSourceOrErr returns the IapSource value or an error if the edge
+// ThirdPartiesOrErr returns the ThirdParties value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e PriceEdges) IapSourceOrErr() (*IapSource, error) {
+func (e PriceEdges) ThirdPartiesOrErr() (*ThirdParty, error) {
 	if e.loadedTypes[1] {
-		if e.IapSource == nil {
-			// The edge iap_source was loaded in eager-loading,
+		if e.ThirdParties == nil {
+			// The edge third_parties was loaded in eager-loading,
 			// but was not found.
-			return nil, &NotFoundError{label: iapsource.Label}
+			return nil, &NotFoundError{label: thirdparty.Label}
 		}
-		return e.IapSource, nil
+		return e.ThirdParties, nil
 	}
-	return nil, &NotLoadedError{edge: "iap_source"}
+	return nil, &NotLoadedError{edge: "third_parties"}
 }
 
 // PlansOrErr returns the Plans value or an error if the edge
@@ -104,9 +104,9 @@ func (*Price) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*Price) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // iap_source_prices
 		&sql.NullInt64{}, // plan_prices
 		&sql.NullInt64{}, // product_prices
+		&sql.NullInt64{}, // third_party_prices
 	}
 }
 
@@ -145,22 +145,22 @@ func (pr *Price) assignValues(values ...interface{}) error {
 	values = values[4:]
 	if len(values) == len(price.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field iap_source_prices", value)
-		} else if value.Valid {
-			pr.iap_source_prices = new(int)
-			*pr.iap_source_prices = int(value.Int64)
-		}
-		if value, ok := values[1].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field plan_prices", value)
 		} else if value.Valid {
 			pr.plan_prices = new(int)
 			*pr.plan_prices = int(value.Int64)
 		}
-		if value, ok := values[2].(*sql.NullInt64); !ok {
+		if value, ok := values[1].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field product_prices", value)
 		} else if value.Valid {
 			pr.product_prices = new(int)
 			*pr.product_prices = int(value.Int64)
+		}
+		if value, ok := values[2].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field third_party_prices", value)
+		} else if value.Valid {
+			pr.third_party_prices = new(int)
+			*pr.third_party_prices = int(value.Int64)
 		}
 	}
 	return nil
@@ -171,9 +171,9 @@ func (pr *Price) QueryProducts() *ProductQuery {
 	return (&PriceClient{pr.config}).QueryProducts(pr)
 }
 
-// QueryIapSource queries the iap_source edge of the Price.
-func (pr *Price) QueryIapSource() *IapSourceQuery {
-	return (&PriceClient{pr.config}).QueryIapSource(pr)
+// QueryThirdParties queries the third_parties edge of the Price.
+func (pr *Price) QueryThirdParties() *ThirdPartyQuery {
+	return (&PriceClient{pr.config}).QueryThirdParties(pr)
 }
 
 // QueryPlans queries the plans edge of the Price.
