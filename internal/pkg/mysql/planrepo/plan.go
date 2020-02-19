@@ -12,7 +12,6 @@ import (
 var (
 	ErrPlanNotExist 			= errors.New("plans: plan not exist")
 	ErrUnknownPlanUnit 			= errors.New("plans: unknown plan unit")
-	ErrPriceIDAlreadyExist   	= errors.New("plans: priceId already exist")
 )
 
 type PlanRepository interface {

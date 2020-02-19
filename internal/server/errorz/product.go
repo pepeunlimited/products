@@ -14,6 +14,8 @@ func (ProductErrorz) IsProductError(err error) error {
 		return twirp.NotFoundError("product_not_found")
 	case productrepo.ErrProductSkuExist:
 		return twirp.NewError(twirp.AlreadyExists, "product_sku_already_exist")
+	case productrepo.ErrCantFigureIsSubscription:
+		return twirp.NewError(twirp.Internal, "is_production_subscription_failed")
 	}
 	log.Print("product-service: unknown error: "+err.Error())
 	return twirp.InternalErrorWith(err)

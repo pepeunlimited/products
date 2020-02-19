@@ -3,31 +3,50 @@ syntax = "proto3";
 package pepeunlimited.products;
 option go_package = "pricerpc";
 
-import "google/protobuf/empty.proto";
-import "google/protobuf/wrappers.proto";
-
-// https://github.com/protocolbuffers/protobuf/blob/master/src/google/protobuf/wrappers.proto
-
 service PriceService {
 
-    rpc CreatePrice(CreatePriceParams) returns (Price);
+    rpc CreatePrice(CreatePriceParams)                      returns (Price);
 
-    rpc GetPrice(GetPriceParams)       returns (Price);
+    // NOTE: if the product is_subscribable GetPrice will throw error !! CUZ !! subscription plans can have multiple prices. then use GetSubscriptionPrices
+    rpc GetPrice(GetPriceParams)                            returns (Price);
+
+    // NOTE: if the product is_subscribable GetPrice will throw error !! CUZ !! subscription plans can have multiple prices.
+    rpc EndPrice(EndPriceParams)                            returns (Price);
+
+    rpc GetSubscriptionPrices(GetSubscriptionPricesParams)  returns (GetSubscriptionPricesResponse);
+}
+
+message GetSubscriptionPricesParams {
+    int64   product_id      = 1;
+    string  product_sku     = 2;
+}
+message GetSubscriptionPricesResponse {
+    repeated Price prices = 1;
+}
+
+message EndPriceParams {
+    GetPriceParams params        = 1;
+    int32          end_at_day    = 2; // optional
+    int32          end_at_month  = 3; // optional
 }
 
 message Price {
-    int64   id       = 1;
-    uint32  price    = 2;
-    uint32  discount = 3;
-    string  start_at = 4;
-    string  end_at   = 5;
+    int64   id              = 1;
+    uint32  price           = 2;
+    uint32  discount        = 3;
+    string  start_at        = 4;
+    string  end_at          = 5;
+    bool    is_subscription = 6;
+    int32   third_party_id  = 7;
+    int64   plan_id         = 8;
+    int64   product_id      = 9;
 }
 
 message CreatePriceParams {
-    int32  start_at_day     = 1; // optional
-    int32  start_at_month   = 2; // optional
-    int32  end_at_day       = 3; // optional
-    int32  end_at_month     = 4; // optional
+    int32   start_at_day     = 1; // optional
+    int32   start_at_month   = 2; // optional
+    int32   end_at_day       = 3; // optional
+    int32   end_at_month     = 4; // optional
     uint32  price           = 5; // => required
     uint32  discount        = 6; // optional
     int64   product_id      = 7; // => required
@@ -36,5 +55,7 @@ message CreatePriceParams {
 }
 
 message GetPriceParams {
-
+    int64   product_id      = 1;
+    string  product_sku     = 2;
+    int64   price_id        = 3;
 }

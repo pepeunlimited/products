@@ -19,14 +19,14 @@ var (
 )
 
 type PriceRepository interface {
-	GetPriceByProductID(ctx context.Context, productId int) 						  					  (*ent.Price, error)
-	GetPriceByProductIDAndTime(ctx context.Context, productId int, now time.Time) 						  (*ent.Price, error)
+	GetPriceByProductID(ctx context.Context, productId int, withProduct bool, withPlan bool, withThirdParty bool) 						  					  (*ent.Price, error)
+	GetPriceByProductIDAndTime(ctx context.Context, productId int, now time.Time, withProduct bool, withPlan bool, withThirdParty bool) 						  (*ent.Price, error)
 	GetPricesByProductID(ctx context.Context, productId int) 							  				  ([]*ent.Price, error)
-	GetPriceByID(ctx context.Context, id int) 							  					  			  (*ent.Price, error)
+	GetPriceByID(ctx context.Context, id int, withProduct bool, withPlan bool, withThirdParty bool) 	  (*ent.Price, error)
 	GetPricesByPlanId(ctx context.Context, planId int) 							  					  	  ([]*ent.Price, error)
 
 	CreateNewPrice(ctx context.Context, price uint16, discount uint16, productId int, thirdPartyID *int, plansId *int)  	  (*ent.Price, error)
-	CreatePrice(ctx context.Context, price uint16, discount uint16, productId int, startAt time.Time, endAt time.Time, iapSourceId *int, plansId *int) (*ent.Price, error)
+	CreatePrice(ctx context.Context, price uint16, discount uint16, productId int, startAt time.Time, endAt time.Time, thirdPartyID *int, plansId *int) (*ent.Price, error)
 
 	EndAt(ctx context.Context, month time.Month, day int, priceId int) 					  			  (*ent.Price, error)
 	Wipe(ctx context.Context)
@@ -44,17 +44,27 @@ func (mysql priceMySQL) GetPricesByPlanId(ctx context.Context, planId int) ([]*e
 	return plans, nil
 }
 
-func (mysql priceMySQL) GetPriceByProductID(ctx context.Context, productId int) (*ent.Price, error) {
+func (mysql priceMySQL) GetPriceByProductID(ctx context.Context, productId int, withProduct bool, withPlan bool, withThirdParty bool) (*ent.Price, error) {
 	now := time.Now().UTC()
-	return mysql.GetPriceByProductIDAndTime(ctx, productId, now)
+	return mysql.GetPriceByProductIDAndTime(ctx, productId, now, withProduct, withPlan, withThirdParty)
 }
 
-func (mysql priceMySQL) GetPriceByProductIDAndTime(ctx context.Context, productId int, now time.Time) (*ent.Price, error) {
-	only, err := mysql.client.Price.Query().Where(
+func (mysql priceMySQL) GetPriceByProductIDAndTime(ctx context.Context, productId int, now time.Time, withProduct bool, withPlan bool, withThirdParty bool) (*ent.Price, error) {
+	query := mysql.client.Price.Query().Where(
 		price.And(
 			price.StartAtLTE(now), price.EndAtGTE(now),
 			price.HasProductsWith(product.ID(productId)),
-		)).Only(ctx)
+		))
+	if withProduct {
+		query.WithProducts()
+	}
+	if withThirdParty {
+		query.WithThirdParties()
+	}
+	if withPlan {
+		query.WithPlans()
+	}
+	only, err := query.Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrPriceNotExist
@@ -77,6 +87,17 @@ func (mysql priceMySQL) CreatePrice(ctx context.Context, price uint16, discount 
 	if err != nil {
 		return nil, err
 	}
+
+	if plansId != nil {
+		if *plansId == 0 {
+			plansId = nil
+		}
+	}
+	if thirdPartyID != nil {
+		if *thirdPartyID == 0 {
+			thirdPartyID = nil
+		}
+	}
 	build := mysql.
 		client.
 		Price.
@@ -90,7 +111,6 @@ func (mysql priceMySQL) CreatePrice(ctx context.Context, price uint16, discount 
 	if plansId != nil {
 		// subscription plans..
 		subscriptionPlans, err := mysql.GetPricesByPlanId(ctx, *plansId)
-		log.Print(len(subscriptionPlans))
 		if err != nil {
 			return nil, err
 		}
@@ -130,19 +150,29 @@ func (mysql priceMySQL) GetPricesByProductID(ctx context.Context, productId int)
 	return all, err
 }
 
-func (mysql priceMySQL) GetPriceByID(ctx context.Context, id int) (*ent.Price, error) {
-	selected, err := mysql.client.Price.Get(ctx, id)
+func (mysql priceMySQL) GetPriceByID(ctx context.Context, id int, withProduct bool, withPlan bool, withThirdParty bool) (*ent.Price, error) {
+	query := mysql.client.Price.Query().Where(price.ID(id))
+	if withProduct {
+		query.WithProducts()
+	}
+	if withPlan {
+		query.WithPlans()
+	}
+	if withThirdParty {
+		query.WithThirdParties()
+	}
+	only, err := query.Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrPriceNotExist
 		}
 		return nil, err
 	}
-	return selected, nil
+	return only, nil
 }
 
 func (mysql priceMySQL) EndAt(ctx context.Context, month time.Month, day int, priceId int) (*ent.Price, error) {
-	prices, err := mysql.GetPriceByID(ctx, priceId)
+	prices, err := mysql.GetPriceByID(ctx, priceId, false, false, false)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +184,7 @@ func (mysql priceMySQL) EndAt(ctx context.Context, month time.Month, day int, pr
 	if err != nil {
 		return nil, err
 	}
-	return updated, nil
+	return mysql.GetPriceByID(ctx,updated.ID, true, true,true)
 }
 
 func (mysql priceMySQL) Wipe(ctx context.Context) {

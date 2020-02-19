@@ -85,7 +85,7 @@ func TestPriceMySQL_GetPricesByProductID(t *testing.T) {
 	if err != ErrInvalidStartAt {
 		t.FailNow()
 	}
-	selectedCurrent, err := pricerepo.GetPriceByProductID(ctx, product.ID)
+	selectedCurrent, err := pricerepo.GetPriceByProductID(ctx, product.ID, false, false, false)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -94,7 +94,7 @@ func TestPriceMySQL_GetPricesByProductID(t *testing.T) {
 		t.FailNow()
 	}
 
-	id, err := pricerepo.GetPriceByProductID(ctx, product.ID)
+	id, err := pricerepo.GetPriceByProductID(ctx, product.ID, false,false,false)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

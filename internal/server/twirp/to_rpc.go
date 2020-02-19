@@ -26,11 +26,21 @@ func ToThirdParties(parties []*ent.ThirdParty) []*thirdpartyrpc.ThirdParty {
 }
 
 func ToPrice(price *ent.Price) *pricerpc.Price {
-	return &pricerpc.Price{
+	p := &pricerpc.Price{
 		Id:       int64(price.ID),
 		Price:    uint32(price.Price),
 		Discount: uint32(price.Discount),
 		StartAt:  price.StartAt.Format(time.RFC3339),
 		EndAt:    price.EndAt.Format(time.RFC3339),
 	}
+	if price.Edges.ThirdParties != nil {
+		p.ThirdPartyId = int32(price.Edges.ThirdParties.ID)
+	}
+	if price.Edges.Plans != nil {
+		p.PlanId = int64(price.Edges.Plans.ID)
+	}
+	if price.Edges.Products != nil {
+		p.ProductId = int64(price.Edges.Products.ID)
+	}
+	return p
 }
