@@ -114,9 +114,9 @@ func TestPlanMySQL_GetPlans(t *testing.T) {
 	plan1,_ := plansrepo.Create(ctx, titleI18nId1, length, unit)
 	plan2,_ := plansrepo.Create(ctx, titleI18nId1, length, unit)
 
-	pricerepo.CreateNewPrice(ctx, uint16(0), product1.ID, nil, &plan1.ID)
-	pricerepo.CreateNewPrice(ctx, uint16(2), product1.ID, nil, &plan2.ID)
-	pricerepo.CreateNewPrice(ctx, uint16(2), product1.ID, nil, &plan2.ID)
+	pricerepo.CreateNewPrice(ctx, uint16(0), uint16(0), product1.ID, nil, &plan1.ID)
+	pricerepo.CreateNewPrice(ctx, uint16(2), uint16(2), product1.ID, nil, &plan2.ID)
+	pricerepo.CreateNewPrice(ctx, uint16(2), uint16(2), product1.ID, nil, &plan2.ID)
 
 	plans, err := plansrepo.GetPlans(ctx)
 	if err != nil {

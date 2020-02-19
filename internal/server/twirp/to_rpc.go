@@ -2,6 +2,7 @@ package twirp
 
 import (
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
+	"github.com/pepeunlimited/prices/pkg/pricerpc"
 	"github.com/pepeunlimited/prices/pkg/thirdpartyrpc"
 	"time"
 )
@@ -22,4 +23,14 @@ func ToThirdParties(parties []*ent.ThirdParty) []*thirdpartyrpc.ThirdParty {
 		list = append(list, ToThirdParty(party))
 	}
 	return list
+}
+
+func ToPrice(price *ent.Price) *pricerpc.Price {
+	return &pricerpc.Price{
+		Id:       int64(price.ID),
+		Price:    uint32(price.Price),
+		Discount: uint32(price.Discount),
+		StartAt:  price.StartAt.Format(time.RFC3339),
+		EndAt:    price.EndAt.Format(time.RFC3339),
+	}
 }

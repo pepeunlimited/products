@@ -25,8 +25,8 @@ type PriceRepository interface {
 	GetPriceByID(ctx context.Context, id int) 							  					  			  (*ent.Price, error)
 	GetPricesByPlanId(ctx context.Context, planId int) 							  					  	  ([]*ent.Price, error)
 
-	CreateNewPrice(ctx context.Context, price uint16, productId int, thirdPartyID *int, plansId *int)  	  (*ent.Price, error)
-	CreatePrice(ctx context.Context, price uint16, productId int, startAt time.Time, endAt time.Time, iapSourceId *int, plansId *int) (*ent.Price, error)
+	CreateNewPrice(ctx context.Context, price uint16, discount uint16, productId int, thirdPartyID *int, plansId *int)  	  (*ent.Price, error)
+	CreatePrice(ctx context.Context, price uint16, discount uint16, productId int, startAt time.Time, endAt time.Time, iapSourceId *int, plansId *int) (*ent.Price, error)
 
 	EndAt(ctx context.Context, month time.Month, day int, priceId int) 					  			  (*ent.Price, error)
 	Wipe(ctx context.Context)
@@ -66,7 +66,7 @@ func (mysql priceMySQL) GetPriceByProductIDAndTime(ctx context.Context, productI
 
 //1   |    Jan 1, 1970, 00:00:00 |  Dec 20, 2011, 00:00:00  |   10$ |   10$
 //1   |   Dec 20, 2011, 00:00:01 |  Dec 26, 2011, 00:00:00  |  	10$ |   10$
-func (mysql priceMySQL) CreatePrice(ctx context.Context, price uint16, productId int, startAt time.Time, endAt time.Time, thirdPartyID *int, plansId *int) (*ent.Price, error) {
+func (mysql priceMySQL) CreatePrice(ctx context.Context, price uint16, discount uint16, productId int, startAt time.Time, endAt time.Time, thirdPartyID *int, plansId *int) (*ent.Price, error) {
 	if endAt.Before(startAt) {
 		return nil, ErrInvalidEndAt
 	}
@@ -82,7 +82,7 @@ func (mysql priceMySQL) CreatePrice(ctx context.Context, price uint16, productId
 		Price.
 		Create().
 		SetPrice(price).
-		SetDiscount(price).
+		SetDiscount(discount).
 		SetProductsID(productId).
 		SetNillablePlansID(plansId).
 		SetNillableThirdPartiesID(thirdPartyID)
@@ -165,8 +165,8 @@ func (mysql priceMySQL) Wipe(ctx context.Context) {
 	mysql.client.Product.Delete().ExecX(ctx)
 }
 
-func (mysql priceMySQL) CreateNewPrice(ctx context.Context, price uint16, productId int, iapSourceId *int, plansId *int) (*ent.Price, error) {
-	return mysql.CreatePrice(ctx, price, productId, clock.ZeroAt().UTC(), clock.InfinityAt().UTC(), iapSourceId, plansId)
+func (mysql priceMySQL) CreateNewPrice(ctx context.Context, price uint16, discount uint16, productId int, iapSourceId *int, plansId *int) (*ent.Price, error) {
+	return mysql.CreatePrice(ctx, price, discount, productId, clock.ZeroAt().UTC(), clock.InfinityAt().UTC(), iapSourceId, plansId)
 }
 
 func NewPriceRepository(client *ent.Client) PriceRepository {

@@ -24,7 +24,7 @@ func TestPriceMySQL_CreatePrice(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	created, err := repo.CreateNewPrice(ctx, price, product.ID, &iap.ID, nil)
+	created, err := repo.CreateNewPrice(ctx, price,price, product.ID, &iap.ID, nil)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -65,20 +65,20 @@ func TestPriceMySQL_GetPricesByProductID(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	initial, err := pricerepo.CreateNewPrice(ctx, uint16(3), product.ID, nil, nil)
+	initial, err := pricerepo.CreateNewPrice(ctx, uint16(3), uint16(3), product.ID, nil, nil)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
 	pricerepo.EndAt(ctx, 2, 14, initial.ID)
 	startAt,_ := clock.ToMonthDate(2, 14)
-	createCurrent, err := pricerepo.CreatePrice(ctx, uint16(5), product.ID, startAt, clock.InfinityAt(), nil, nil)
+	createCurrent, err := pricerepo.CreatePrice(ctx, uint16(5), uint16(5), product.ID, startAt, clock.InfinityAt(), nil, nil)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
 	startAt,_ = clock.ToMonthDate(2, 15)
-	_, err = pricerepo.CreatePrice(ctx, uint16(3), product.ID, startAt, clock.InfinityAt(), nil, nil)
+	_, err = pricerepo.CreatePrice(ctx, uint16(3),uint16(3), product.ID, startAt, clock.InfinityAt(), nil, nil)
 	if err == nil {
 		t.FailNow()
 	}

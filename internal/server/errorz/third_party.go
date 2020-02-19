@@ -8,7 +8,6 @@ import (
 
 type ThirdPartyErrorz struct {}
 
-
 func (ThirdPartyErrorz) IsThirdPartyError(err error) error {
 	switch err {
 	case thirdpartyrepo.ErrThirdPartyNotExist:
