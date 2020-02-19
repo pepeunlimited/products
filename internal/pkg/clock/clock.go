@@ -2,7 +2,6 @@ package clock
 
 import (
 	"errors"
-	"math"
 	"time"
 )
 
@@ -11,9 +10,9 @@ var (
 	ErrInvalidMonth 	= errors.New("clock: invalid month")
 )
 
-// 2106-02-07 06:28:15.000
+// 9999-12-31 00:00:00.000 (MySQL max value for Date)
 func InfinityAt() time.Time {
-	return time.Unix(math.MaxUint32, 0)
+	return time.Date(9999, 12, 31, 0,0,0,0,time.UTC)
 }
 
 // 1970-01-01 00:00:00.000

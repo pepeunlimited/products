@@ -3,6 +3,7 @@ package thirdpartyrepo
 import (
 	"context"
 	"errors"
+	"github.com/pepeunlimited/microservice-kit/validator"
 	"github.com/pepeunlimited/prices/internal/pkg/clock"
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdparty"
@@ -36,8 +37,12 @@ func (mysql thirdpartiesMySQL) CreateStartAt(ctx context.Context, apple string, 
 		return nil, ErrInAppPurchaseSkuExist
 	}
 	if google != nil {
-		if _, err := mysql.GetBillingBySku(ctx, *google); err == nil {
-			return nil, ErrGoogleBillingServiceSkuExist
+		if validator.IsEmpty(*google) {
+			google = nil
+		} else {
+			if _, err := mysql.GetBillingBySku(ctx, *google); err == nil {
+				return nil, ErrGoogleBillingServiceSkuExist
+			}
 		}
 	}
 	save, err := mysql.
@@ -105,8 +110,7 @@ func (mysql thirdpartiesMySQL) GetBillingBySku(ctx context.Context, sku string) 
 }
 
 func (mysql thirdpartiesMySQL) Create(ctx context.Context, apple string, google *string) (*ent.ThirdParty, error) {
-	now := time.Now()
-	return mysql.CreateStartAt(ctx, apple, google, now)
+	return mysql.CreateStartAt(ctx, apple, google, clock.ZeroAt())
 }
 
 func (mysql thirdpartiesMySQL) EndAt(ctx context.Context, month time.Month, day int, id int) (*ent.ThirdParty, error) {

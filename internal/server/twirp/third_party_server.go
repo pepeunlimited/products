@@ -18,8 +18,25 @@ type ThirdPartyServer struct {
 	errorz errorz.ThirdPartyErrorz
 }
 
+func (server ThirdPartyServer) EndThirdParty(ctx context.Context, params *thirdpartyrpc.EndThirdPartyParams) (*thirdpartyrpc.ThirdParty, error) {
+	err := server.valid.EndThirdParty(params)
+	if err != nil {
+		return nil, err
+	}
+	party, err := server.GetThirdParty(ctx, params.Params)
+	if err != nil {
+		return nil, err
+	}
+	ended, err := server.thirdparty.EndAt(ctx, time.Month(params.EndAtMonth), int(params.EndAtDay), int(party.Id))
+	if err != nil {
+		return nil, server.errorz.IsThirdPartyError(err)
+	}
+	return ToThirdParty(ended), nil
+}
+
 func (server ThirdPartyServer) CreateThirdParty(ctx context.Context, params *thirdpartyrpc.CreateThirdPartyParams) (*thirdpartyrpc.ThirdParty, error) {
 	err := server.valid.CreateThirdParty(params)
+
 	if err != nil {
 		return nil, err
 	}
@@ -28,6 +45,7 @@ func (server ThirdPartyServer) CreateThirdParty(ctx context.Context, params *thi
 		if err != nil {
 			return nil, err
 		}
+		startAt = startAt.Add(1 * time.Second)
 		thirdparty, err := server.thirdparty.CreateStartAt(ctx, params.InAppPurchaseSku, &params.GoogleBillingServiceSku, startAt)
 		if err != nil {
 			return nil, server.errorz.IsThirdPartyError(err)
@@ -42,7 +60,15 @@ func (server ThirdPartyServer) CreateThirdParty(ctx context.Context, params *thi
 }
 
 func (server ThirdPartyServer) GetThirdParties(ctx context.Context, params *thirdpartyrpc.GetThirdPartiesParams) (*thirdpartyrpc.GetThirdPartiesResponse, error) {
-	panic("implement me")
+	err := server.valid.GetThirdParties(params)
+	if err != nil {
+		return nil, err
+	}
+	parties, err := server.thirdparty.GetThirdParties(ctx)
+	if err != nil {
+		return nil, server.errorz.IsThirdPartyError(err)
+	}
+	return &thirdpartyrpc.GetThirdPartiesResponse{ThirdParties: ToThirdParties(parties)}, nil
 }
 
 func (server ThirdPartyServer) GetThirdParty(ctx context.Context, params *thirdpartyrpc.GetThirdPartyParams) (*thirdpartyrpc.ThirdParty, error) {

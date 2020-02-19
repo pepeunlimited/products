@@ -10,4 +10,31 @@ import "google/protobuf/wrappers.proto";
 
 service PriceService {
 
+    rpc CreatePrice(CreatePriceParams) returns (Price);
+
+    rpc GetPrice(GetPriceParams)       returns (Price);
+}
+
+message Price {
+    int64   id       = 1;
+    uint32  price    = 2;
+    uint32  discount = 3;
+    string  start_at = 4;
+    string  end_at   = 5;
+}
+
+message CreatePriceParams {
+    int32  start_at_day     = 1; // optional
+    int32  start_at_month   = 2; // optional
+    int32  end_at_day       = 3; // optional
+    int32  end_at_month     = 4; // optional
+    uint32  price           = 5; // => required
+    uint32  discount        = 6; // optional
+    int64   product_id      = 7; // => required
+    int64   plan_id         = 8; // optional
+    int32   third_party_id  = 9; // optional
+}
+
+message GetPriceParams {
+
 }

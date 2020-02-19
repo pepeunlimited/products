@@ -36,3 +36,24 @@ func (v ThirdPartyServerValidator) GetThirdParty(params *thirdpartyrpc.GetThirdP
 	}
 	return nil
 }
+
+func (v ThirdPartyServerValidator) EndThirdParty(params *thirdpartyrpc.EndThirdPartyParams) error {
+	if params.Params == nil {
+		return twirp.RequiredArgumentError("params")
+	}
+	err := v.GetThirdParty(params.Params)
+	if err != nil {
+		return err
+	}
+	if params.EndAtDay == 0 {
+		return twirp.RequiredArgumentError("end_at_day")
+	}
+	if params.EndAtMonth == 0 {
+		return twirp.RequiredArgumentError("end_at_month")
+	}
+	return nil
+}
+
+func (v ThirdPartyServerValidator) GetThirdParties(params *thirdpartyrpc.GetThirdPartiesParams) error {
+	return nil
+}

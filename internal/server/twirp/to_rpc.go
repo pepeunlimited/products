@@ -15,3 +15,11 @@ func ToThirdParty(thirdparty *ent.ThirdParty) *thirdpartyrpc.ThirdParty {
 		EndAt:                   thirdparty.EndAt.Format(time.RFC3339),
 	}
 }
+
+func ToThirdParties(parties []*ent.ThirdParty) []*thirdpartyrpc.ThirdParty {
+	list := make([]*thirdpartyrpc.ThirdParty, 0)
+	for _, party := range parties {
+		list = append(list, ToThirdParty(party))
+	}
+	return list
+}
