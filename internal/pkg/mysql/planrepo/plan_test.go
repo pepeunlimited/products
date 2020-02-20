@@ -129,7 +129,7 @@ func TestPlanMySQL_GetPlans(t *testing.T) {
 	if plans[0].TitleI18nID != 1 {
 		t.FailNow()
 	}
-	is, err := productrepo.IsSubscribableByID(ctx, product1.ID)
+	_, is, err := productrepo.IsSubscribableByID(ctx, product1.ID)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

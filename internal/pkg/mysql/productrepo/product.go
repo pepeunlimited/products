@@ -23,7 +23,7 @@ type ProductRepository interface {
 	GetProducts(ctx context.Context, pageToken int64, pageSize int32)   ([]*ent.Product, int64, error)
 	Wipe(ctx context.Context)
 
-	IsSubscribableByID(ctx context.Context, id int)				(*bool, error)
+	IsSubscribableByID(ctx context.Context, id int)						(*ent.Product, *bool, error)
 }
 
 type productMySQL struct {
@@ -40,25 +40,25 @@ func (mysql productMySQL) GetProducts(ctx context.Context, pageToken int64, page
 	return all, int64(all[len(all) - 1].ID), nil
 }
 
-func (mysql productMySQL) IsSubscribableByID(ctx context.Context, id int) (*bool, error) {
+func (mysql productMySQL) IsSubscribableByID(ctx context.Context, id int) (*ent.Product, *bool, error) {
 	selected, err := mysql.GetProductByID(ctx, true, id)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	prices := selected.Edges.Prices
 	if len(prices) == 0 {
-		return nil, ErrCantFigureIsSubscription
+		return nil, nil, ErrCantFigureIsSubscription
 	}
 	_, err = prices[0].QueryPlans().Where(plan.HasPrices()).Only(ctx)
 	isSubscribable := false
 	if err != nil {
 		if ent.IsNotFound(err) {
-			return &isSubscribable, nil
+			return selected, &isSubscribable, nil
 		}
-		return nil, err
+		return nil, nil, err
 	}
 	isSubscribable = true
-	return &isSubscribable, nil
+	return selected, &isSubscribable, nil
 }
 
 //			https://dbdiagram.io/d

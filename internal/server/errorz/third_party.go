@@ -6,9 +6,7 @@ import (
 	"log"
 )
 
-type ThirdPartyErrorz struct {}
-
-func (ThirdPartyErrorz) IsThirdPartyError(err error) error {
+func IsThirdPartyError(err error) error {
 	switch err {
 	case thirdpartyrepo.ErrThirdPartyNotExist:
 		return twirp.NotFoundError("third_party_not_found")
@@ -19,8 +17,4 @@ func (ThirdPartyErrorz) IsThirdPartyError(err error) error {
 	}
 	log.Print("third-party-service: unknown error: "+err.Error())
 	return twirp.InternalErrorWith(err)
-}
-
-func NewThirdPartyErrorz() ThirdPartyErrorz {
-	return ThirdPartyErrorz{}
 }

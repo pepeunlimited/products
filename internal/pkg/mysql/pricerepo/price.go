@@ -8,7 +8,6 @@ import (
 	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
-	"log"
 	"time"
 )
 
@@ -21,9 +20,11 @@ var (
 type PriceRepository interface {
 	GetPriceByProductID(ctx context.Context, productId int, withProduct bool, withPlan bool, withThirdParty bool) 						  					  (*ent.Price, error)
 	GetPriceByProductIDAndTime(ctx context.Context, productId int, now time.Time, withProduct bool, withPlan bool, withThirdParty bool) 						  (*ent.Price, error)
-	GetPricesByProductID(ctx context.Context, productId int) 							  				  ([]*ent.Price, error)
+	GetPricesByProductID(ctx context.Context, productId int, isSequence bool) 							  ([]*ent.Price, error)
 	GetPriceByID(ctx context.Context, id int, withProduct bool, withPlan bool, withThirdParty bool) 	  (*ent.Price, error)
 	GetPricesByPlanId(ctx context.Context, planId int) 							  					  	  ([]*ent.Price, error)
+	GetPriceByPlanId(ctx context.Context, planId int, withProduct bool, withPlan bool, withThirdParty bool) 							  					  	  (*ent.Price, error)
+	GetPriceByPlanIdAndTime(ctx context.Context, planId int, now time.Time, withProduct bool, withPlan bool, withThirdParty bool) 							  (*ent.Price, error)
 
 	CreateNewPrice(ctx context.Context, price uint16, discount uint16, productId int, thirdPartyID *int, plansId *int)  	  (*ent.Price, error)
 	CreatePrice(ctx context.Context, price uint16, discount uint16, productId int, startAt time.Time, endAt time.Time, thirdPartyID *int, plansId *int) (*ent.Price, error)
@@ -36,8 +37,36 @@ type priceMySQL struct {
 	client *ent.Client
 }
 
+func (mysql priceMySQL) GetPriceByPlanIdAndTime(ctx context.Context, planId int, now time.Time, withProduct bool, withPlan bool, withThirdParty bool) (*ent.Price, error) {
+	query := mysql.client.Price.Query().Where(
+		price.And(
+			price.StartAtLTE(now),
+			price.EndAtGTE(now),
+			price.HasPlansWith(plan.ID(planId))),
+	)
+	if withThirdParty {
+		query.WithThirdParties()
+	}
+	if withPlan {
+		query.WithPlans()
+	}
+	if withProduct {
+		query.WithProducts()
+	}
+	plan, err := query.Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return plan, nil
+}
+
+func (mysql priceMySQL) GetPriceByPlanId(ctx context.Context, planId int, withProduct bool, withPlan bool, withThirdParty bool) (*ent.Price, error) {
+	return mysql.GetPriceByPlanIdAndTime(ctx, planId, time.Now().UTC(), withProduct, withPlan, withThirdParty)
+}
+
 func (mysql priceMySQL) GetPricesByPlanId(ctx context.Context, planId int) ([]*ent.Price, error) {
-	plans, err := mysql.client.Price.Query().Where(price.HasPlansWith(plan.ID(planId))).All(ctx)
+	plans, err := mysql.client.Price.Query().Where(price.HasPlansWith(plan.ID(planId))).
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +81,8 @@ func (mysql priceMySQL) GetPriceByProductID(ctx context.Context, productId int, 
 func (mysql priceMySQL) GetPriceByProductIDAndTime(ctx context.Context, productId int, now time.Time, withProduct bool, withPlan bool, withThirdParty bool) (*ent.Price, error) {
 	query := mysql.client.Price.Query().Where(
 		price.And(
-			price.StartAtLTE(now), price.EndAtGTE(now),
+			price.StartAtLTE(now),
+			price.EndAtGTE(now),
 			price.HasProductsWith(product.ID(productId)),
 		))
 	if withProduct {
@@ -83,7 +113,7 @@ func (mysql priceMySQL) CreatePrice(ctx context.Context, price uint16, discount 
 	if startAt.After(endAt) {
 		return nil, ErrInvalidStartAt
 	}
-	prices, err := mysql.GetPricesByProductID(ctx, productId)
+	prices, err := mysql.GetPricesByProductID(ctx, productId, false)
 	if err != nil {
 		return nil, err
 	}
@@ -120,6 +150,7 @@ func (mysql priceMySQL) CreatePrice(ctx context.Context, price uint16, discount 
 			if startAt.Unix() < latestEndAt.Unix() {
 				return nil, ErrInvalidStartAt
 			}
+			build.SetStartAt(startAt.Add(1 * time.Second).UTC()).SetEndAt(endAt.UTC())
 		} else {
 			build.SetStartAt(startAt.Add(1 * time.Second).UTC()).SetEndAt(endAt.UTC())
 		}
@@ -139,11 +170,25 @@ func (mysql priceMySQL) CreatePrice(ctx context.Context, price uint16, discount 
 	if err != nil {
 		return nil, err
 	}
-	return created, nil
+	return mysql.GetPriceByID(ctx, created.ID, true, true, true)
 }
 
-func (mysql priceMySQL) GetPricesByProductID(ctx context.Context, productId int) ([]*ent.Price, error) {
-	all, err := mysql.client.Price.Query().Where(price.HasProductsWith(product.ID(productId))).Order(ent.Asc(price.FieldID)).All(ctx)
+
+func (mysql priceMySQL) GetPricesByProductID(ctx context.Context, productId int, isSequence bool) ([]*ent.Price, error) {
+	now := time.Now().UTC()
+	query := mysql.client.Price.Query().Order(ent.Asc(price.FieldID))
+	if isSequence {
+		query.Where(price.And(
+			price.StartAtLTE(now),
+			price.EndAtGTE(now),
+			price.HasProductsWith(product.ID(productId)),
+		)).WithPlans().
+			WithThirdParties().
+			WithProducts()
+	} else {
+		query.Where(price.HasProductsWith(product.ID(productId)))
+	}
+	all, err := query.All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -201,18 +246,4 @@ func (mysql priceMySQL) CreateNewPrice(ctx context.Context, price uint16, discou
 
 func NewPriceRepository(client *ent.Client) PriceRepository {
 	return &priceMySQL{client: client}
-}
-
-func (mysql priceMySQL) rollback(tx *ent.Tx){
-	if err := tx.Rollback(); err != nil {
-		log.Print("prices: failed execute rollback.."+err.Error())
-	}
-}
-
-func (mysql priceMySQL) commit(tx *ent.Tx) error {
-	if err := tx.Commit(); err != nil {
-		log.Print("prices: failed execute commit.."+err.Error())
-		return err
-	}
-	return nil
 }

@@ -6,9 +6,7 @@ import (
 	"log"
 )
 
-type PlanErrorz struct {}
-
-func (PlanErrorz) IsPlanError(err error) error {
+func IsPlanError(err error) error {
 	switch err {
 	case planrepo.ErrPlanNotExist:
 		return twirp.NotFoundError("plan_not_found")
@@ -18,8 +16,4 @@ func (PlanErrorz) IsPlanError(err error) error {
 	}
 	log.Print("plan-service: unknown error: "+err.Error())
 	return twirp.InternalErrorWith(err)
-}
-
-func NewPlanErrorz() PlanErrorz {
-	return PlanErrorz{}
 }

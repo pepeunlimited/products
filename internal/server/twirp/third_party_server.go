@@ -15,7 +15,6 @@ import (
 type ThirdPartyServer struct {
 	thirdparty thirdpartyrepo.ThirdPartyRepository
 	valid validator.ThirdPartyServerValidator
-	errorz errorz.ThirdPartyErrorz
 }
 
 func (server ThirdPartyServer) EndThirdParty(ctx context.Context, params *thirdpartyrpc.EndThirdPartyParams) (*thirdpartyrpc.ThirdParty, error) {
@@ -29,7 +28,7 @@ func (server ThirdPartyServer) EndThirdParty(ctx context.Context, params *thirdp
 	}
 	ended, err := server.thirdparty.EndAt(ctx, time.Month(params.EndAtMonth), int(params.EndAtDay), int(party.Id))
 	if err != nil {
-		return nil, server.errorz.IsThirdPartyError(err)
+		return nil, errorz.IsThirdPartyError(err)
 	}
 	return ToThirdParty(ended), nil
 }
@@ -48,13 +47,13 @@ func (server ThirdPartyServer) CreateThirdParty(ctx context.Context, params *thi
 		startAt = startAt.Add(1 * time.Second)
 		thirdparty, err := server.thirdparty.CreateStartAt(ctx, params.InAppPurchaseSku, &params.GoogleBillingServiceSku, startAt)
 		if err != nil {
-			return nil, server.errorz.IsThirdPartyError(err)
+			return nil, errorz.IsThirdPartyError(err)
 		}
 		return ToThirdParty(thirdparty), nil
 	}
 	thirdparty, err := server.thirdparty.Create(ctx, params.InAppPurchaseSku, &params.GoogleBillingServiceSku)
 	if err != nil {
-		return nil, server.errorz.IsThirdPartyError(err)
+		return nil, errorz.IsThirdPartyError(err)
 	}
 	return ToThirdParty(thirdparty), nil
 }
@@ -66,7 +65,7 @@ func (server ThirdPartyServer) GetThirdParties(ctx context.Context, params *thir
 	}
 	parties, err := server.thirdparty.GetThirdParties(ctx)
 	if err != nil {
-		return nil, server.errorz.IsThirdPartyError(err)
+		return nil, errorz.IsThirdPartyError(err)
 	}
 	return &thirdpartyrpc.GetThirdPartiesResponse{ThirdParties: ToThirdParties(parties)}, nil
 }
@@ -87,7 +86,7 @@ func (server ThirdPartyServer) GetThirdParty(ctx context.Context, params *thirdp
 		thirdparty, err = server.thirdparty.GetByID(ctx, int(params.Id))
 	}
 	if err != nil {
-		return nil, server.errorz.IsThirdPartyError(err)
+		return nil, errorz.IsThirdPartyError(err)
 	}
 	return ToThirdParty(thirdparty), nil
 }
@@ -96,6 +95,5 @@ func NewThirdPartyServer(client *ent.Client) ThirdPartyServer {
 	return ThirdPartyServer{
 		thirdparty:thirdpartyrepo.NewThirdPartyRepository(client),
 		valid:validator.NewThirdPartyServerValidator(),
-		errorz:errorz.NewThirdPartyErrorz(),
 	}
 }

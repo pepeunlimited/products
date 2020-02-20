@@ -58,4 +58,5 @@ message GetPriceParams {
     int64   product_id      = 1;
     string  product_sku     = 2;
     int64   price_id        = 3;
+    int64   plan_id         = 4;
 }

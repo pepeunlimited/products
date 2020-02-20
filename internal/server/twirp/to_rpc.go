@@ -44,3 +44,11 @@ func ToPrice(price *ent.Price) *pricerpc.Price {
 	}
 	return p
 }
+
+func ToPrices(prices []*ent.Price) []*pricerpc.Price {
+	list := make([]*pricerpc.Price, 0)
+	for _, price := range prices {
+		list = append(list, ToPrice(price))
+	}
+	return list
+}

@@ -44,7 +44,7 @@ func TestPriceMySQL_CreatePrice(t *testing.T) {
 	if !ended.EndAt.Equal(endAt) {
 		t.FailNow()
 	}
-	isSubscribable, err := products.IsSubscribableByID(ctx, product.ID)
+	_, isSubscribable, err := products.IsSubscribableByID(ctx, product.ID)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -102,7 +102,7 @@ func TestPriceMySQL_GetPricesByProductID(t *testing.T) {
 	if id == nil {
 		t.FailNow()
 	}
-	isSubscribable, err := productrepo.IsSubscribableByID(ctx, product.ID)
+	_, isSubscribable, err := productrepo.IsSubscribableByID(ctx, product.ID)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

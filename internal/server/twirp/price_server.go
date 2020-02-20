@@ -22,10 +22,6 @@ type PriceServer struct {
 	products			productrepo.ProductRepository
 	thirdparties    	thirdpartyrepo.ThirdPartyRepository
 	plans				planrepo.PlanRepository
-	productErrorz 		errorz.ProductErrorz
-	priceErrorz 		errorz.PriceErrorz
-	thirdPartyErrorz	errorz.ThirdPartyErrorz
-	planErrorz			errorz.PlanErrorz
 }
 
 func (server PriceServer) EndPrice(ctx context.Context, params *pricerpc.EndPriceParams) (*pricerpc.Price, error) {
@@ -42,7 +38,35 @@ func (server PriceServer) EndPrice(ctx context.Context, params *pricerpc.EndPric
 }
 
 func (server PriceServer) GetSubscriptionPrices(ctx context.Context, params *pricerpc.GetSubscriptionPricesParams) (*pricerpc.GetSubscriptionPricesResponse, error) {
-	panic("implement me")
+	err := server.valid.GetSubscriptionPrices(params)
+	if err != nil {
+		return nil, err
+	}
+	var prices []*ent.Price
+	if params.ProductId != 0 { // ByProductId
+		_, isSubscription, err2 := server.isProductSubscribableById(ctx, int(params.ProductId))
+		if err2 != nil {
+			return nil, errorz.IsProductError(err)
+		}
+		if !*isSubscription {
+			return nil, twirp.InvalidArgumentError("product_id", "price_is_not_subscription")
+		}
+		prices, err = server.prices.GetPricesByProductID(ctx, int(params.ProductId), true)
+	}
+	if !validator2.IsEmpty(params.ProductSku) { // ByProductSku
+		product, isSubscription, err := server.isProductSubscribableBySku(ctx, params.ProductSku)
+		if err != nil {
+			return nil, errorz.IsProductError(err)
+		}
+		if !*isSubscription {
+			return nil, twirp.InvalidArgumentError("product_sku", "price_is_not_subscription")
+		}
+		prices, err = server.prices.GetPricesByProductID(ctx, product.ID, true)
+	}
+	if err != nil {
+		return nil, errorz.IsPriceError(err)
+	}
+	return &pricerpc.GetSubscriptionPricesResponse{Prices: ToPrices(prices)}, nil
 }
 
 func (server PriceServer) CreatePrice(ctx context.Context, params *pricerpc.CreatePriceParams) (*pricerpc.Price, error) {
@@ -52,7 +76,7 @@ func (server PriceServer) CreatePrice(ctx context.Context, params *pricerpc.Crea
 	}
 	_, err = server.products.GetProductByID(ctx, false, int(params.ProductId))
 	if err != nil {
-		return nil, server.productErrorz.IsProductError(err)
+		return nil, errorz.IsProductError(err)
 	}
 	var startAt time.Time
 	var endAt 	time.Time
@@ -80,18 +104,18 @@ func (server PriceServer) CreatePrice(ctx context.Context, params *pricerpc.Crea
 	if plansId != 0 {
 		_, err := server.plans.GetPlansByID(ctx, plansId)
 		if err != nil {
-			return nil, server.planErrorz.IsPlanError(err)
+			return nil, errorz.IsPlanError(err)
 		}
 	}
 	if thirdPartyId != 0 {
 		_, err := server.thirdparties.GetByID(ctx, thirdPartyId)
 		if err != nil {
-			return nil, server.thirdPartyErrorz.IsThirdPartyError(err)
+			return nil, errorz.IsThirdPartyError(err)
 		}
 	}
 	price, err := server.prices.CreatePrice(ctx, uint16(params.Price), uint16(params.Discount), int(params.ProductId), startAt, endAt, &thirdPartyId, &plansId)
 	if err != nil {
-		return nil, server.priceErrorz.IsPriceError(err)
+		return nil, errorz.IsPriceError(err)
 	}
 	return ToPrice(price), nil
 }
@@ -102,46 +126,52 @@ func (server PriceServer) GetPrice(ctx context.Context, params *pricerpc.GetPric
 		return nil, err
 	}
 	var price *ent.Price
-	if params.ProductId != 0 {
-		err = server.isSubscribableByProductId(ctx, int(params.ProductId))
+	if params.ProductId != 0 { // ByProductID
+		_, isSubscription, err := server.isProductSubscribableById(ctx, int(params.ProductId))
 		if err != nil {
-			return nil, err
+			return nil, errorz.IsProductError(err)
+		}
+		if *isSubscription {
+			return nil, twirp.InvalidArgumentError("product_id", "price_is_subscription")
 		}
 		price, err = server.prices.GetPriceByProductID(ctx, int(params.ProductId), true, true, true)
 	}
-	if !validator2.IsEmpty(params.ProductSku) {
-		product, err := server.isSubscribableByProductSku(ctx, params.ProductSku)
+	if !validator2.IsEmpty(params.ProductSku) { // ByProductSku
+		product, isSubscription, err := server.isProductSubscribableBySku(ctx, params.ProductSku)
 		if err != nil {
-			return nil, err
+			return nil, errorz.IsProductError(err)
+		}
+		if *isSubscription {
+			return nil, twirp.InvalidArgumentError("product_sku", "price_is_subscription")
 		}
 		price, err = server.prices.GetPriceByProductID(ctx, product.ID, true, true,true)
 	}
-	if params.PriceId != 0 {
+	if params.PriceId != 0 { // ByPriceID
 		price, err = server.prices.GetPriceByID(ctx, int(params.PriceId), true, true,true)
 	}
+	if params.PlanId != 0 { // ByPlanId
+		price, err = server.prices.GetPriceByPlanId(ctx, int(params.PlanId), true, true, true)
+	}
 	if nil != err {
-		return nil, server.priceErrorz.IsPriceError(err)
+		return nil, errorz.IsPriceError(err)
 	}
 	return ToPrice(price), nil
 }
 
-func (server PriceServer) isSubscribableByProductSku(ctx context.Context, productSku string) (*ent.Product, error) {
+func (server PriceServer) isProductSubscribableBySku(ctx context.Context, productSku string) (*ent.Product, *bool, error) {
 	sku, err := server.products.GetProductBySku(ctx, productSku)
 	if err != nil {
-		return nil, server.productErrorz.IsProductError(err)
+		return nil, nil, errorz.IsProductError(err)
 	}
-	return sku, server.isSubscribableByProductId(ctx, sku.ID)
+	return server.isProductSubscribableById(ctx, sku.ID)
 }
 
-func (server PriceServer) isSubscribableByProductId(ctx context.Context, productId int) error {
-	isSubscribable, err := server.products.IsSubscribableByID(ctx, productId)
+func (server PriceServer) isProductSubscribableById(ctx context.Context, productId int) (*ent.Product, *bool, error) {
+	product, isSubscribable, err := server.products.IsSubscribableByID(ctx, productId)
 	if err != nil {
-		return server.productErrorz.IsProductError(err)
+		return nil, nil, errorz.IsProductError(err)
 	}
-	if *isSubscribable {
-		return twirp.InvalidArgumentError("product_id", "is_subscribable")
-	}
-	return nil
+	return product, isSubscribable, nil
 }
 
 func NewPriceServer(client *ent.Client) PriceServer {
@@ -149,11 +179,7 @@ func NewPriceServer(client *ent.Client) PriceServer {
 		prices:pricerepo.NewPriceRepository(client),
 		valid:validator.NewPriceServerValidator(),
 		products:productrepo.NewProductRepository(client),
-		priceErrorz: errorz.NewPriceErrorz(),
 		thirdparties:thirdpartyrepo.NewThirdPartyRepository(client),
-		productErrorz:errorz.NewProductErrorz(),
 		plans:planrepo.NewPlanRepository(client),
-		thirdPartyErrorz:errorz.NewThirdPartyErrorz(),
-		planErrorz:errorz.NewPlanErrorz(),
 	}
 }

@@ -6,9 +6,7 @@ import (
 	"log"
 )
 
-type ProductErrorz struct {}
-
-func (ProductErrorz) IsProductError(err error) error {
+func IsProductError(err error) error {
 	switch err {
 	case productrepo.ErrProductNotExist:
 		return twirp.NotFoundError("product_not_found")
@@ -19,8 +17,4 @@ func (ProductErrorz) IsProductError(err error) error {
 	}
 	log.Print("product-service: unknown error: "+err.Error())
 	return twirp.InternalErrorWith(err)
-}
-
-func NewProductErrorz() ProductErrorz {
-	return ProductErrorz{}
 }

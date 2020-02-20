@@ -46,7 +46,6 @@ message ThirdParty {
     string google_billing_service_sku  = 3;
     string start_at                    = 4;
     string end_at                      = 5;
-    int64  price_id                    = 6;
 }
 
 message GetThirdPartiesResponse {

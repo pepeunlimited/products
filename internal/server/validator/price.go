@@ -37,8 +37,17 @@ func (v PriceServerValidator) EndPrice(params *pricerpc.EndPriceParams) error {
 func (v PriceServerValidator) GetPrice(params *pricerpc.GetPriceParams) error {
 	if params.ProductId  == 0 &&
 		params.PriceId == 0 &&
+		params.PlanId == 0 &&
 		validator.IsEmpty(params.ProductSku) {
 		return twirp.RequiredArgumentError("at_least_price_id")
+	}
+	return nil
+}
+
+func (v PriceServerValidator) GetSubscriptionPrices(params *pricerpc.GetSubscriptionPricesParams) error {
+	if params.ProductId == 0 &&
+		validator.IsEmpty(params.ProductSku) {
+		return twirp.RequiredArgumentError("at_least_product_id")
 	}
 	return nil
 }

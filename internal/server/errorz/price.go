@@ -6,9 +6,7 @@ import (
 	"log"
 )
 
-type PriceErrorz struct {}
-
-func (PriceErrorz) IsPriceError(err error) error {
+func IsPriceError(err error) error {
 	switch err {
 	case pricerepo.ErrInvalidEndAt:
 		return twirp.InvalidArgumentError("end_at", "invalid_end_at")
@@ -19,8 +17,4 @@ func (PriceErrorz) IsPriceError(err error) error {
 	}
 	log.Print("price-service: unknown error: "+err.Error())
 	return twirp.InternalErrorWith(err)
-}
-
-func NewPriceErrorz() PriceErrorz {
-	return PriceErrorz{}
 }

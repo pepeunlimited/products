@@ -18,7 +18,7 @@ var (
 
 type ThirdPartyRepository interface {
 	GetByID(ctx context.Context, id int)					  									(*ent.ThirdParty, error)
-	GetInAppPurchaseBySku(ctx context.Context, sku string)					  					(*ent.ThirdParty, error)
+	GetInAppPurchaseBySku(ctx context.Context, sku string)										(*ent.ThirdParty, error)
 	GetBillingBySku(ctx context.Context, sku string)					  						(*ent.ThirdParty, error)
 	Create(ctx context.Context, apple string, google *string)  									(*ent.ThirdParty, error)
 	CreateStartAt(ctx context.Context, apple string, google *string, startAt time.Time)  		(*ent.ThirdParty, error)
@@ -77,7 +77,7 @@ func (mysql thirdpartiesMySQL) Wipe(ctx context.Context) {
 }
 
 func (mysql thirdpartiesMySQL) GetByID(ctx context.Context, id int) (*ent.ThirdParty, error) {
-	sources, err := mysql.client.ThirdParty.Get(ctx, id)
+	sources, err := mysql.client.ThirdParty.Query().Where(thirdparty.ID(id)).Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrThirdPartyNotExist

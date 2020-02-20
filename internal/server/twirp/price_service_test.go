@@ -7,10 +7,35 @@ import (
 	"github.com/pepeunlimited/prices/pkg/pricerpc"
 	"github.com/pepeunlimited/prices/pkg/thirdpartyrpc"
 	"github.com/twitchtv/twirp"
-	"log"
 	"testing"
 	"time"
 )
+
+
+func TestPriceServer_GetPrice(t *testing.T) {
+	ctx := context.TODO()
+	server := NewPriceServer(ent.NewEntClient())
+	server.products.Wipe(ctx)
+	product, err := server.products.CreateProduct(ctx, "sku")
+	price, err := server.CreatePrice(ctx, &pricerpc.CreatePriceParams{
+		StartAtDay:   0,
+		StartAtMonth: 0,
+		EndAtDay:     0,
+		EndAtMonth:   0,
+		Price:        3,
+		Discount:     3,
+		ProductId:    int64(product.ID),
+		PlanId:       0,
+		ThirdPartyId: 0,
+	})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	if price.ProductId == 0 {
+		t.FailNow()
+	}
+}
 
 func TestPriceServer_CreatePrice(t *testing.T) {
 	ctx := context.TODO()
@@ -93,6 +118,13 @@ func TestPriceServer_CreatePrice(t *testing.T) {
 	if fromServer.Id != price.Id {
 		t.FailNow()
 	}
+	if fromServer.ThirdPartyId == 0 {
+		t.FailNow()
+	}
+	if fromServer.ProductId == 0 {
+		t.FailNow()
+	}
+
 }
 
 func TestPriceServer_GetPriceByProductIdIsSubscribableTrue(t *testing.T) {
@@ -104,8 +136,8 @@ func TestPriceServer_GetPriceByProductIdIsSubscribableTrue(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	plan := planrepo.NewPlanRepository(ent.NewEntClient())
-	create, err := plan.Create(ctx, 1, 1, planrepo.Days)
+	planrepos := planrepo.NewPlanRepository(ent.NewEntClient())
+	plan, err := planrepos.Create(ctx, 1, 1, planrepo.Days)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -118,7 +150,7 @@ func TestPriceServer_GetPriceByProductIdIsSubscribableTrue(t *testing.T) {
 		Price:        3,
 		Discount:     0,
 		ProductId:    int64(product.ID),
-		PlanId:       int64(create.ID),
+		PlanId:       int64(plan.ID),
 		ThirdPartyId: 0,
 	})
 	if err != nil {
@@ -141,6 +173,16 @@ func TestPriceServer_GetPriceByProductIdIsSubscribableTrue(t *testing.T) {
 		t.FailNow()
 	}
 	if err.(twirp.Error).Code() != twirp.InvalidArgument {
+		t.FailNow()
+	}
+	price, err := server.GetPrice(ctx, &pricerpc.GetPriceParams{
+		PlanId: int64(plan.ID),
+	})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	if price.Id != int64(plan.ID) {
 		t.FailNow()
 	}
 
@@ -187,7 +229,6 @@ func TestPriceServer_GetPriceByProductIdIsSubscribableFalse(t *testing.T) {
 	fromServer, err = server.GetPrice(ctx, &pricerpc.GetPriceParams{
 		ProductSku: "sku",
 	})
-	log.Print(fromServer)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -198,6 +239,81 @@ func TestPriceServer_GetPriceByProductIdIsSubscribableFalse(t *testing.T) {
 		t.FailNow()
 	}
 	if fromDB.Price != uint16(fromServer.Price) {
+		t.FailNow()
+	}
+}
+
+func  TestPriceServer_GetSubscriptionPrices(t *testing.T) {
+	ctx := context.TODO()
+	server := NewPriceServer(ent.NewEntClient())
+	server.products.Wipe(ctx)
+	product, err := server.products.CreateProduct(ctx, "sku")
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	plan, err := server.plans.Create(ctx, 1, uint8(12), planrepo.Days)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	prices, err := server.CreatePrice(ctx, &pricerpc.CreatePriceParams{
+		StartAtDay:   0,
+		StartAtMonth: 0,
+		EndAtDay:     0,
+		EndAtMonth:   0,
+		Price:        1,
+		Discount:     1,
+		ProductId:    int64(product.ID),
+		PlanId:       int64(plan.ID),
+		ThirdPartyId: 0,
+	})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	now := time.Now().UTC()
+	server.EndPrice(ctx, &pricerpc.EndPriceParams{
+		Params: &pricerpc.GetPriceParams{
+			PriceId: prices.Id,
+		},
+		EndAtDay:   int32(now.Day()),
+		EndAtMonth: int32(now.Month()),
+	})
+	_, err = server.CreatePrice(ctx, &pricerpc.CreatePriceParams{
+		StartAtDay:   int32(now.Day()),
+		StartAtMonth: int32(now.Month()),
+		EndAtDay:     0,
+		EndAtMonth:   0,
+		Price:        3,
+		Discount:     3,
+		ProductId:    int64(product.ID),
+		PlanId:       int64(plan.ID),
+		ThirdPartyId: 0,
+	})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	subscriptions, err := server.GetSubscriptionPrices(ctx, &pricerpc.GetSubscriptionPricesParams{
+		ProductId: int64(product.ID),
+	})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	if len(subscriptions.Prices) != 1 {
+		t.FailNow()
+	}
+	if subscriptions.Prices[0].Price != 3 {
+		t.FailNow()
+	}
+	price, err := server.GetPrice(ctx, &pricerpc.GetPriceParams{PlanId: int64(plan.ID)})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	if price.Price != 3 {
 		t.FailNow()
 	}
 }
