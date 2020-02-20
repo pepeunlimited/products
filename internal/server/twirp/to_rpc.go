@@ -2,7 +2,9 @@ package twirp
 
 import (
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
+	"github.com/pepeunlimited/prices/pkg/planrpc"
 	"github.com/pepeunlimited/prices/pkg/pricerpc"
+	"github.com/pepeunlimited/prices/pkg/productrpc"
 	"github.com/pepeunlimited/prices/pkg/thirdpartyrpc"
 	"time"
 )
@@ -51,4 +53,20 @@ func ToPrices(prices []*ent.Price) []*pricerpc.Price {
 		list = append(list, ToPrice(price))
 	}
 	return list
+}
+
+func ToPlan(plan *ent.Plan) *planrpc.Plan {
+	return &planrpc.Plan{
+		Id:          int64(plan.ID),
+		TitleI18NId: plan.TitleI18nID,
+		Unit:        plan.Unit,
+		Length: 	 int32(plan.Length),
+	}
+}
+
+func ToProduct(product *ent.Product) *productrpc.Product {
+	return &productrpc.Product{
+		Sku: product.Sku,
+		Id:  int64(product.ID),
+	}
 }

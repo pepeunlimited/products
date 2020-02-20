@@ -182,10 +182,12 @@ func TestPriceServer_GetPriceByProductIdIsSubscribableTrue(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	if price.Id != int64(plan.ID) {
+	if price.PlanId != int64(plan.ID) {
 		t.FailNow()
 	}
-
+	if price.ProductId != int64(product.ID) {
+		t.FailNow()
+	}
 }
 
 func TestPriceServer_GetPriceByProductIdIsSubscribableFalse(t *testing.T) {
@@ -257,6 +259,14 @@ func  TestPriceServer_GetSubscriptionPrices(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
+	thirdpartyServer := NewThirdPartyServer(ent.NewEntClient())
+	thirdparty, err := thirdpartyServer.CreateThirdParty(ctx, &thirdpartyrpc.CreateThirdPartyParams{
+		InAppPurchaseSku: "in-app-sku",
+	})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
 	prices, err := server.CreatePrice(ctx, &pricerpc.CreatePriceParams{
 		StartAtDay:   0,
 		StartAtMonth: 0,
@@ -266,7 +276,7 @@ func  TestPriceServer_GetSubscriptionPrices(t *testing.T) {
 		Discount:     1,
 		ProductId:    int64(product.ID),
 		PlanId:       int64(plan.ID),
-		ThirdPartyId: 0,
+		ThirdPartyId: thirdparty.Id,
 	})
 	if err != nil {
 		t.Error(err)
@@ -289,7 +299,7 @@ func  TestPriceServer_GetSubscriptionPrices(t *testing.T) {
 		Discount:     3,
 		ProductId:    int64(product.ID),
 		PlanId:       int64(plan.ID),
-		ThirdPartyId: 0,
+		ThirdPartyId: thirdparty.Id,
 	})
 	if err != nil {
 		t.Error(err)
@@ -314,6 +324,15 @@ func  TestPriceServer_GetSubscriptionPrices(t *testing.T) {
 		t.FailNow()
 	}
 	if price.Price != 3 {
+		t.FailNow()
+	}
+	if price.ProductId == 0 {
+		t.FailNow()
+	}
+	if price.ThirdPartyId == 0 {
+		t.FailNow()
+	}
+	if price.PlanId == 0 {
 		t.FailNow()
 	}
 }

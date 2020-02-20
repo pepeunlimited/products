@@ -3,51 +3,24 @@ syntax = "proto3";
 package pepeunlimited.products;
 option go_package = "productrpc";
 
-import "google/protobuf/empty.proto";
-import "google/protobuf/wrappers.proto";
-
-// https://github.com/protocolbuffers/protobuf/blob/master/src/google/protobuf/wrappers.proto
 
 service ProductService {
 
-    rpc StartSubscription(CreateSubscriptionParams)    returns (Subscription);
+    rpc CreateProduct(CreateProductParams) returns (Product);
 
-    rpc StopSubscription(StopSubscriptionParams)       returns (Subscription);
-
-    // get subscription with subscription_id or user_id and product_id
-    rpc GetSubscription(GetSubscriptionParams)         returns (Subscription);
-
-    rpc GetSubscriptions(GetSubscriptionsParams)       returns (GetSubscriptionsResponse);
+    rpc GetProduct(GetProductParams)       returns (Product);
 }
 
-message CreateSubscriptionParams {
-    Subscription subscription = 1; //required
+message CreateProductParams {
+    string sku = 1;
 }
 
-message GetSubscriptionParams {
-    int64 subscription_id = 1;
-    int64 user_id         = 2;
-    int64 product_id      = 3;
+message Product {
+    int64  id           = 1;
+    string sku          = 2;
 }
 
-message StopSubscriptionParams {
-    int64 subscription_id = 1;
-    int64 user_id        = 2;
-    int64 product_id     = 3;
-}
-
-message GetSubscriptionsParams {
-    int64 user_id       = 1;
-}
-
-message GetSubscriptionsResponse {
-    repeated Subscription subscriptions = 1;
-}
-
-message Subscription {
-    int64 id            = 1;
-    int64 user_id       = 2;
-    int64 plan_id       = 3;
-    string start_at     = 4;
-    string end_at       = 5;
+message GetProductParams {
+    int64  product_id   = 1;
+    string sku          = 2;
 }

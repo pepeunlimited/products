@@ -12,7 +12,6 @@ func IsPlanError(err error) error {
 		return twirp.NotFoundError("plan_not_found")
 	case planrepo.ErrUnknownPlanUnit:
 		return twirp.InvalidArgumentError("unit","unknown_plan_unit")
-
 	}
 	log.Print("plan-service: unknown error: "+err.Error())
 	return twirp.InternalErrorWith(err)

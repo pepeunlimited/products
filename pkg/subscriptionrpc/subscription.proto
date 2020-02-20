@@ -3,11 +3,6 @@ syntax = "proto3";
 package pepeunlimited.products;
 option go_package = "subscriptionrpc";
 
-import "google/protobuf/empty.proto";
-import "google/protobuf/wrappers.proto";
-
-// https://github.com/protocolbuffers/protobuf/blob/master/src/google/protobuf/wrappers.proto
-
 service SubscriptionService {
 
     rpc StartSubscription(CreateSubscriptionParams)    returns (Subscription);
