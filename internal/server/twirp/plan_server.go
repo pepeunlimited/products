@@ -21,7 +21,7 @@ func (server PlanServer) CreatePlan(ctx context.Context, params *planrpc.CreateP
 	}
 	create, err := server.plans.Create(ctx, params.TitleI18NId, uint8(params.Length), planrepo.PlanUnitFromString(params.Unit))
 	if err != nil {
-		return nil, errorz.IsPlanError(err)
+		return nil, errorz.Plan(err)
 	}
 	return ToPlan(create), nil
 }
@@ -35,9 +35,9 @@ func (server PlanServer) GetPlan(ctx context.Context, params *planrpc.GetPlanPar
 	if err != nil {
 		return nil, err
 	}
-	plan, err := server.plans.GetPlansByID(ctx, int(params.PlanId))
+	plan, err := server.plans.GetPlanByID(ctx, int(params.PlanId))
 	if err != nil {
-		return nil, errorz.IsPriceError(err)
+		return nil, errorz.Price(err)
 	}
 	return ToPlan(plan), nil
 }

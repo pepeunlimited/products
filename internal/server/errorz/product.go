@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func IsProductError(err error) error {
+func Product(err error) error {
 	switch err {
 	case productrepo.ErrProductNotExist:
 		return twirp.NotFoundError("product_not_found")

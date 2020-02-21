@@ -15,6 +15,21 @@ type ProductServer struct {
 	valid validator.ProductValidator
 }
 
+func (server ProductServer) GetProducts(ctx context.Context, params *productrpc.GetProductsParams) (*productrpc.GetProductsResponse, error) {
+	err := server.valid.GetProducts(params)
+	if err != nil {
+		return nil, err
+	}
+	products, nextPageToken, err := server.products.GetProducts(ctx, params.PageToken, params.PageSize)
+	if err != nil {
+		return nil, errorz.Product(err)
+	}
+	return &productrpc.GetProductsResponse{
+		Products:      ToProducts(products),
+		NextPageToken: nextPageToken,
+	}, nil
+}
+
 func (server ProductServer) CreateProduct(ctx context.Context, params *productrpc.CreateProductParams) (*productrpc.Product, error) {
 	err := server.valid.CreateProduct(params)
 	if err != nil {
@@ -22,7 +37,7 @@ func (server ProductServer) CreateProduct(ctx context.Context, params *productrp
 	}
 	product, err := server.products.CreateProduct(ctx, params.Sku)
 	if err != nil {
-		return nil, errorz.IsProductError(err)
+		return nil, errorz.Product(err)
 	}
 	return ToProduct(product), nil
 }
@@ -40,7 +55,7 @@ func (server ProductServer) GetProduct(ctx context.Context, params *productrpc.G
 		product, err = server.products.GetProductByID(ctx, false, int(params.ProductId))
 	}
 	if err != nil {
-		return nil, errorz.IsProductError(err)
+		return nil, errorz.Product(err)
 	}
 	return ToProduct(product), nil
 }

@@ -32,4 +32,18 @@ func TestProductServer_CreateProduct(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
+	products, err := server.GetProducts(ctx, &productrpc.GetProductsParams{
+		PageSize:  20,
+		PageToken: 0,
+	})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	if len(products.Products) != 1 {
+		t.FailNow()
+	}
+	if products.NextPageToken == 0 {
+		t.FailNow()
+	}
 }

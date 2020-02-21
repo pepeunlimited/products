@@ -5,38 +5,38 @@ option go_package = "subscriptionrpc";
 
 service SubscriptionService {
 
-    rpc StartSubscription(CreateSubscriptionParams)    returns (Subscription);
+    rpc StartSubscription(StartSubscriptionParams)     returns (Subscription);
 
     rpc StopSubscription(StopSubscriptionParams)       returns (Subscription);
 
-    // get subscription with subscription_id or user_id and product_id
     rpc GetSubscription(GetSubscriptionParams)         returns (Subscription);
 
     rpc GetSubscriptions(GetSubscriptionsParams)       returns (GetSubscriptionsResponse);
 }
 
-message CreateSubscriptionParams {
-    Subscription subscription = 1; //required
+message StartSubscriptionParams {
+    int64 user_id         = 1;
+    int64 plan_id         = 2;
 }
 
 message GetSubscriptionParams {
     int64 subscription_id = 1;
     int64 user_id         = 2;
-    int64 product_id      = 3;
 }
 
 message StopSubscriptionParams {
-    int64 subscription_id = 1;
-    int64 user_id        = 2;
-    int64 product_id     = 3;
+    int64 user_id         = 1;
 }
 
 message GetSubscriptionsParams {
     int64 user_id       = 1;
+    int32 page_size     = 2;
+    int64 page_token    = 3;
 }
 
 message GetSubscriptionsResponse {
     repeated Subscription subscriptions = 1;
+    int64 next_page_token               = 2;
 }
 
 message Subscription {

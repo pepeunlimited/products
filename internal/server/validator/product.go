@@ -24,6 +24,13 @@ func (v ProductValidator) GetProduct(params *productrpc.GetProductParams) error 
 	return nil
 }
 
+func (v ProductValidator) GetProducts(params *productrpc.GetProductsParams) error {
+	if params.PageSize == 0 {
+		return twirp.RequiredArgumentError("page_size")
+	}
+	return nil
+}
+
 func NewProductValidator() ProductValidator {
 	return ProductValidator{}
 }

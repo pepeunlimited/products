@@ -17,10 +17,9 @@ var (
 type PlanRepository interface {
 	Create(ctx context.Context, titleI18nId int64, length uint8, unit Unit) (*ent.Plan, error)
 
-	LengthByPlansID(ctx context.Context, startAt time.Time, plansID int) (time.Time, error)
+	EndAtByPlanID(ctx context.Context, startAt time.Time, planId int) (time.Time, error)
 
-	GetPlansByID(ctx context.Context, plansID int) 						 (*ent.Plan, error)
-	GetPlansByPriceID(ctx context.Context, priceID int64)				 (*ent.Plan, error)
+	GetPlanByID(ctx context.Context, plansID int) 						 (*ent.Plan, error)
 	GetPlans(ctx context.Context) 							 			 ([]*ent.Plan, error)
 	GetPlansByTime(ctx context.Context, time time.Time) 				 ([]*ent.Plan, error)
 
@@ -40,19 +39,7 @@ func (mysql planMySQL) GetPlansByTime(ctx context.Context, now time.Time) ([]*en
 	return mysql.client.Plan.Query().Where(plan.HasPricesWith(price.And(price.StartAtLTE(now), price.EndAtGTE(now), price.HasPlans()))).All(ctx)
 }
 
-func (mysql planMySQL) GetPlansByPriceID(ctx context.Context, plansID int64) (*ent.Plan, error) {
-	//plan, err := mysql.client.Plan.Query().Where(plan.HasPricesWith().PriceID(plansID)).Only(ctx)
-	//if err != nil {
-	//	if ent.IsNotFound(err) {
-	//		return nil, ErrPlanNotExist
-	//	}
-	//	return nil, err
-	//}
-	//return plan, nil
-	panic("not implemented")
-}
-
-func (mysql planMySQL) GetPlansByID(ctx context.Context, plansID int) (*ent.Plan, error) {
+func (mysql planMySQL) GetPlanByID(ctx context.Context, plansID int) (*ent.Plan, error) {
 	plans, err := mysql.client.Plan.Get(ctx, plansID)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -63,8 +50,8 @@ func (mysql planMySQL) GetPlansByID(ctx context.Context, plansID int) (*ent.Plan
 	return plans, nil
 }
 
-func (mysql planMySQL) LengthByPlansID(ctx context.Context, startAt time.Time, plansID int) (time.Time, error) {
-	plans, err := mysql.GetPlansByID(ctx, plansID)
+func (mysql planMySQL) EndAtByPlanID(ctx context.Context, startAt time.Time, planId int) (time.Time, error) {
+	plans, err := mysql.GetPlanByID(ctx, planId)
 	if err != nil {
 		return time.Time{}, err
 	}

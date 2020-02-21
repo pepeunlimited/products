@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func IsPriceError(err error) error {
+func Price(err error) error {
 	switch err {
 	case pricerepo.ErrInvalidEndAt:
 		return twirp.InvalidArgumentError("end_at", "invalid_end_at")

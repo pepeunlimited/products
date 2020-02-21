@@ -55,6 +55,9 @@ func (mysql priceMySQL) GetPriceByPlanIdAndTime(ctx context.Context, planId int,
 	}
 	plan, err := query.Only(ctx)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, ErrPriceNotExist
+		}
 		return nil, err
 	}
 	return plan, nil

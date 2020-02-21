@@ -5,6 +5,7 @@ import (
 	"github.com/pepeunlimited/prices/pkg/planrpc"
 	"github.com/pepeunlimited/prices/pkg/pricerpc"
 	"github.com/pepeunlimited/prices/pkg/productrpc"
+	"github.com/pepeunlimited/prices/pkg/subscriptionrpc"
 	"github.com/pepeunlimited/prices/pkg/thirdpartyrpc"
 	"time"
 )
@@ -69,4 +70,33 @@ func ToProduct(product *ent.Product) *productrpc.Product {
 		Sku: product.Sku,
 		Id:  int64(product.ID),
 	}
+}
+
+func ToSubscription(subscription *ent.Subscription) *subscriptionrpc.Subscription {
+	s := &subscriptionrpc.Subscription{
+		Id:     	int64(subscription.ID),
+		UserId: 	subscription.UserID,
+		StartAt:	subscription.StartAt.Format(time.RFC3339),
+		EndAt:		subscription.EndAt.Format(time.RFC3339),
+	}
+	if subscription.Edges.Plans != nil {
+		s.PlanId = int64(subscription.Edges.Plans.ID)
+	}
+	return s
+}
+
+func ToSubscriptions(subscriptions []*ent.Subscription) []*subscriptionrpc.Subscription {
+	list := make([]*subscriptionrpc.Subscription, 0)
+	for _, subscription := range subscriptions {
+		list = append(list, ToSubscription(subscription))
+	}
+	return list
+}
+
+func ToProducts(products []*ent.Product) []*productrpc.Product {
+	list := make([]*productrpc.Product, 0)
+	for _,product := range products {
+		list = append(list, ToProduct(product))
+	}
+	return list
 }

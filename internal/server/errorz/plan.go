@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func IsPlanError(err error) error {
+func Plan(err error) error {
 	switch err {
 	case planrepo.ErrPlanNotExist:
 		return twirp.NotFoundError("plan_not_found")

@@ -27,7 +27,7 @@ func TestSubscriptionMySQL_Create(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	endAt, err = plans.LengthByPlansID(ctx, startAt, plan.ID)
+	endAt, err = plans.EndAtByPlanID(ctx, startAt, plan.ID)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

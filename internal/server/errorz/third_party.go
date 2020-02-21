@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func IsThirdPartyError(err error) error {
+func ThirdParty(err error) error {
 	switch err {
 	case thirdpartyrepo.ErrThirdPartyNotExist:
 		return twirp.NotFoundError("third_party_not_found")

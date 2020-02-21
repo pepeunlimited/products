@@ -16,18 +16,33 @@ var (
 )
 
 type ProductRepository interface {
-	CreateProduct(ctx context.Context, sku string) 						(*ent.Product, error)
-	GetProductBySku(ctx context.Context, sku string) 					(*ent.Product, error)
-	GetProductByID(ctx context.Context, withPrices bool, id int) 		(*ent.Product, error)
+	CreateProduct(ctx context.Context, sku string) 						  (*ent.Product, error)
+	CreateProducts(ctx context.Context, pageToken int64, pageSize int32)  ([]*ent.Product, int64, error)
+	GetProductBySku(ctx context.Context, sku string) 					  (*ent.Product, error)
+	GetProductByID(ctx context.Context, withPrices bool, id int) 		  (*ent.Product, error)
 	// note: not includes subscribable products
-	GetProducts(ctx context.Context, pageToken int64, pageSize int32)   ([]*ent.Product, int64, error)
+	GetProducts(ctx context.Context, pageToken int64, pageSize int32)     ([]*ent.Product, int64, error)
 	Wipe(ctx context.Context)
 
-	IsSubscribableByID(ctx context.Context, id int)						(*ent.Product, *bool, error)
+	IsSubscribableByID(ctx context.Context, id int)						  (*ent.Product, *bool, error)
 }
 
 type productMySQL struct {
 	client *ent.Client
+}
+
+func (mysql productMySQL) CreateProducts(ctx context.Context, pageToken int64, pageSize int32) ([]*ent.Product, int64, error) {
+	products, err := mysql.client.Product.Query().Where(
+		product.IDGT(int(pageToken))).
+		Order(ent.Asc(product.FieldID)).
+		Limit(int(pageSize)).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	if len(products) == 0 {
+		return []*ent.Product{}, pageToken, nil
+	}
+	return products, int64(products[len(products) - 1].ID), nil
 }
 
 func (mysql productMySQL) GetProducts(ctx context.Context, pageToken int64, pageSize int32) ([]*ent.Product, int64, error) {
