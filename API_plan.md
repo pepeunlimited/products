@@ -1,8 +1,3 @@
-# cURL
-
-### Install
-```$ brew install jq > curl ... | jq```
-
 ##### CreateTodo
 ```
 $ curl -H "Content-Type: application/json" \

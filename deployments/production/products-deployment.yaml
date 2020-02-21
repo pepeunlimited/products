@@ -1,23 +1,23 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: todo
+  name: products
   labels:
-    app: todo
+    app: products
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: todo
+      app: products
   template:
     metadata:
       labels:
-        app: todo
+        app: products
     spec:
       containers:
         - env:
             - name: MYSQL_DATABASE
-              value: users
+              value: products
             - name: MYSQL_HOST
               value: external-mysql.default.svc
             - name: MYSQL_PORT
@@ -26,8 +26,8 @@ spec:
               value: root
             - name: MYSQL_USER
               value: root
-          image: pepeunlimited/todo:0.1
-          name: todo
+          image: pepeunlimited/products:0.0.1
+          name: products
           ports:
             - containerPort: 8080
           resources: {}
