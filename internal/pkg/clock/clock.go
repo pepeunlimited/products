@@ -1,13 +1,8 @@
 package clock
 
 import (
-	"errors"
+	"github.com/twitchtv/twirp"
 	"time"
-)
-
-var (
-	ErrInvalidDay 		= errors.New("clock: invalid day")
-	ErrInvalidMonth 	= errors.New("clock: invalid month")
 )
 
 // 9999-12-31 00:00:00.000 (MySQL max value for Date)
@@ -22,10 +17,10 @@ func ZeroAt() time.Time {
 
 func ToMonthDate(month time.Month, day int) (time.Time, error) {
 	if day <= 0 || day > 31 {
-		return time.Time{}, ErrInvalidDay
+		return time.Time{}, twirp.InvalidArgumentError("day", "invalid")
 	}
 	if month <= 0 || month > 12 {
-		return time.Time{}, ErrInvalidMonth
+		return time.Time{}, twirp.InvalidArgumentError("month", "invalid")
 	}
 	current := time.Now().UTC()
 	return time.Date(current.Year(), month, day, 0, 0,0,0, time.UTC), nil

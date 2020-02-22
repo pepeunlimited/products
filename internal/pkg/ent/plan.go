@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdpartyprice"
+	"github.com/pepeunlimited/products/internal/pkg/ent/plan"
+	"github.com/pepeunlimited/products/internal/pkg/ent/product"
+	"github.com/pepeunlimited/products/internal/pkg/ent/thirdpartyprice"
 )
 
 // Plan is the model entity for the Plan schema.

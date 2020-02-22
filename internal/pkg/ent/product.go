@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
+	"github.com/pepeunlimited/products/internal/pkg/ent/product"
 )
 
 // Product is the model entity for the Product schema.

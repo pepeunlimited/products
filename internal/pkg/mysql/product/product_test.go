@@ -2,7 +2,7 @@ package product
 
 import (
 	"context"
-	"github.com/pepeunlimited/prices/internal/pkg/ent"
+	"github.com/pepeunlimited/products/internal/pkg/ent"
 	"testing"
 )
 

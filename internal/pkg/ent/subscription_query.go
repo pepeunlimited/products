@@ -11,9 +11,9 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/predicate"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/subscription"
+	"github.com/pepeunlimited/products/internal/pkg/ent/plan"
+	"github.com/pepeunlimited/products/internal/pkg/ent/predicate"
+	"github.com/pepeunlimited/products/internal/pkg/ent/subscription"
 )
 
 // SubscriptionQuery is the builder for querying Subscription entities.

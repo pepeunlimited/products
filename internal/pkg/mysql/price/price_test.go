@@ -2,10 +2,10 @@ package price
 
 import (
 	"context"
-	"github.com/pepeunlimited/prices/internal/pkg/clock"
-	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/product"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/thirdpartyprice"
+	"github.com/pepeunlimited/products/internal/pkg/clock"
+	"github.com/pepeunlimited/products/internal/pkg/ent"
+	"github.com/pepeunlimited/products/internal/pkg/mysql/product"
+	"github.com/pepeunlimited/products/internal/pkg/mysql/thirdpartyprice"
 	"testing"
 )
 

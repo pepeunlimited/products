@@ -2,15 +2,15 @@ package plan
 
 import (
 	"context"
-	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/product"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/thirdpartyprice"
+	"github.com/pepeunlimited/products/internal/pkg/ent"
+	"github.com/pepeunlimited/products/internal/pkg/mysql/product"
+	"github.com/pepeunlimited/products/internal/pkg/mysql/thirdpartyprice"
 	"testing"
 )
 
 func TestPlanMySQL_Create(t *testing.T) {
 	ctx := context.TODO()
-	repo := NewPlanRepository(ent.NewEntClient())
+	repo := New(ent.NewEntClient())
 
 	titleI18nId := int64(2)
 	length 	:= uint8(2)
@@ -34,7 +34,7 @@ func TestPlanMySQL_Create(t *testing.T) {
 
 //func TestPlanMySQL_LengthByPlansID(t *testing.T) {
 //	ctx := context.TODO()
-//	plans := NewPlanRepository(ent.NewEntClient())
+//	plans := New(ent.NewEntClient())
 //	plans.Wipe(ctx)
 //	startAt := time.Now()
 //	endAt 	:= time.Now()
@@ -109,7 +109,7 @@ func TestPlanMySQL_GetPlans(t *testing.T) {
 	ctx := context.TODO()
 	client := ent.NewEntClient()
 	productrepo := product.New(client)
-	plansrepo 	:= NewPlanRepository(client)
+	plansrepo 	:= New(client)
 	plansrepo.Wipe(ctx)
 
 	thirdparty := thirdpartyprice.New(client)

@@ -2,8 +2,8 @@ package thirdpartyprice
 
 import (
 	"context"
-	"github.com/pepeunlimited/prices/internal/pkg/clock"
-	"github.com/pepeunlimited/prices/internal/pkg/ent"
+	"github.com/pepeunlimited/products/internal/pkg/clock"
+	"github.com/pepeunlimited/products/internal/pkg/ent"
 	"testing"
 )
 

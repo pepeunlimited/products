@@ -4,16 +4,16 @@ import (
 	"context"
 	"errors"
 	"github.com/pepeunlimited/microservice-kit/validator"
-	"github.com/pepeunlimited/prices/internal/pkg/clock"
-	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdpartyprice"
+	"github.com/pepeunlimited/products/internal/pkg/clock"
+	"github.com/pepeunlimited/products/internal/pkg/ent"
+	"github.com/pepeunlimited/products/internal/pkg/ent/thirdpartyprice"
 	"time"
 )
 
 var (
-	ErrThirdPartyNotExist  				= errors.New("third-party-price: not exist")
-	ErrInAppPurchaseSkuExist 			= errors.New("third-party-price: in-app-purchase sku exist")
-	ErrGoogleBillingServiceSkuExist 	= errors.New("third-party-price: google-billing-service sku exist")
+	ErrThirdPartyPriceNotExist      = errors.New("third-party-price: not exist")
+	ErrInAppPurchaseSkuExist        = errors.New("third-party-price: in-app-purchase sku exist")
+	ErrGoogleBillingServiceSkuExist = errors.New("third-party-price: google-billing-service sku exist")
 )
 
 type ThirdPartyPriceRepository interface {
@@ -69,8 +69,8 @@ func (mysql price3rd) GetThirdPartyPricesByTime(ctx context.Context, now time.Ti
 func (mysql price3rd) Wipe(ctx context.Context) {
 	mysql.client.Subscription.Delete().ExecX(ctx)
 	mysql.client.Price.Delete().ExecX(ctx)
-	mysql.client.ThirdPartyPrice.Delete().ExecX(ctx)
 	mysql.client.Plan.Delete().ExecX(ctx)
+	mysql.client.ThirdPartyPrice.Delete().ExecX(ctx)
 	mysql.client.Product.Delete().ExecX(ctx)
 }
 
@@ -78,7 +78,7 @@ func (mysql price3rd) GetByID(ctx context.Context, id int) (*ent.ThirdPartyPrice
 	sources, err := mysql.client.ThirdPartyPrice.Query().Where(thirdpartyprice.ID(id)).Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			return nil, ErrThirdPartyNotExist
+			return nil, ErrThirdPartyPriceNotExist
 		}
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (mysql price3rd) GetInAppPurchaseBySku(ctx context.Context, sku string) (*e
 	sources, err := mysql.client.ThirdPartyPrice.Query().Where(thirdpartyprice.InAppPurchaseSku(sku)).Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			return nil, ErrThirdPartyNotExist
+			return nil, ErrThirdPartyPriceNotExist
 		}
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func (mysql price3rd) GetBillingBySku(ctx context.Context, sku string) (*ent.Thi
 	sources, err := mysql.client.ThirdPartyPrice.Query().Where(thirdpartyprice.GoogleBillingServiceSku(sku)).Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			return nil, ErrThirdPartyNotExist
+			return nil, ErrThirdPartyPriceNotExist
 		}
 		return nil, err
 	}

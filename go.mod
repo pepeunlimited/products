@@ -1,4 +1,4 @@
-module github.com/pepeunlimited/prices
+module github.com/pepeunlimited/products
 
 go 1.13
 

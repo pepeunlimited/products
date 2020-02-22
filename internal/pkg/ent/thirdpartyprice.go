@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdpartyprice"
+	"github.com/pepeunlimited/products/internal/pkg/ent/thirdpartyprice"
 )
 
 // ThirdPartyPrice is the model entity for the ThirdPartyPrice schema.

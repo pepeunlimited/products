@@ -2,20 +2,21 @@ package twirp
 
 import (
 	"context"
-	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/plan"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/price"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/subscription"
-	"github.com/pepeunlimited/prices/internal/server/errorz"
-	"github.com/pepeunlimited/prices/internal/server/validator"
-	"github.com/pepeunlimited/prices/pkg/rpc/subscription"
+	"github.com/pepeunlimited/products/internal/pkg/ent"
+	"github.com/pepeunlimited/products/internal/pkg/mysql/plan"
+	"github.com/pepeunlimited/products/internal/pkg/mysql/price"
+	subscriptionrepo "github.com/pepeunlimited/products/internal/pkg/mysql/subscription"
+	"github.com/pepeunlimited/products/internal/server/errorz"
+	"github.com/pepeunlimited/products/internal/server/validator"
+	"github.com/pepeunlimited/products/pkg/rpc/subscription"
+	"github.com/twitchtv/twirp"
 	"time"
 )
 
 type SubscriptionServer struct {
 	valid         validator.SubscriptionServerValidator
 	plans         plan.PlanRepository
-	subscriptions subscription.SubscriptionRepository
+	subscriptions subscriptionrepo.SubscriptionRepository
 	prices        price.PriceRepository
 }
 
@@ -24,14 +25,14 @@ func (server SubscriptionServer) StartSubscription(ctx context.Context, params *
 	if err != nil {
 		return nil, err
 	}
-	_, err = server.prices.GetPriceByPlanId(ctx, int(params.PlanId), false, false, false)
-	if err != nil {
-		return nil, errorz.Price(err)
-	}
-	now := time.Now().UTC()
-	endAt, err := server.plans.EndAtByPlanID(ctx, now, int(params.PlanId))
+	plans, err := server.plans.GetPlanByID(ctx, int(params.PlanId))
 	if err != nil {
 		return nil, errorz.Plan(err)
+	}
+	now := time.Now().UTC()
+	endAt, err := server.endAt(int(plans.Length), now, plan.PlanUnitFromString(plans.Unit))
+	if err != nil {
+		return nil, err
 	}
 	subscription, err := server.subscriptions.Create(ctx, params.UserId, now, endAt, int(params.PlanId))
 	if err != nil {
@@ -75,11 +76,26 @@ func (server SubscriptionServer) GetSubscriptions(ctx context.Context, params *s
 	}, nil
 }
 
+func (server SubscriptionServer) endAt(length int, startAt time.Time, unit plan.Unit) (time.Time, error) {
+	switch unit {
+	case plan.Days:
+		return startAt.AddDate(0, 0, length).UTC(), nil
+	case plan.Weeks:
+		return startAt.AddDate(0, 0, length * 7).UTC(), nil
+	case plan.Months:
+		return startAt.AddDate(0, length, 0).UTC(),nil
+	case plan.Years:
+		return startAt.AddDate(length, 0, 0).UTC(),nil
+	default:
+		return time.Time{}, twirp.InvalidArgumentError("unit", "unknown")
+	}
+}
+
 func NewSubscriptionServer(client *ent.Client) SubscriptionServer {
 	return SubscriptionServer{
 		valid:         validator.NewSubscriptionServerValidator(),
-		plans:         plan.NewPlanRepository(client),
-		subscriptions: subscription.New(client),
+		plans:         plan.New(client),
+		subscriptions: subscriptionrepo.New(client),
 		prices:        price.New(client),
 	}
 }

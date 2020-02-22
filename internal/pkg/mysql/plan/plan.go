@@ -3,10 +3,10 @@ package plan
 import (
 	"context"
 	"errors"
-	"github.com/pepeunlimited/prices/internal/pkg/clock"
-	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
+	"github.com/pepeunlimited/products/internal/pkg/clock"
+	"github.com/pepeunlimited/products/internal/pkg/ent"
+	"github.com/pepeunlimited/products/internal/pkg/ent/plan"
+	"github.com/pepeunlimited/products/internal/pkg/ent/product"
 	"time"
 )
 
@@ -17,23 +17,15 @@ var (
 
 type PlanRepository interface {
 	CreatePlan(ctx context.Context, i18nId int64, length uint8, unit Unit, price uint16, discount uint16, productId int, startAt time.Time, endAt time.Time, price3rdId *int) (*ent.Plan, error)
-
 	CreateNewPlan(ctx context.Context, i18nId int64, length uint8, unit Unit, price uint16, discount uint16, productId int, price3rdId *int) (*ent.Plan, error)
-
 	EndPlanAt(ctx context.Context, month time.Month, day int, planId int) (*ent.Plan, error)
 
 	GetPlanByID(ctx context.Context, planId int) (*ent.Plan, error)
-
 	GetPlansByProductSkuAndTime(ctx context.Context, productSku string, now time.Time) ([]*ent.Plan, error)
-
 	GetPlansByProductIdAndTime(ctx context.Context, productId int, now time.Time) ([]*ent.Plan, error)
-
 	GetPlansByProductSku(ctx context.Context, productSku string) ([]*ent.Plan, error)
-
 	GetPlansByProductId(ctx context.Context, productId int) ([]*ent.Plan, error)
-
 	GetPlans(ctx context.Context) ([]*ent.Plan, error)
-
 	GetPlansByTime(ctx context.Context, time time.Time) ([]*ent.Plan, error)
 
 	Wipe(ctx context.Context)
@@ -52,7 +44,11 @@ func (mysql planMySQL) EndPlanAt(ctx context.Context, month time.Month, day int,
 	if err != nil {
 		return nil, err
 	}
-	return plan.Update().SetEndAt(endAt).Save(ctx)
+	save, err := plan.Update().SetEndAt(endAt).Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return mysql.GetPlanByID(ctx, save.ID)
 }
 
 func (mysql planMySQL) GetPlansByProductSkuAndTime(ctx context.Context, productSku string, now time.Time) ([]*ent.Plan, error) {
@@ -100,7 +96,7 @@ func (mysql planMySQL) GetPlansByTime(ctx context.Context, now time.Time) ([]*en
 }
 
 func (mysql planMySQL) GetPlanByID(ctx context.Context, planId int) (*ent.Plan, error) {
-	plans, err := mysql.client.Plan.Get(ctx, planId)
+	plans, err := mysql.client.Plan.Query().Where(plan.ID(planId)).WithThirdPartyPrices().WithProducts().Only(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, ErrPlanNotExist
@@ -113,12 +109,20 @@ func (mysql planMySQL) GetPlanByID(ctx context.Context, planId int) (*ent.Plan, 
 func (mysql planMySQL) Wipe(ctx context.Context) {
 	mysql.client.Subscription.Delete().ExecX(ctx)
 	mysql.client.Price.Delete().ExecX(ctx)
-	mysql.client.ThirdPartyPrice.Delete().ExecX(ctx)
 	mysql.client.Plan.Delete().ExecX(ctx)
+	mysql.client.ThirdPartyPrice.Delete().ExecX(ctx)
 	mysql.client.Product.Delete().ExecX(ctx)
 }
 
 func (mysql planMySQL) CreatePlan(ctx context.Context, i18nId int64, length uint8, unit Unit, price uint16, discount uint16, productId int, startAt time.Time, endAt time.Time, price3rdId *int) (*ent.Plan, error) {
+	if price3rdId != nil {
+		if *price3rdId == 0 {
+			price3rdId = nil
+		}
+	}
+	if startAt.Year() != 1970 {
+		startAt = startAt.Add(1 * time.Second)
+	}
 	plans, err := mysql.
 		client.
 		Plan.
@@ -136,9 +140,9 @@ func (mysql planMySQL) CreatePlan(ctx context.Context, i18nId int64, length uint
 	if err != nil {
 		return nil, err
 	}
-	return plans, nil
+	return mysql.GetPlanByID(ctx, plans.ID)
 }
 
-func NewPlanRepository(client *ent.Client) PlanRepository {
+func New(client *ent.Client) PlanRepository {
 	return planMySQL{client:client}
 }

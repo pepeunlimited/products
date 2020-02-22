@@ -9,9 +9,9 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdpartyprice"
+	"github.com/pepeunlimited/products/internal/pkg/ent/price"
+	"github.com/pepeunlimited/products/internal/pkg/ent/product"
+	"github.com/pepeunlimited/products/internal/pkg/ent/thirdpartyprice"
 )
 
 // PriceCreate is the builder for creating a Price entity.

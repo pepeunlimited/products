@@ -2,11 +2,11 @@ package twirp
 
 import (
 	"context"
-	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/pkg/rpc/plan"
-	"github.com/pepeunlimited/prices/pkg/rpc/price"
-	"github.com/pepeunlimited/prices/pkg/rpc/product"
-	"github.com/pepeunlimited/prices/pkg/rpc/subscription"
+	"github.com/pepeunlimited/products/internal/pkg/ent"
+	"github.com/pepeunlimited/products/pkg/rpc/plan"
+	"github.com/pepeunlimited/products/pkg/rpc/price"
+	"github.com/pepeunlimited/products/pkg/rpc/product"
+	"github.com/pepeunlimited/products/pkg/rpc/subscription"
 	"testing"
 	"time"
 )
@@ -44,14 +44,13 @@ func TestSubscriptionServer_StartSubscription(t *testing.T) {
 		Price:        3,
 		Discount:     3,
 		ProductId:    product.Id,
-		PlanId:       plan.Id,
 		ThirdPartyId: 0,
 	})
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	subscription, err := server.StartSubscription(ctx, &subscription.StartSubscriptionParams{
+	fromServer, err := server.StartSubscription(ctx, &subscription.StartSubscriptionParams{
 		UserId: 1,
 		PlanId: plan.Id,
 	})
@@ -60,12 +59,12 @@ func TestSubscriptionServer_StartSubscription(t *testing.T) {
 		t.FailNow()
 	}
 	now := time.Now()
-	startAt, err := time.Parse(time.RFC3339, subscription.StartAt)
+	startAt, err := time.Parse(time.RFC3339, fromServer.StartAt)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	endAt, err := time.Parse(time.RFC3339, subscription.EndAt)
+	endAt, err := time.Parse(time.RFC3339, fromServer.EndAt)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -82,15 +81,15 @@ func TestSubscriptionServer_StartSubscription(t *testing.T) {
 	if now.Add((24 * time.Hour) * time.Duration(length)).Day() != endAt.Day() {
 		t.FailNow()
 	}
-	fromServer, err := server.GetSubscription(ctx, &subscription.GetSubscriptionParams{
-		SubscriptionId: subscription.Id,
+	fromServer, err = server.GetSubscription(ctx, &subscription.GetSubscriptionParams{
+		SubscriptionId: fromServer.Id,
 		UserId:         1,
 	})
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	if fromServer.Id != subscription.Id {
+	if fromServer.Id != fromServer.Id {
 		t.FailNow()
 	}
 	subscriptions, err := server.GetSubscriptions(ctx, &subscription.GetSubscriptionsParams{

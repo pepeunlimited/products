@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package pepeunlimited.products;
-option go_package = "subscriptionrpc";
+option go_package = "subscription";
 
 service SubscriptionService {
 

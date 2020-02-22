@@ -1,109 +1,117 @@
 package twirp
 
 import (
-	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/pkg/rpc/plan"
-	"github.com/pepeunlimited/prices/pkg/rpc/price"
-	"github.com/pepeunlimited/prices/pkg/rpc/product"
-	"github.com/pepeunlimited/prices/pkg/rpc/subscription"
-	"github.com/pepeunlimited/prices/pkg/rpc/thirdpartyprice"
+	"github.com/pepeunlimited/products/internal/pkg/ent"
+	"github.com/pepeunlimited/products/pkg/rpc/plan"
+	"github.com/pepeunlimited/products/pkg/rpc/price"
+	"github.com/pepeunlimited/products/pkg/rpc/product"
+	"github.com/pepeunlimited/products/pkg/rpc/subscription"
+	"github.com/pepeunlimited/products/pkg/rpc/thirdpartyprice"
 	"time"
 )
 
-func ToThirdParty(thirdparty *ent.ThirdParty) *thirdpartyprice.ThirdParty {
-	return &thirdpartyprice.ThirdParty{
-		Id:                      int32(thirdparty.ID),
-		InAppPurchaseSku:        thirdparty.InAppPurchaseSku,
-		GoogleBillingServiceSku: thirdparty.GoogleBillingServiceSku,
-		StartAt:                 thirdparty.StartAt.Format(time.RFC3339),
-		EndAt:                   thirdparty.EndAt.Format(time.RFC3339),
+func ToThirdParty(from *ent.ThirdPartyPrice) *thirdpartyprice.ThirdPartyPrice {
+	return &thirdpartyprice.ThirdPartyPrice{
+		Id:                      int32(from.ID),
+		InAppPurchaseSku:        from.InAppPurchaseSku,
+		GoogleBillingServiceSku: from.GoogleBillingServiceSku,
+		StartAt:                 from.StartAt.Format(time.RFC3339),
+		EndAt:                   from.EndAt.Format(time.RFC3339),
 	}
 }
 
-func ToThirdParties(parties []*ent.ThirdParty) []*thirdpartyprice.ThirdParty {
-	list := make([]*thirdpartyprice.ThirdParty, 0)
-	for _, party := range parties {
+func ToThirdParties(from []*ent.ThirdPartyPrice) []*thirdpartyprice.ThirdPartyPrice {
+	list := make([]*thirdpartyprice.ThirdPartyPrice, 0)
+	for _, party := range from {
 		list = append(list, ToThirdParty(party))
 	}
 	return list
 }
 
-func ToPrice(price *ent.Price) *price.Price {
+func ToPrice(from *ent.Price) *price.Price {
 	p := &price.Price{
-		Id:       int64(price.ID),
-		Price:    uint32(price.Price),
-		Discount: uint32(price.Discount),
-		StartAt:  price.StartAt.Format(time.RFC3339),
-		EndAt:    price.EndAt.Format(time.RFC3339),
+		Id:       int64(from.ID),
+		Price:    uint32(from.Price),
+		Discount: uint32(from.Discount),
+		StartAt:  from.StartAt.Format(time.RFC3339),
+		EndAt:    from.EndAt.Format(time.RFC3339),
 	}
-	if price.Edges.ThirdParties != nil {
-		p.ThirdPartyId = int32(price.Edges.ThirdParties.ID)
+	if from.Edges.ThirdPartyPrices != nil {
+		p.ThirdPartyId = int32(from.Edges.ThirdPartyPrices.ID)
 	}
-	if price.Edges.Plans != nil {
-		p.PlanId = int64(price.Edges.Plans.ID)
-	}
-	if price.Edges.Products != nil {
-		p.ProductId = int64(price.Edges.Products.ID)
+	if from.Edges.Products != nil {
+		p.ProductId = int64(from.Edges.Products.ID)
 	}
 	return p
 }
 
-func ToPrices(prices []*ent.Price) []*price.Price {
+func ToPrices(from []*ent.Price) []*price.Price {
 	list := make([]*price.Price, 0)
-	for _, price := range prices {
+	for _, price := range from {
 		list = append(list, ToPrice(price))
 	}
 	return list
 }
 
-func ToPlan(plan *ent.Plan) *plan.Plan {
-	return &plan.Plan{
-		Id:          int64(plan.ID),
-		TitleI18NId: plan.TitleI18nID,
-		Unit:        plan.Unit,
-		Length: 	 int32(plan.Length),
+func ToPlan(from *ent.Plan) *plan.Plan {
+	p := &plan.Plan{
+		Id:                int64(from.ID),
+		TitleI18NId:       from.TitleI18nID,
+		Unit:              from.Unit,
+		Length:            int32(from.Length),
+		Price:             uint32(from.Price),
+		Discount:          uint32(from.Discount),
+		StartAt:           from.StartAt.Format(time.RFC3339),
+		EndAt:             from.EndAt.Format(time.RFC3339),
 	}
+	if from.Edges.Products != nil {
+		p.ProductId = int64(from.Edges.Products.ID)
+	}
+	if from.Edges.ThirdPartyPrices != nil {
+		p.ThirdPartyPriceId = int32(from.Edges.ThirdPartyPrices.ID)
+	}
+	return p
 }
 
-func ToProduct(product *ent.Product) *product.Product {
+func ToProduct(from *ent.Product) *product.Product {
 	return &product.Product{
-		Sku: product.Sku,
-		Id:  int64(product.ID),
+		Sku: from.Sku,
+		Id:  int64(from.ID),
 	}
 }
 
-func ToSubscription(subscription *ent.Subscription) *subscription.Subscription {
+func ToSubscription(from *ent.Subscription) *subscription.Subscription {
 	s := &subscription.Subscription{
-		Id:     	int64(subscription.ID),
-		UserId: 	subscription.UserID,
-		StartAt:	subscription.StartAt.Format(time.RFC3339),
-		EndAt:		subscription.EndAt.Format(time.RFC3339),
+		Id:     	int64(from.ID),
+		UserId: 	from.UserID,
+		StartAt:	from.StartAt.Format(time.RFC3339),
+		EndAt:		from.EndAt.Format(time.RFC3339),
 	}
-	if subscription.Edges.Plans != nil {
-		s.PlanId = int64(subscription.Edges.Plans.ID)
+	if from.Edges.Plans != nil {
+		s.PlanId = int64(from.Edges.Plans.ID)
 	}
 	return s
 }
 
-func ToSubscriptions(subscriptions []*ent.Subscription) []*subscription.Subscription {
+func ToSubscriptions(from []*ent.Subscription) []*subscription.Subscription {
 	list := make([]*subscription.Subscription, 0)
-	for _, subscription := range subscriptions {
+	for _, subscription := range from {
 		list = append(list, ToSubscription(subscription))
 	}
 	return list
 }
 
-func ToProducts(products []*ent.Product) []*product.Product {
+func ToProducts(from []*ent.Product) []*product.Product {
 	list := make([]*product.Product, 0)
-	for _,product := range products {
+	for _,product := range from {
 		list = append(list, ToProduct(product))
 	}
 	return list
 }
 
-func ToPlans(plans []*ent.Plan) []*plan.Plan {
+func ToPlans(from []*ent.Plan) []*plan.Plan {
 	list := make([]*plan.Plan, 0)
-	for _, plan := range plans {
+	for _, plan := range from {
 		list = append(list, ToPlan(plan))
 	}
 	return list

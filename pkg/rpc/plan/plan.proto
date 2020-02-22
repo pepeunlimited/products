@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package pepeunlimited.products;
-option go_package = "planrpc";
+option go_package = "plan";
 
 service PlanService {
 
@@ -15,36 +15,34 @@ service PlanService {
 }
 
 message CreatePlanParams {
-    int64   title_i18n_id      = 1;
-    int32   length             = 2;
-    string  unit               = 3; // days, weeks, months
-    int32   start_at_day       = 4; // optional
-    int32   start_at_month     = 5; // optional
-    int32   end_at_day         = 6; // optional
-    int32   end_at_month       = 7; // optional
-    uint32  price              = 8;  // => required
-    uint32  discount           = 9;  // optional
-    int64   product_id         = 10;  // => required
-    int32   third_party_id     = 11;  // optional
+    int64   title_i18n_id         = 1;
+    int32   length                = 2;
+    string  unit                  = 3; // days, weeks, months
+    int32   start_at_day          = 4; // optional
+    int32   start_at_month        = 5; // optional
+    int32   end_at_day            = 6; // optional
+    int32   end_at_month          = 7; // optional
+    uint32  price                 = 8;  // => required
+    uint32  discount              = 9;  // optional
+    int64   product_id            = 10;  // => required
+    int32   third_party_price_id  = 11;  // optional
 }
 
 message Plan {
-    int64   id                = 1;
-    int64   title_i18n_id     = 2;
-    string  unit              = 3;
-    int32   length            = 4;
-    uint32  price             = 5;
-    uint32  discount          = 6;
-    string  start_at          = 7;
-    string  end_at            = 8;
-    int32   third_party_id    = 9;
-    int64   product_id        = 10;
+    int64   id                   = 1;
+    int64   title_i18n_id        = 2;
+    string  unit                 = 3;
+    int32   length               = 4;
+    uint32  price                = 5;
+    uint32  discount             = 6;
+    string  start_at             = 7;
+    string  end_at               = 8;
+    int32   third_party_price_id = 9;
+    int64   product_id           = 10;
 }
 
 message GetPlanParams {
-    int64   plan_id     = 1; // now check if the price is active
-    int64   product_id  = 2; // will check if the price is active
-    string  product_sku = 3; // will check if the price is active
+    int64   plan_id     = 1; // no check if the price is active
 }
 
 message GetPlansParams {
@@ -57,7 +55,7 @@ message GetPlansResponse {
 }
 
 message EndPlanAtParams {
-    GetPlanParams params = 1;
+    int64 plan_id        = 1;
     int32 end_at_day     = 2;
     int32 end_at_month   = 3;
 }

@@ -3,15 +3,15 @@ package twirp
 import (
 	"context"
 	validator2 "github.com/pepeunlimited/microservice-kit/validator"
-	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/product"
-	"github.com/pepeunlimited/prices/internal/server/errorz"
-	"github.com/pepeunlimited/prices/internal/server/validator"
-	"github.com/pepeunlimited/prices/pkg/rpc/product"
+	"github.com/pepeunlimited/products/internal/pkg/ent"
+	productrepo "github.com/pepeunlimited/products/internal/pkg/mysql/product"
+	"github.com/pepeunlimited/products/internal/server/errorz"
+	"github.com/pepeunlimited/products/internal/server/validator"
+	"github.com/pepeunlimited/products/pkg/rpc/product"
 )
 
 type ProductServer struct {
-	products product.ProductRepository
+	products productrepo.ProductRepository
 	valid    validator.ProductValidator
 }
 
@@ -49,10 +49,10 @@ func (server ProductServer) GetProduct(ctx context.Context, params *product.GetP
 	}
 	var product *ent.Product
 	if !validator2.IsEmpty(params.Sku) {
-		product, err = server.products.GetProductBySku(ctx, params.Sku)
+		product, err = server.products.GetProductBySku(ctx, false, false, params.Sku)
 	}
 	if params.ProductId != 0 {
-		product, err = server.products.GetProductByID(ctx, false, int(params.ProductId))
+		product, err = server.products.GetProductByID(ctx, false, false, int(params.ProductId))
 	}
 	if err != nil {
 		return nil, errorz.Product(err)
@@ -62,7 +62,7 @@ func (server ProductServer) GetProduct(ctx context.Context, params *product.GetP
 
 func NewProductServer(client *ent.Client) ProductServer {
 	return ProductServer{
-		products: product.New(client),
+		products: productrepo.New(client),
 		valid:    validator.NewProductValidator(),
 	}
 }

@@ -3,7 +3,7 @@
 package thirdpartyprice
 
 import (
-	"github.com/pepeunlimited/prices/internal/pkg/ent/schema"
+	"github.com/pepeunlimited/products/internal/pkg/ent/schema"
 )
 
 const (

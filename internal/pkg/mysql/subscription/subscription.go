@@ -3,8 +3,8 @@ package subscription
 import (
 	"context"
 	"errors"
-	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/subscription"
+	"github.com/pepeunlimited/products/internal/pkg/ent"
+	"github.com/pepeunlimited/products/internal/pkg/ent/subscription"
 	"time"
 )
 
@@ -43,9 +43,9 @@ func (mysql subscriptionMySQL) GetSubscriptionByIdAndUserId(ctx context.Context,
 
 func (mysql subscriptionMySQL) Wipe(ctx context.Context) {
 	mysql.client.Subscription.Delete().ExecX(ctx)
-	mysql.client.ThirdPartyPrice.Delete().ExecX(ctx)
 	mysql.client.Price.Delete().ExecX(ctx)
 	mysql.client.Plan.Delete().ExecX(ctx)
+	mysql.client.ThirdPartyPrice.Delete().ExecX(ctx)
 	mysql.client.Product.Delete().ExecX(ctx)
 }
 

@@ -2,8 +2,8 @@ package twirp
 
 import (
 	"context"
-	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/pkg/rpc/product"
+	"github.com/pepeunlimited/products/internal/pkg/ent"
+	"github.com/pepeunlimited/products/pkg/rpc/product"
 	"testing"
 )
 
@@ -11,21 +11,21 @@ func TestProductServer_CreateProduct(t *testing.T) {
 	ctx := context.TODO()
 	server := NewProductServer(ent.NewEntClient())
 	server.products.Wipe(ctx)
-	product, err := server.CreateProduct(ctx, &product.CreateProductParams{
+	fromServer, err := server.CreateProduct(ctx, &product.CreateProductParams{
 		Sku: "sku",
 	})
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	product, err = server.GetProduct(ctx, &product.GetProductParams{
-		ProductId: product.Id,
+	_, err = server.GetProduct(ctx, &product.GetProductParams{
+		ProductId: fromServer.Id,
 	})
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	product, err = server.GetProduct(ctx, &product.GetProductParams{
+	_, err = server.GetProduct(ctx, &product.GetProductParams{
 		Sku:"sku",
 	})
 	if err != nil {

@@ -2,9 +2,9 @@ package subscription
 
 import (
 	"context"
-	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/plan"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/product"
+	"github.com/pepeunlimited/products/internal/pkg/ent"
+	"github.com/pepeunlimited/products/internal/pkg/mysql/plan"
+	"github.com/pepeunlimited/products/internal/pkg/mysql/product"
 	"testing"
 	"time"
 )
@@ -13,7 +13,7 @@ func TestSubscriptionMySQL_Create(t *testing.T) {
 	client := ent.NewEntClient()
 	ctx := context.TODO()
 	subscriptionrepo := New(client)
-	plans 		 	 := plan.NewPlanRepository(client)
+	plans 		 	 := plan.New(client)
 	plans.Wipe(ctx)
 	startAt 	:= time.Now().UTC()
 	userID  	:= int64(1)

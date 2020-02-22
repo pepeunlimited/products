@@ -2,7 +2,7 @@ package validator
 
 import (
 	"github.com/pepeunlimited/microservice-kit/validator"
-	"github.com/pepeunlimited/prices/pkg/rpc/product"
+	"github.com/pepeunlimited/products/pkg/rpc/product"
 	"github.com/twitchtv/twirp"
 )
 

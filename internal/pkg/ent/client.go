@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/pepeunlimited/prices/internal/pkg/ent/migrate"
+	"github.com/pepeunlimited/products/internal/pkg/ent/migrate"
 
-	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/subscription"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdpartyprice"
+	"github.com/pepeunlimited/products/internal/pkg/ent/plan"
+	"github.com/pepeunlimited/products/internal/pkg/ent/price"
+	"github.com/pepeunlimited/products/internal/pkg/ent/product"
+	"github.com/pepeunlimited/products/internal/pkg/ent/subscription"
+	"github.com/pepeunlimited/products/internal/pkg/ent/thirdpartyprice"
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"

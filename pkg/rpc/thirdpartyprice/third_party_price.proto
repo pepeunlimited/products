@@ -1,37 +1,38 @@
 syntax = "proto3";
 
 package pepeunlimited.products;
-option go_package = "thirdpartypricerpc";
+option go_package = "thirdpartyprice";
 
 // 3rdPartyPrice
 service ThirdPartyPriceService {
 
-    rpc CreateThirdPartyPrice(CreateThirdPartyParams)              returns (ThirdPartyPrice);
+    rpc CreateThirdPartyPrice(CreateThirdPartyPriceParams) returns (ThirdPartyPrice);
 
-    rpc GetThirdPartyPrices(GetThirdPartiesParams)                 returns (GetThirdPartyPricesResponse);
+    rpc GetThirdPartyPrices(GetThirdPartiesParams) returns (GetThirdPartyPricesResponse);
 
-    rpc GetThirdPartyPrice(GetThirdPartyParams)                    returns (ThirdPartyPrice);
+    rpc GetThirdPartyPrice(GetThirdPartyPriceParams) returns (ThirdPartyPrice);
 
-    rpc EndThirdParty(EndThirdPartyParams)                         returns (ThirdPartyPrice);
+    rpc EndThirdParty(EndThirdPartyPriceParams) returns (ThirdPartyPrice);
 }
 
-message EndThirdPartyParams {
-    GetThirdPartyParams params         = 1;
+message EndThirdPartyPriceParams {
+    GetThirdPartyPriceParams params    = 1;
     int32  end_at_month                = 2; // optional
     int32  end_at_day                  = 3; // optional
 }
 
-message GetThirdPartyParams {
+message GetThirdPartyPriceParams {
     int32  third_party_price_id        = 1; // at least one is required
     string in_app_purchase_sku         = 2; // at least one is required
     string google_billing_service_sku  = 3; // at least one is required
 }
 
-message CreateThirdPartyParams {
+message CreateThirdPartyPriceParams {
     string in_app_purchase_sku         = 1;
     string google_billing_service_sku  = 2;
     int32  start_at_month              = 3; // optional
     int32  start_at_day                = 4; // optional
+    string type                        = 5;
 }
 
 message GetThirdPartiesParams {

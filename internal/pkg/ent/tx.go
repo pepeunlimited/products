@@ -6,7 +6,7 @@ import (
 	"context"
 
 	"github.com/facebookincubator/ent/dialect"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/migrate"
+	"github.com/pepeunlimited/products/internal/pkg/ent/migrate"
 )
 
 // Tx is a transactional client that is created by calling Client.Tx().

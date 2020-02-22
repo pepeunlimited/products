@@ -3,10 +3,10 @@ package price
 import (
 	"context"
 	"errors"
-	"github.com/pepeunlimited/prices/internal/pkg/clock"
-	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
+	"github.com/pepeunlimited/products/internal/pkg/clock"
+	"github.com/pepeunlimited/products/internal/pkg/ent"
+	"github.com/pepeunlimited/products/internal/pkg/ent/price"
+	"github.com/pepeunlimited/products/internal/pkg/ent/product"
 	"time"
 )
 
@@ -18,6 +18,9 @@ var (
 )
 
 type PriceRepository interface {
+	GetPriceByProductSku(ctx context.Context, productSku string, withProduct bool, withThirdParty bool) (*ent.Price, error)
+	GetPriceByProductSkuAndTime(ctx context.Context, productSku string, now time.Time, withProduct bool, withThirdParty bool) (*ent.Price, error)
+
 	GetPriceByProductID(ctx context.Context, productId int, withProduct bool, withThirdParty bool) (*ent.Price, error)
 	GetPriceByProductIDAndTime(ctx context.Context, productId int, now time.Time, withProduct bool, withThirdParty bool) (*ent.Price, error)
 	GetPricesByProductID(ctx context.Context, productId int, isSequence bool) ([]*ent.Price, error)
@@ -31,6 +34,34 @@ type PriceRepository interface {
 
 type priceMySQL struct {
 	client *ent.Client
+}
+
+func (mysql priceMySQL) GetPriceByProductSku(ctx context.Context, productSku string, withProduct bool, withThirdParty bool) (*ent.Price, error) {
+	now := time.Now().UTC()
+	return mysql.GetPriceByProductSkuAndTime(ctx, productSku, now, withProduct, withThirdParty)
+}
+
+func (mysql priceMySQL) GetPriceByProductSkuAndTime(ctx context.Context, productSku string, now time.Time, withProduct bool, withThirdParty bool) (*ent.Price, error) {
+	query := mysql.client.Price.Query().Where(
+		price.And(
+			price.StartAtLTE(now),
+			price.EndAtGTE(now),
+			price.HasProductsWith(product.Sku(productSku)),
+		))
+	if withProduct {
+		query.WithProducts()
+	}
+	if withThirdParty {
+		query.WithThirdPartyPrices()
+	}
+	only, err := query.Only(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, ErrPriceNotExist
+		}
+		return nil, err
+	}
+	return only, nil
 }
 
 func (mysql priceMySQL) GetPriceByProductID(ctx context.Context, productId int, withProduct bool, withThirdParty bool) (*ent.Price, error) {
@@ -167,9 +198,9 @@ func (mysql priceMySQL) EndAt(ctx context.Context, month time.Month, day int, pr
 
 func (mysql priceMySQL) Wipe(ctx context.Context) {
 	mysql.client.Subscription.Delete().ExecX(ctx)
-	mysql.client.ThirdPartyPrice.Delete().ExecX(ctx)
 	mysql.client.Price.Delete().ExecX(ctx)
 	mysql.client.Plan.Delete().ExecX(ctx)
+	mysql.client.ThirdPartyPrice.Delete().ExecX(ctx)
 	mysql.client.Product.Delete().ExecX(ctx)
 }
 

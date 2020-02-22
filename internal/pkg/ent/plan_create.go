@@ -10,10 +10,10 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/subscription"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdpartyprice"
+	"github.com/pepeunlimited/products/internal/pkg/ent/plan"
+	"github.com/pepeunlimited/products/internal/pkg/ent/product"
+	"github.com/pepeunlimited/products/internal/pkg/ent/subscription"
+	"github.com/pepeunlimited/products/internal/pkg/ent/thirdpartyprice"
 )
 
 // PlanCreate is the builder for creating a Plan entity.

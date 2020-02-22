@@ -3,8 +3,8 @@ package product
 import (
 	"context"
 	"errors"
-	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
+	"github.com/pepeunlimited/products/internal/pkg/ent"
+	"github.com/pepeunlimited/products/internal/pkg/ent/product"
 )
 
 var (
@@ -83,8 +83,8 @@ func (mysql productMySQL) GetProductBySku(ctx context.Context, withPrices bool, 
 func (mysql productMySQL) Wipe(ctx context.Context) {
 	mysql.client.Subscription.Delete().ExecX(ctx)
 	mysql.client.Price.Delete().ExecX(ctx)
-	mysql.client.ThirdPartyPrice.Delete().ExecX(ctx)
 	mysql.client.Plan.Delete().ExecX(ctx)
+	mysql.client.ThirdPartyPrice.Delete().ExecX(ctx)
 	mysql.client.Product.Delete().ExecX(ctx)
 }
 

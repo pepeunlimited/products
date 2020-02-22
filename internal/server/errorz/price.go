@@ -1,7 +1,7 @@
 package errorz
 
 import (
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/price"
+	"github.com/pepeunlimited/products/internal/pkg/mysql/price"
 	"github.com/twitchtv/twirp"
 	"log"
 )
