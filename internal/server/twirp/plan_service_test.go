@@ -71,7 +71,7 @@ func TestPlanServer_GetPlans(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	fromServer, err := server.CreatePlan(ctx, &plan.CreatePlanParams{
+	fromServer0, err := server.CreatePlan(ctx, &plan.CreatePlanParams{
 		TitleI18NId:       0,
 		Length:            12,
 		Unit:              "days",
@@ -86,9 +86,76 @@ func TestPlanServer_GetPlans(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	fromServer, err = server.GetPlan(ctx, &plan.GetPlanParams{PlanId: fromServer.Id})
+	fromServer0, err = server.GetPlan(ctx, &plan.GetPlanParams{PlanId: fromServer0.Id})
 	if err != nil {
 		t.Error(err)
+		t.FailNow()
+	}
+	fromServer1, err := server.CreatePlan(ctx, &plan.CreatePlanParams{
+		TitleI18NId:       0,
+		Length:            2,
+		Unit:              "days",
+		Price:             2,
+		Discount:          2,
+		ProductId:         fromServerProduct.Id,
+		ThirdPartyPriceId: 0,
+	})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	fromServer1, err = server.GetPlan(ctx, &plan.GetPlanParams{PlanId: fromServer1.Id})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	fromServer2, err := server.CreatePlan(ctx, &plan.CreatePlanParams{
+		TitleI18NId:       0,
+		Length:            2,
+		Unit:              "days",
+		Price:             0,
+		Discount:          0,
+		EndAtDay:		   int32(now.Day()),
+		EndAtMonth:	   	   int32(now.Month()),
+		ProductId:         fromServerProduct.Id,
+		ThirdPartyPriceId: 0,
+	})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	fromServer2, err = server.GetPlan(ctx, &plan.GetPlanParams{PlanId: fromServer2.Id})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	plans, err := server.GetPlans(ctx, &plan.GetPlansParams{
+		ProductId: fromServerProduct.Id,
+	})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	if len(plans.Plans) != 2 {
+		t.FailNow()
+	}
+	_, err = server.EndPlanAt(ctx, &plan.EndPlanAtParams{
+		PlanId:     fromServer1.Id,
+		EndAtDay:   int32(now.Day() - 1),
+		EndAtMonth: int32(now.Month()),
+	})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	plans, err = server.GetPlans(ctx, &plan.GetPlansParams{
+		ProductId: fromServerProduct.Id,
+	})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	if len(plans.Plans) != 1 {
 		t.FailNow()
 	}
 }

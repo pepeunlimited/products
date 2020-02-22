@@ -5,7 +5,6 @@ import (
 	"github.com/pepeunlimited/products/internal/pkg/ent"
 	"github.com/pepeunlimited/products/pkg/rpc/price"
 	"github.com/pepeunlimited/products/pkg/rpc/thirdpartyprice"
-	"github.com/twitchtv/twirp"
 	"testing"
 	"time"
 )
@@ -81,9 +80,15 @@ func TestPriceServer_CreatePrice(t *testing.T) {
 		t.FailNow()
 	}
 	thirdpartypriceServer := NewThirdPartyPriceServer(ent.NewEntClient())
-	party,_ := thirdpartypriceServer.CreateThirdPartyPrice(ctx, &thirdpartyprice.CreateThirdPartyPriceParams{
+	party,err := thirdpartypriceServer.CreateThirdPartyPrice(ctx, &thirdpartyprice.CreateThirdPartyPriceParams{
 		InAppPurchaseSku: "in-app-purchase-sku",
+		Type:             "CONSUMABLE",
+
 	})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
 	createdPrice, err = server.CreatePrice(ctx, &price.CreatePriceParams{
 		StartAtDay:   int32(now.Day()),
 		StartAtMonth: int32(now.Month()),
@@ -123,60 +128,7 @@ func TestPriceServer_CreatePrice(t *testing.T) {
 
 }
 
-func TestPriceServer_GetPriceByProductIdIsSubscribableTrue(t *testing.T) {
-	ctx := context.TODO()
-	server := NewPriceServer(ent.NewEntClient())
-	server.products.Wipe(ctx)
-	product, err := server.products.CreateProduct(ctx, "sku")
-	if err != nil {
-		t.Error(err)
-		t.FailNow()
-	}
-	fromServer, err := server.CreatePrice(ctx, &price.CreatePriceParams{
-		StartAtDay:   0,
-		StartAtMonth: 0,
-		EndAtDay:     0,
-		EndAtMonth:   0,
-		Price:        3,
-		Discount:     0,
-		ProductId:    int64(product.ID),
-		ThirdPartyId: 0,
-	})
-	if err != nil {
-		t.Error(err)
-		t.FailNow()
-	}
-	_, err = server.GetPrice(ctx, &price.GetPriceParams{
-		ProductId: int64(product.ID),
-	})
-	if err == nil {
-		t.FailNow()
-	}
-	if err.(twirp.Error).Code() != twirp.InvalidArgument {
-		t.FailNow()
-	}
-	_, err = server.GetPrice(ctx, &price.GetPriceParams{
-		ProductSku: "sku",
-	})
-	if err == nil {
-		t.FailNow()
-	}
-	if err.(twirp.Error).Code() != twirp.InvalidArgument {
-		t.FailNow()
-	}
-	price, err := server.GetPrice(ctx, &price.GetPriceParams{
-		PriceId: fromServer.Id,
-	})
-	if err != nil {
-		t.Error(err)
-		t.FailNow()
-	}
-	if price.ProductId != int64(product.ID) {
-		t.FailNow()
-	}
-}
-
-func TestPriceServer_GetPriceByProductIdIsSubscribableFalse(t *testing.T) {
+func TestPriceServer_GetPriceByProductId(t *testing.T) {
 	ctx := context.TODO()
 	server := NewPriceServer(ent.NewEntClient())
 	server.products.Wipe(ctx)
@@ -243,6 +195,7 @@ func  TestPriceServer_GetPriceWithThirdPartyPrices(t *testing.T) {
 	thirdpartypriceServer := NewThirdPartyPriceServer(ent.NewEntClient())
 	thirdparty, err := thirdpartypriceServer.CreateThirdPartyPrice(ctx, &thirdpartyprice.CreateThirdPartyPriceParams{
 		InAppPurchaseSku: "in-app-sku",
+		Type:             "CONSUMABLE",
 	})
 	if err != nil {
 		t.Error(err)
@@ -262,6 +215,12 @@ func  TestPriceServer_GetPriceWithThirdPartyPrices(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
+	if prices.ProductId == 0 {
+		t.FailNow()
+	}
+	if prices.ThirdPartyId == 0 {
+		t.FailNow()
+	}
 	now := time.Now().UTC()
 	server.EndPriceAt(ctx, &price.EndPriceAtParams{
 		Params: &price.GetPriceParams{
@@ -278,27 +237,10 @@ func  TestPriceServer_GetPriceWithThirdPartyPrices(t *testing.T) {
 		Price:        3,
 		Discount:     3,
 		ProductId:    int64(product.ID),
-		ThirdPartyId: thirdparty.Id,
+		ThirdPartyId: 0,
 	})
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	//price, err := server.GetPrice(ctx, &price.GetPriceParams{ProductId: int64(plan.ID)})
-	//if err != nil {
-	//	t.Error(err)
-	//	t.FailNow()
-	//}
-	//if price.Price != 3 {
-	//	t.FailNow()
-	//}
-	//if price.ProductId == 0 {
-	//	t.FailNow()
-	//}
-	//if price.ThirdPartyId == 0 {
-	//	t.FailNow()
-	//}
-	//if price.PlanId == 0 {
-	//	t.FailNow()
-	//}
 }
