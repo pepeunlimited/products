@@ -26,8 +26,16 @@ func (server PlanServer) CreatePlan(ctx context.Context, params *planrpc.CreateP
 	return ToPlan(create), nil
 }
 
-func (server PlanServer) GetPlans(context.Context, *planrpc.GetPlansParams) (*planrpc.GetPlansResponse, error) {
-	panic("implement me")
+func (server PlanServer) GetPlans(ctx context.Context, params *planrpc.GetPlansParams) (*planrpc.GetPlansResponse, error) {
+	err := server.valid.GetPlans(params)
+	if err != nil {
+		return nil, err
+	}
+	plans, err := server.plans.GetPlans(ctx, params.Show)
+	if err != nil {
+		return nil, errorz.Plan(err)
+	}
+	return &planrpc.GetPlansResponse{Plans:ToPlans(plans)}, nil
 }
 
 func (server PlanServer) GetPlan(ctx context.Context, params *planrpc.GetPlanParams) (*planrpc.Plan, error) {
@@ -37,7 +45,7 @@ func (server PlanServer) GetPlan(ctx context.Context, params *planrpc.GetPlanPar
 	}
 	plan, err := server.plans.GetPlanByID(ctx, int(params.PlanId))
 	if err != nil {
-		return nil, errorz.Price(err)
+		return nil, errorz.Plan(err)
 	}
 	return ToPlan(plan), nil
 }

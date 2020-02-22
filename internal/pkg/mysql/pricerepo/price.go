@@ -15,6 +15,7 @@ var (
 	ErrPriceNotExist 		= errors.New("prices: not exist")
 	ErrInvalidStartAt 		= errors.New("prices: invalid startAt")
 	ErrInvalidEndAt 		= errors.New("prices: invalid endAt")
+	ErrInvalidProduct 		= errors.New("prices: invalid product")
 )
 
 type PriceRepository interface {
@@ -142,6 +143,9 @@ func (mysql priceMySQL) CreatePrice(ctx context.Context, price uint16, discount 
 		SetNillableThirdPartiesID(thirdPartyID)
 	// check collision with month and day with existing price
 	if plansId != nil {
+		if len(prices) > 0 { // do not allow mix planId and nil with same product
+			return nil, ErrInvalidProduct
+		}
 		// subscription plans..
 		subscriptionPlans, err := mysql.GetPricesByPlanId(ctx, *plansId)
 		if err != nil {
@@ -166,6 +170,9 @@ func (mysql priceMySQL) CreatePrice(ctx context.Context, price uint16, discount 
 		}
 		build.SetStartAt(startAt.Add(1 * time.Second).UTC()).SetEndAt(endAt.UTC())
 	} else {
+		if startAt.Year() != 1970 {
+			startAt = startAt.Add(1*time.Second)
+		}
 		// initial..
 		build.SetStartAt(startAt).SetEndAt(endAt)
 	}

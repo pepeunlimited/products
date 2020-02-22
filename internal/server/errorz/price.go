@@ -12,6 +12,8 @@ func Price(err error) error {
 		return twirp.InvalidArgumentError("end_at", "invalid_end_at")
 	case pricerepo.ErrInvalidStartAt:
 		return twirp.InvalidArgumentError("start_at", "invalid_start_at")
+	case pricerepo.ErrInvalidProduct:
+		return twirp.InvalidArgumentError("product_id", "invalid_product_id")
 	case pricerepo.ErrPriceNotExist:
 		return twirp.NotFoundError("price_not_found")
 	}

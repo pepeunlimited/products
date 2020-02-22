@@ -23,8 +23,8 @@ type ThirdPartyRepository interface {
 	Create(ctx context.Context, apple string, google *string)  									(*ent.ThirdParty, error)
 	CreateStartAt(ctx context.Context, apple string, google *string, startAt time.Time)  		(*ent.ThirdParty, error)
 	EndAt(ctx context.Context, month time.Month, day int, id int)								(*ent.ThirdParty, error)
-	GetThirdParties(ctx context.Context) 										  				([]*ent.ThirdParty, error)
-	GetThirdPartiesByTime(ctx context.Context, now time.Time) 									([]*ent.ThirdParty, error)
+	GetThirdParties(ctx context.Context, show bool) 										  	([]*ent.ThirdParty, error)
+	GetThirdPartiesByTime(ctx context.Context, now time.Time, show bool) 						([]*ent.ThirdParty, error)
 	Wipe(ctx context.Context)
 }
 
@@ -60,12 +60,12 @@ func (mysql thirdpartiesMySQL) CreateStartAt(ctx context.Context, apple string, 
 	return save, nil
 }
 
-func (mysql thirdpartiesMySQL) GetThirdPartiesByTime(ctx context.Context, now time.Time) ([]*ent.ThirdParty, error) {
-	all, err := mysql.client.ThirdParty.Query().Where(thirdparty.StartAtLTE(now), thirdparty.EndAtGTE(now)).All(ctx)
-	if err != nil {
-		return nil, err
+func (mysql thirdpartiesMySQL) GetThirdPartiesByTime(ctx context.Context, now time.Time, show bool) ([]*ent.ThirdParty, error) {
+	query := mysql.client.ThirdParty.Query()
+	if !show {
+		query.Where(thirdparty.StartAtLTE(now), thirdparty.EndAtGTE(now))
 	}
-	return all, nil
+	return query.All(ctx)
 }
 
 func (mysql thirdpartiesMySQL) Wipe(ctx context.Context) {
@@ -129,9 +129,9 @@ func (mysql thirdpartiesMySQL) EndAt(ctx context.Context, month time.Month, day 
 	return updated, nil
 }
 
-func (mysql thirdpartiesMySQL) GetThirdParties(ctx context.Context) ([]*ent.ThirdParty, error) {
+func (mysql thirdpartiesMySQL) GetThirdParties(ctx context.Context, show bool) ([]*ent.ThirdParty, error) {
 	now := time.Now().UTC()
-	return mysql.GetThirdPartiesByTime(ctx, now)
+	return mysql.GetThirdPartiesByTime(ctx, now, show)
 }
 
 func NewThirdPartyRepository(client *ent.Client) ThirdPartyRepository {

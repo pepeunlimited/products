@@ -28,7 +28,7 @@ func main() {
 	ps := productrpc.NewProductServiceServer(twirp.NewProductServer(client), nil)
 	pls := planrpc.NewPlanServiceServer(twirp.NewPlanServer(client), nil)
 	ss := subscriptionrpc.NewSubscriptionServiceServer(twirp.NewSubscriptionServer(client), nil)
-	tp := thirdpartyrpc.NewThirdPartyPriceServiceServer(twirp.NewThirdPartyServer(client), nil)
+	tp := thirdpartyrpc.NewThirdPartyServiceServer(twirp.NewThirdPartyServer(client), nil)
 	prs := pricerpc.NewPriceServiceServer(twirp.NewPriceServer(client), nil)
 
 	mux := http.NewServeMux()

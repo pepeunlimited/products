@@ -63,11 +63,11 @@ func (server ThirdPartyServer) GetThirdParties(ctx context.Context, params *thir
 	if err != nil {
 		return nil, err
 	}
-	parties, err := server.thirdparty.GetThirdParties(ctx)
+	thirdParties, err := server.thirdparty.GetThirdParties(ctx, params.Show)
 	if err != nil {
 		return nil, errorz.ThirdParty(err)
 	}
-	return &thirdpartyrpc.GetThirdPartiesResponse{ThirdParties: ToThirdParties(parties)}, nil
+	return &thirdpartyrpc.GetThirdPartiesResponse{ThirdParties: ToThirdParties(thirdParties)}, nil
 }
 
 func (server ThirdPartyServer) GetThirdParty(ctx context.Context, params *thirdpartyrpc.GetThirdPartyParams) (*thirdpartyrpc.ThirdParty, error) {
@@ -82,8 +82,8 @@ func (server ThirdPartyServer) GetThirdParty(ctx context.Context, params *thirdp
 	if !validator2.IsEmpty(params.GoogleBillingServiceSku) {
 		thirdparty, err = server.thirdparty.GetBillingBySku(ctx, params.GoogleBillingServiceSku)
 	}
-	if params.Id != 0 {
-		thirdparty, err = server.thirdparty.GetByID(ctx, int(params.Id))
+	if params.ThirdPartyId != 0 {
+		thirdparty, err = server.thirdparty.GetByID(ctx, int(params.ThirdPartyId))
 	}
 	if err != nil {
 		return nil, errorz.ThirdParty(err)

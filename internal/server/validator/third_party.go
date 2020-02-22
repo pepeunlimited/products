@@ -31,8 +31,8 @@ func (ThirdPartyServerValidator) CreateThirdParty(params *thirdpartyrpc.CreateTh
 
 func (v ThirdPartyServerValidator) GetThirdParty(params *thirdpartyrpc.GetThirdPartyParams) error {
 	if validator.IsEmpty(params.GoogleBillingServiceSku) &&
-		validator.IsEmpty(params.InAppPurchaseSku) && params.Id == 0 {
-		return twirp.RequiredArgumentError("id_or_googlesku_or_applesku")
+		validator.IsEmpty(params.InAppPurchaseSku) && params.ThirdPartyId == 0 {
+		return twirp.RequiredArgumentError("at_least_third_party_id")
 	}
 	return nil
 }

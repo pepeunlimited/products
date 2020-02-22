@@ -30,6 +30,10 @@ func (v PlanServerValidator) GetPlan(params *planrpc.GetPlanParams) error {
 	return nil
 }
 
+func (v PlanServerValidator) GetPlans(params *planrpc.GetPlansParams) error {
+	return nil
+}
+
 func NewPlanServerValidator() PlanServerValidator {
 	return PlanServerValidator{}
 }

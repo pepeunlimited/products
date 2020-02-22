@@ -100,3 +100,11 @@ func ToProducts(products []*ent.Product) []*productrpc.Product {
 	}
 	return list
 }
+
+func ToPlans(plans []*ent.Plan) []*planrpc.Plan {
+	list := make([]*planrpc.Plan, 0)
+	for _, plan := range plans {
+		list = append(list, ToPlan(plan))
+	}
+	return list
+}

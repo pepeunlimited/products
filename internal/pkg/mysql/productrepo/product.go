@@ -52,6 +52,9 @@ func (mysql productMySQL) GetProducts(ctx context.Context, pageToken int64, page
 	if err != nil {
 		return nil, 0, err
 	}
+	if len(all) == 0 {
+		return []*ent.Product{}, 0, nil
+	}
 	return all, int64(all[len(all) - 1].ID), nil
 }
 

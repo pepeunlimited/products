@@ -44,7 +44,7 @@ func TestPlanMySQL_LengthByPlansID(t *testing.T) {
 	if planOneDay.Unit == "UNKNOWN" {
 		t.FailNow()
 	}
-	endAt, err = plans.LengthByPlansID(ctx, startAt, planOneDay.ID)
+	endAt, err = plans.EndAtByPlanID(ctx, startAt, planOneDay.ID)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -59,7 +59,7 @@ func TestPlanMySQL_LengthByPlansID(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	endAt, err = plans.LengthByPlansID(ctx, startAt, planOneWeek.ID)
+	endAt, err = plans.EndAtByPlanID(ctx, startAt, planOneWeek.ID)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -74,7 +74,7 @@ func TestPlanMySQL_LengthByPlansID(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	endAt, err = plans.LengthByPlansID(ctx, startAt, planOneMonth.ID)
+	endAt, err = plans.EndAtByPlanID(ctx, startAt, planOneMonth.ID)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -89,7 +89,7 @@ func TestPlanMySQL_LengthByPlansID(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	endAt, err = plans.LengthByPlansID(ctx, startAt, planOneYear.ID)
+	endAt, err = plans.EndAtByPlanID(ctx, startAt, planOneYear.ID)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -118,7 +118,7 @@ func TestPlanMySQL_GetPlans(t *testing.T) {
 	pricerepo.CreateNewPrice(ctx, uint16(2), uint16(2), product1.ID, nil, &plan2.ID)
 	pricerepo.CreateNewPrice(ctx, uint16(2), uint16(2), product1.ID, nil, &plan2.ID)
 
-	plans, err := plansrepo.GetPlans(ctx)
+	plans, err := plansrepo.GetPlans(ctx, false)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

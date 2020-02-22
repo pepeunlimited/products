@@ -20,8 +20,8 @@ type PlanRepository interface {
 	EndAtByPlanID(ctx context.Context, startAt time.Time, planId int) (time.Time, error)
 
 	GetPlanByID(ctx context.Context, plansID int) 						 (*ent.Plan, error)
-	GetPlans(ctx context.Context) 							 			 ([]*ent.Plan, error)
-	GetPlansByTime(ctx context.Context, time time.Time) 				 ([]*ent.Plan, error)
+	GetPlans(ctx context.Context, show bool) 							 ([]*ent.Plan, error)
+	GetPlansByTime(ctx context.Context, time time.Time, show bool) 	     ([]*ent.Plan, error)
 
 	Wipe(ctx context.Context)
 }
@@ -30,13 +30,17 @@ type planMySQL struct {
 	client *ent.Client
 }
 
-func (mysql planMySQL) GetPlans(ctx context.Context) ([]*ent.Plan, error) {
+func (mysql planMySQL) GetPlans(ctx context.Context, show bool) ([]*ent.Plan, error) {
 	now := time.Now().UTC()
-	return mysql.GetPlansByTime(ctx, now)
+	return mysql.GetPlansByTime(ctx, now, show)
 }
 
-func (mysql planMySQL) GetPlansByTime(ctx context.Context, now time.Time) ([]*ent.Plan, error) {
-	return mysql.client.Plan.Query().Where(plan.HasPricesWith(price.And(price.StartAtLTE(now), price.EndAtGTE(now), price.HasPlans()))).All(ctx)
+func (mysql planMySQL) GetPlansByTime(ctx context.Context, now time.Time, show bool) ([]*ent.Plan, error) {
+	query := mysql.client.Plan.Query()
+	if !show {
+		query.Where(plan.HasPricesWith(price.And(price.StartAtLTE(now), price.EndAtGTE(now), price.HasPlans())))
+	}
+	return query.All(ctx)
 }
 
 func (mysql planMySQL) GetPlanByID(ctx context.Context, plansID int) (*ent.Plan, error) {

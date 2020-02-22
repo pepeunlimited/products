@@ -28,11 +28,11 @@ import io "io"
 import json "encoding/json"
 import url "net/url"
 
-// ================================
-// ThirdPartyPriceService Interface
-// ================================
+// ===========================
+// ThirdPartyService Interface
+// ===========================
 
-type ThirdPartyPriceService interface {
+type ThirdPartyService interface {
 	CreateThirdParty(context.Context, *CreateThirdPartyParams) (*ThirdParty, error)
 
 	GetThirdParties(context.Context, *GetThirdPartiesParams) (*GetThirdPartiesResponse, error)
@@ -42,19 +42,19 @@ type ThirdPartyPriceService interface {
 	EndThirdParty(context.Context, *EndThirdPartyParams) (*ThirdParty, error)
 }
 
-// ======================================
-// ThirdPartyPriceService Protobuf Client
-// ======================================
+// =================================
+// ThirdPartyService Protobuf Client
+// =================================
 
-type thirdPartyPriceServiceProtobufClient struct {
+type thirdPartyServiceProtobufClient struct {
 	client HTTPClient
 	urls   [4]string
 	opts   twirp.ClientOptions
 }
 
-// NewThirdPartyPriceServiceProtobufClient creates a Protobuf client that implements the ThirdPartyPriceService interface.
+// NewThirdPartyServiceProtobufClient creates a Protobuf client that implements the ThirdPartyService interface.
 // It communicates using Protobuf and can be configured with a custom HTTPClient.
-func NewThirdPartyPriceServiceProtobufClient(addr string, client HTTPClient, opts ...twirp.ClientOption) ThirdPartyPriceService {
+func NewThirdPartyServiceProtobufClient(addr string, client HTTPClient, opts ...twirp.ClientOption) ThirdPartyService {
 	if c, ok := client.(*http.Client); ok {
 		client = withoutRedirects(c)
 	}
@@ -64,7 +64,7 @@ func NewThirdPartyPriceServiceProtobufClient(addr string, client HTTPClient, opt
 		o(&clientOpts)
 	}
 
-	prefix := urlBase(addr) + ThirdPartyPriceServicePathPrefix
+	prefix := urlBase(addr) + ThirdPartyServicePathPrefix
 	urls := [4]string{
 		prefix + "CreateThirdParty",
 		prefix + "GetThirdParties",
@@ -72,16 +72,16 @@ func NewThirdPartyPriceServiceProtobufClient(addr string, client HTTPClient, opt
 		prefix + "EndThirdParty",
 	}
 
-	return &thirdPartyPriceServiceProtobufClient{
+	return &thirdPartyServiceProtobufClient{
 		client: client,
 		urls:   urls,
 		opts:   clientOpts,
 	}
 }
 
-func (c *thirdPartyPriceServiceProtobufClient) CreateThirdParty(ctx context.Context, in *CreateThirdPartyParams) (*ThirdParty, error) {
+func (c *thirdPartyServiceProtobufClient) CreateThirdParty(ctx context.Context, in *CreateThirdPartyParams) (*ThirdParty, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "pepeunlimited.products")
-	ctx = ctxsetters.WithServiceName(ctx, "ThirdPartyPriceService")
+	ctx = ctxsetters.WithServiceName(ctx, "ThirdPartyService")
 	ctx = ctxsetters.WithMethodName(ctx, "CreateThirdParty")
 	out := new(ThirdParty)
 	err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[0], in, out)
@@ -99,9 +99,9 @@ func (c *thirdPartyPriceServiceProtobufClient) CreateThirdParty(ctx context.Cont
 	return out, nil
 }
 
-func (c *thirdPartyPriceServiceProtobufClient) GetThirdParties(ctx context.Context, in *GetThirdPartiesParams) (*GetThirdPartiesResponse, error) {
+func (c *thirdPartyServiceProtobufClient) GetThirdParties(ctx context.Context, in *GetThirdPartiesParams) (*GetThirdPartiesResponse, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "pepeunlimited.products")
-	ctx = ctxsetters.WithServiceName(ctx, "ThirdPartyPriceService")
+	ctx = ctxsetters.WithServiceName(ctx, "ThirdPartyService")
 	ctx = ctxsetters.WithMethodName(ctx, "GetThirdParties")
 	out := new(GetThirdPartiesResponse)
 	err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
@@ -119,9 +119,9 @@ func (c *thirdPartyPriceServiceProtobufClient) GetThirdParties(ctx context.Conte
 	return out, nil
 }
 
-func (c *thirdPartyPriceServiceProtobufClient) GetThirdParty(ctx context.Context, in *GetThirdPartyParams) (*ThirdParty, error) {
+func (c *thirdPartyServiceProtobufClient) GetThirdParty(ctx context.Context, in *GetThirdPartyParams) (*ThirdParty, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "pepeunlimited.products")
-	ctx = ctxsetters.WithServiceName(ctx, "ThirdPartyPriceService")
+	ctx = ctxsetters.WithServiceName(ctx, "ThirdPartyService")
 	ctx = ctxsetters.WithMethodName(ctx, "GetThirdParty")
 	out := new(ThirdParty)
 	err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
@@ -139,9 +139,9 @@ func (c *thirdPartyPriceServiceProtobufClient) GetThirdParty(ctx context.Context
 	return out, nil
 }
 
-func (c *thirdPartyPriceServiceProtobufClient) EndThirdParty(ctx context.Context, in *EndThirdPartyParams) (*ThirdParty, error) {
+func (c *thirdPartyServiceProtobufClient) EndThirdParty(ctx context.Context, in *EndThirdPartyParams) (*ThirdParty, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "pepeunlimited.products")
-	ctx = ctxsetters.WithServiceName(ctx, "ThirdPartyPriceService")
+	ctx = ctxsetters.WithServiceName(ctx, "ThirdPartyService")
 	ctx = ctxsetters.WithMethodName(ctx, "EndThirdParty")
 	out := new(ThirdParty)
 	err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[3], in, out)
@@ -159,19 +159,19 @@ func (c *thirdPartyPriceServiceProtobufClient) EndThirdParty(ctx context.Context
 	return out, nil
 }
 
-// ==================================
-// ThirdPartyPriceService JSON Client
-// ==================================
+// =============================
+// ThirdPartyService JSON Client
+// =============================
 
-type thirdPartyPriceServiceJSONClient struct {
+type thirdPartyServiceJSONClient struct {
 	client HTTPClient
 	urls   [4]string
 	opts   twirp.ClientOptions
 }
 
-// NewThirdPartyPriceServiceJSONClient creates a JSON client that implements the ThirdPartyPriceService interface.
+// NewThirdPartyServiceJSONClient creates a JSON client that implements the ThirdPartyService interface.
 // It communicates using JSON and can be configured with a custom HTTPClient.
-func NewThirdPartyPriceServiceJSONClient(addr string, client HTTPClient, opts ...twirp.ClientOption) ThirdPartyPriceService {
+func NewThirdPartyServiceJSONClient(addr string, client HTTPClient, opts ...twirp.ClientOption) ThirdPartyService {
 	if c, ok := client.(*http.Client); ok {
 		client = withoutRedirects(c)
 	}
@@ -181,7 +181,7 @@ func NewThirdPartyPriceServiceJSONClient(addr string, client HTTPClient, opts ..
 		o(&clientOpts)
 	}
 
-	prefix := urlBase(addr) + ThirdPartyPriceServicePathPrefix
+	prefix := urlBase(addr) + ThirdPartyServicePathPrefix
 	urls := [4]string{
 		prefix + "CreateThirdParty",
 		prefix + "GetThirdParties",
@@ -189,16 +189,16 @@ func NewThirdPartyPriceServiceJSONClient(addr string, client HTTPClient, opts ..
 		prefix + "EndThirdParty",
 	}
 
-	return &thirdPartyPriceServiceJSONClient{
+	return &thirdPartyServiceJSONClient{
 		client: client,
 		urls:   urls,
 		opts:   clientOpts,
 	}
 }
 
-func (c *thirdPartyPriceServiceJSONClient) CreateThirdParty(ctx context.Context, in *CreateThirdPartyParams) (*ThirdParty, error) {
+func (c *thirdPartyServiceJSONClient) CreateThirdParty(ctx context.Context, in *CreateThirdPartyParams) (*ThirdParty, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "pepeunlimited.products")
-	ctx = ctxsetters.WithServiceName(ctx, "ThirdPartyPriceService")
+	ctx = ctxsetters.WithServiceName(ctx, "ThirdPartyService")
 	ctx = ctxsetters.WithMethodName(ctx, "CreateThirdParty")
 	out := new(ThirdParty)
 	err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[0], in, out)
@@ -216,9 +216,9 @@ func (c *thirdPartyPriceServiceJSONClient) CreateThirdParty(ctx context.Context,
 	return out, nil
 }
 
-func (c *thirdPartyPriceServiceJSONClient) GetThirdParties(ctx context.Context, in *GetThirdPartiesParams) (*GetThirdPartiesResponse, error) {
+func (c *thirdPartyServiceJSONClient) GetThirdParties(ctx context.Context, in *GetThirdPartiesParams) (*GetThirdPartiesResponse, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "pepeunlimited.products")
-	ctx = ctxsetters.WithServiceName(ctx, "ThirdPartyPriceService")
+	ctx = ctxsetters.WithServiceName(ctx, "ThirdPartyService")
 	ctx = ctxsetters.WithMethodName(ctx, "GetThirdParties")
 	out := new(GetThirdPartiesResponse)
 	err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
@@ -236,9 +236,9 @@ func (c *thirdPartyPriceServiceJSONClient) GetThirdParties(ctx context.Context, 
 	return out, nil
 }
 
-func (c *thirdPartyPriceServiceJSONClient) GetThirdParty(ctx context.Context, in *GetThirdPartyParams) (*ThirdParty, error) {
+func (c *thirdPartyServiceJSONClient) GetThirdParty(ctx context.Context, in *GetThirdPartyParams) (*ThirdParty, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "pepeunlimited.products")
-	ctx = ctxsetters.WithServiceName(ctx, "ThirdPartyPriceService")
+	ctx = ctxsetters.WithServiceName(ctx, "ThirdPartyService")
 	ctx = ctxsetters.WithMethodName(ctx, "GetThirdParty")
 	out := new(ThirdParty)
 	err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
@@ -256,9 +256,9 @@ func (c *thirdPartyPriceServiceJSONClient) GetThirdParty(ctx context.Context, in
 	return out, nil
 }
 
-func (c *thirdPartyPriceServiceJSONClient) EndThirdParty(ctx context.Context, in *EndThirdPartyParams) (*ThirdParty, error) {
+func (c *thirdPartyServiceJSONClient) EndThirdParty(ctx context.Context, in *EndThirdPartyParams) (*ThirdParty, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "pepeunlimited.products")
-	ctx = ctxsetters.WithServiceName(ctx, "ThirdPartyPriceService")
+	ctx = ctxsetters.WithServiceName(ctx, "ThirdPartyService")
 	ctx = ctxsetters.WithMethodName(ctx, "EndThirdParty")
 	out := new(ThirdParty)
 	err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[3], in, out)
@@ -276,37 +276,37 @@ func (c *thirdPartyPriceServiceJSONClient) EndThirdParty(ctx context.Context, in
 	return out, nil
 }
 
-// =====================================
-// ThirdPartyPriceService Server Handler
-// =====================================
+// ================================
+// ThirdPartyService Server Handler
+// ================================
 
-type thirdPartyPriceServiceServer struct {
-	ThirdPartyPriceService
+type thirdPartyServiceServer struct {
+	ThirdPartyService
 	hooks *twirp.ServerHooks
 }
 
-func NewThirdPartyPriceServiceServer(svc ThirdPartyPriceService, hooks *twirp.ServerHooks) TwirpServer {
-	return &thirdPartyPriceServiceServer{
-		ThirdPartyPriceService: svc,
-		hooks:                  hooks,
+func NewThirdPartyServiceServer(svc ThirdPartyService, hooks *twirp.ServerHooks) TwirpServer {
+	return &thirdPartyServiceServer{
+		ThirdPartyService: svc,
+		hooks:             hooks,
 	}
 }
 
 // writeError writes an HTTP response with a valid Twirp error format, and triggers hooks.
 // If err is not a twirp.Error, it will get wrapped with twirp.InternalErrorWith(err)
-func (s *thirdPartyPriceServiceServer) writeError(ctx context.Context, resp http.ResponseWriter, err error) {
+func (s *thirdPartyServiceServer) writeError(ctx context.Context, resp http.ResponseWriter, err error) {
 	writeError(ctx, resp, err, s.hooks)
 }
 
-// ThirdPartyPriceServicePathPrefix is used for all URL paths on a twirp ThirdPartyPriceService server.
-// Requests are always: POST ThirdPartyPriceServicePathPrefix/method
+// ThirdPartyServicePathPrefix is used for all URL paths on a twirp ThirdPartyService server.
+// Requests are always: POST ThirdPartyServicePathPrefix/method
 // It can be used in an HTTP mux to route twirp requests along with non-twirp requests on other routes.
-const ThirdPartyPriceServicePathPrefix = "/twirp/pepeunlimited.products.ThirdPartyPriceService/"
+const ThirdPartyServicePathPrefix = "/twirp/pepeunlimited.products.ThirdPartyService/"
 
-func (s *thirdPartyPriceServiceServer) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+func (s *thirdPartyServiceServer) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	ctx = ctxsetters.WithPackageName(ctx, "pepeunlimited.products")
-	ctx = ctxsetters.WithServiceName(ctx, "ThirdPartyPriceService")
+	ctx = ctxsetters.WithServiceName(ctx, "ThirdPartyService")
 	ctx = ctxsetters.WithResponseWriter(ctx, resp)
 
 	var err error
@@ -324,16 +324,16 @@ func (s *thirdPartyPriceServiceServer) ServeHTTP(resp http.ResponseWriter, req *
 	}
 
 	switch req.URL.Path {
-	case "/twirp/pepeunlimited.products.ThirdPartyPriceService/CreateThirdParty":
+	case "/twirp/pepeunlimited.products.ThirdPartyService/CreateThirdParty":
 		s.serveCreateThirdParty(ctx, resp, req)
 		return
-	case "/twirp/pepeunlimited.products.ThirdPartyPriceService/GetThirdParties":
+	case "/twirp/pepeunlimited.products.ThirdPartyService/GetThirdParties":
 		s.serveGetThirdParties(ctx, resp, req)
 		return
-	case "/twirp/pepeunlimited.products.ThirdPartyPriceService/GetThirdParty":
+	case "/twirp/pepeunlimited.products.ThirdPartyService/GetThirdParty":
 		s.serveGetThirdParty(ctx, resp, req)
 		return
-	case "/twirp/pepeunlimited.products.ThirdPartyPriceService/EndThirdParty":
+	case "/twirp/pepeunlimited.products.ThirdPartyService/EndThirdParty":
 		s.serveEndThirdParty(ctx, resp, req)
 		return
 	default:
@@ -344,7 +344,7 @@ func (s *thirdPartyPriceServiceServer) ServeHTTP(resp http.ResponseWriter, req *
 	}
 }
 
-func (s *thirdPartyPriceServiceServer) serveCreateThirdParty(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *thirdPartyServiceServer) serveCreateThirdParty(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	header := req.Header.Get("Content-Type")
 	i := strings.Index(header, ";")
 	if i == -1 {
@@ -362,7 +362,7 @@ func (s *thirdPartyPriceServiceServer) serveCreateThirdParty(ctx context.Context
 	}
 }
 
-func (s *thirdPartyPriceServiceServer) serveCreateThirdPartyJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *thirdPartyServiceServer) serveCreateThirdPartyJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
 	ctx = ctxsetters.WithMethodName(ctx, "CreateThirdParty")
 	ctx, err = callRequestRouted(ctx, s.hooks)
@@ -382,7 +382,7 @@ func (s *thirdPartyPriceServiceServer) serveCreateThirdPartyJSON(ctx context.Con
 	var respContent *ThirdParty
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
-		respContent, err = s.ThirdPartyPriceService.CreateThirdParty(ctx, reqContent)
+		respContent, err = s.ThirdPartyService.CreateThirdParty(ctx, reqContent)
 	}()
 
 	if err != nil {
@@ -417,7 +417,7 @@ func (s *thirdPartyPriceServiceServer) serveCreateThirdPartyJSON(ctx context.Con
 	callResponseSent(ctx, s.hooks)
 }
 
-func (s *thirdPartyPriceServiceServer) serveCreateThirdPartyProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *thirdPartyServiceServer) serveCreateThirdPartyProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
 	ctx = ctxsetters.WithMethodName(ctx, "CreateThirdParty")
 	ctx, err = callRequestRouted(ctx, s.hooks)
@@ -441,7 +441,7 @@ func (s *thirdPartyPriceServiceServer) serveCreateThirdPartyProtobuf(ctx context
 	var respContent *ThirdParty
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
-		respContent, err = s.ThirdPartyPriceService.CreateThirdParty(ctx, reqContent)
+		respContent, err = s.ThirdPartyService.CreateThirdParty(ctx, reqContent)
 	}()
 
 	if err != nil {
@@ -473,7 +473,7 @@ func (s *thirdPartyPriceServiceServer) serveCreateThirdPartyProtobuf(ctx context
 	callResponseSent(ctx, s.hooks)
 }
 
-func (s *thirdPartyPriceServiceServer) serveGetThirdParties(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *thirdPartyServiceServer) serveGetThirdParties(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	header := req.Header.Get("Content-Type")
 	i := strings.Index(header, ";")
 	if i == -1 {
@@ -491,7 +491,7 @@ func (s *thirdPartyPriceServiceServer) serveGetThirdParties(ctx context.Context,
 	}
 }
 
-func (s *thirdPartyPriceServiceServer) serveGetThirdPartiesJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *thirdPartyServiceServer) serveGetThirdPartiesJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
 	ctx = ctxsetters.WithMethodName(ctx, "GetThirdParties")
 	ctx, err = callRequestRouted(ctx, s.hooks)
@@ -511,7 +511,7 @@ func (s *thirdPartyPriceServiceServer) serveGetThirdPartiesJSON(ctx context.Cont
 	var respContent *GetThirdPartiesResponse
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
-		respContent, err = s.ThirdPartyPriceService.GetThirdParties(ctx, reqContent)
+		respContent, err = s.ThirdPartyService.GetThirdParties(ctx, reqContent)
 	}()
 
 	if err != nil {
@@ -546,7 +546,7 @@ func (s *thirdPartyPriceServiceServer) serveGetThirdPartiesJSON(ctx context.Cont
 	callResponseSent(ctx, s.hooks)
 }
 
-func (s *thirdPartyPriceServiceServer) serveGetThirdPartiesProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *thirdPartyServiceServer) serveGetThirdPartiesProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
 	ctx = ctxsetters.WithMethodName(ctx, "GetThirdParties")
 	ctx, err = callRequestRouted(ctx, s.hooks)
@@ -570,7 +570,7 @@ func (s *thirdPartyPriceServiceServer) serveGetThirdPartiesProtobuf(ctx context.
 	var respContent *GetThirdPartiesResponse
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
-		respContent, err = s.ThirdPartyPriceService.GetThirdParties(ctx, reqContent)
+		respContent, err = s.ThirdPartyService.GetThirdParties(ctx, reqContent)
 	}()
 
 	if err != nil {
@@ -602,7 +602,7 @@ func (s *thirdPartyPriceServiceServer) serveGetThirdPartiesProtobuf(ctx context.
 	callResponseSent(ctx, s.hooks)
 }
 
-func (s *thirdPartyPriceServiceServer) serveGetThirdParty(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *thirdPartyServiceServer) serveGetThirdParty(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	header := req.Header.Get("Content-Type")
 	i := strings.Index(header, ";")
 	if i == -1 {
@@ -620,7 +620,7 @@ func (s *thirdPartyPriceServiceServer) serveGetThirdParty(ctx context.Context, r
 	}
 }
 
-func (s *thirdPartyPriceServiceServer) serveGetThirdPartyJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *thirdPartyServiceServer) serveGetThirdPartyJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
 	ctx = ctxsetters.WithMethodName(ctx, "GetThirdParty")
 	ctx, err = callRequestRouted(ctx, s.hooks)
@@ -640,7 +640,7 @@ func (s *thirdPartyPriceServiceServer) serveGetThirdPartyJSON(ctx context.Contex
 	var respContent *ThirdParty
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
-		respContent, err = s.ThirdPartyPriceService.GetThirdParty(ctx, reqContent)
+		respContent, err = s.ThirdPartyService.GetThirdParty(ctx, reqContent)
 	}()
 
 	if err != nil {
@@ -675,7 +675,7 @@ func (s *thirdPartyPriceServiceServer) serveGetThirdPartyJSON(ctx context.Contex
 	callResponseSent(ctx, s.hooks)
 }
 
-func (s *thirdPartyPriceServiceServer) serveGetThirdPartyProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *thirdPartyServiceServer) serveGetThirdPartyProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
 	ctx = ctxsetters.WithMethodName(ctx, "GetThirdParty")
 	ctx, err = callRequestRouted(ctx, s.hooks)
@@ -699,7 +699,7 @@ func (s *thirdPartyPriceServiceServer) serveGetThirdPartyProtobuf(ctx context.Co
 	var respContent *ThirdParty
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
-		respContent, err = s.ThirdPartyPriceService.GetThirdParty(ctx, reqContent)
+		respContent, err = s.ThirdPartyService.GetThirdParty(ctx, reqContent)
 	}()
 
 	if err != nil {
@@ -731,7 +731,7 @@ func (s *thirdPartyPriceServiceServer) serveGetThirdPartyProtobuf(ctx context.Co
 	callResponseSent(ctx, s.hooks)
 }
 
-func (s *thirdPartyPriceServiceServer) serveEndThirdParty(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *thirdPartyServiceServer) serveEndThirdParty(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	header := req.Header.Get("Content-Type")
 	i := strings.Index(header, ";")
 	if i == -1 {
@@ -749,7 +749,7 @@ func (s *thirdPartyPriceServiceServer) serveEndThirdParty(ctx context.Context, r
 	}
 }
 
-func (s *thirdPartyPriceServiceServer) serveEndThirdPartyJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *thirdPartyServiceServer) serveEndThirdPartyJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
 	ctx = ctxsetters.WithMethodName(ctx, "EndThirdParty")
 	ctx, err = callRequestRouted(ctx, s.hooks)
@@ -769,7 +769,7 @@ func (s *thirdPartyPriceServiceServer) serveEndThirdPartyJSON(ctx context.Contex
 	var respContent *ThirdParty
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
-		respContent, err = s.ThirdPartyPriceService.EndThirdParty(ctx, reqContent)
+		respContent, err = s.ThirdPartyService.EndThirdParty(ctx, reqContent)
 	}()
 
 	if err != nil {
@@ -804,7 +804,7 @@ func (s *thirdPartyPriceServiceServer) serveEndThirdPartyJSON(ctx context.Contex
 	callResponseSent(ctx, s.hooks)
 }
 
-func (s *thirdPartyPriceServiceServer) serveEndThirdPartyProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *thirdPartyServiceServer) serveEndThirdPartyProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
 	ctx = ctxsetters.WithMethodName(ctx, "EndThirdParty")
 	ctx, err = callRequestRouted(ctx, s.hooks)
@@ -828,7 +828,7 @@ func (s *thirdPartyPriceServiceServer) serveEndThirdPartyProtobuf(ctx context.Co
 	var respContent *ThirdParty
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
-		respContent, err = s.ThirdPartyPriceService.EndThirdParty(ctx, reqContent)
+		respContent, err = s.ThirdPartyService.EndThirdParty(ctx, reqContent)
 	}()
 
 	if err != nil {
@@ -860,16 +860,16 @@ func (s *thirdPartyPriceServiceServer) serveEndThirdPartyProtobuf(ctx context.Co
 	callResponseSent(ctx, s.hooks)
 }
 
-func (s *thirdPartyPriceServiceServer) ServiceDescriptor() ([]byte, int) {
+func (s *thirdPartyServiceServer) ServiceDescriptor() ([]byte, int) {
 	return twirpFileDescriptor0, 0
 }
 
-func (s *thirdPartyPriceServiceServer) ProtocGenTwirpVersion() string {
+func (s *thirdPartyServiceServer) ProtocGenTwirpVersion() string {
 	return "v5.10.0"
 }
 
-func (s *thirdPartyPriceServiceServer) PathPrefix() string {
-	return ThirdPartyPriceServicePathPrefix
+func (s *thirdPartyServiceServer) PathPrefix() string {
+	return ThirdPartyServicePathPrefix
 }
 
 // =====
@@ -1385,37 +1385,38 @@ func callClientError(ctx context.Context, h *twirp.ClientHooks, err twirp.Error)
 }
 
 var twirpFileDescriptor0 = []byte{
-	// 504 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x54, 0x4f, 0x6f, 0x12, 0x41,
-	0x14, 0xcf, 0x82, 0x60, 0xfb, 0x0a, 0x6d, 0x1d, 0x52, 0xc0, 0xd5, 0x18, 0xb2, 0xf1, 0x40, 0x62,
-	0x0a, 0x09, 0x1e, 0x3d, 0xb5, 0xd5, 0xf4, 0x64, 0x42, 0x16, 0x4f, 0x5e, 0xb6, 0x03, 0xf3, 0x0a,
-	0x13, 0x60, 0x76, 0x9c, 0x99, 0xd5, 0xf0, 0x31, 0xbc, 0xfa, 0x45, 0x4c, 0xfc, 0x0c, 0x7e, 0x28,
-	0xb3, 0x33, 0xcb, 0x9f, 0xae, 0x60, 0x56, 0x2f, 0xde, 0x36, 0xf3, 0xde, 0xdb, 0xdf, 0x9f, 0xf9,
-	0xcd, 0x83, 0x27, 0x66, 0xc6, 0x15, 0x8b, 0x24, 0x55, 0x66, 0xd5, 0x93, 0x2a, 0x36, 0x31, 0x69,
-	0x4a, 0x94, 0x98, 0x88, 0x05, 0x5f, 0x72, 0x83, 0x2c, 0x3d, 0x64, 0xc9, 0xc4, 0x68, 0xff, 0xd9,
-	0x34, 0x8e, 0xa7, 0x0b, 0xec, 0xdb, 0xae, 0x71, 0x72, 0xdf, 0xc7, 0xa5, 0x5c, 0x0f, 0xf9, 0x2f,
-	0xf2, 0xc5, 0x2f, 0x8a, 0x4a, 0x89, 0x4a, 0xbb, 0x7a, 0xf0, 0xcd, 0x83, 0xc6, 0x3b, 0xc1, 0x3e,
-	0xa4, 0x68, 0xc3, 0x14, 0x6c, 0x48, 0x15, 0x5d, 0x6a, 0x72, 0x03, 0x55, 0x69, 0xbf, 0xda, 0x5e,
-	0xc7, 0xeb, 0x9e, 0x0c, 0x5e, 0xf5, 0xf6, 0xa3, 0xf7, 0x6e, 0xd1, 0xe4, 0x87, 0xc3, 0x6c, 0x94,
-	0x74, 0xa0, 0x86, 0x82, 0x45, 0xd4, 0x44, 0xcb, 0x58, 0x98, 0x59, 0xbb, 0xd4, 0xf1, 0xba, 0x95,
-	0x10, 0x50, 0xb0, 0x2b, 0xf3, 0x3e, 0x3d, 0x21, 0xcf, 0x01, 0xb2, 0x0e, 0x46, 0x57, 0xed, 0xb2,
-	0xad, 0x1f, 0xd9, 0xfa, 0x5b, 0xba, 0x0a, 0xbe, 0x7a, 0xd0, 0xd8, 0xf3, 0x7f, 0x72, 0x0a, 0x25,
-	0xce, 0x2c, 0xb1, 0x4a, 0x58, 0xe2, 0x8c, 0x5c, 0x42, 0x83, 0x8b, 0x88, 0x4a, 0x19, 0xc9, 0x44,
-	0x4d, 0x66, 0x54, 0x63, 0xa4, 0xe7, 0x89, 0x85, 0x3b, 0x0e, 0xcf, 0xb9, 0xb8, 0x92, 0x72, 0x98,
-	0x15, 0x46, 0xf3, 0x84, 0xbc, 0x01, 0xdf, 0xb9, 0x12, 0x8d, 0xf9, 0x62, 0xc1, 0xc5, 0x34, 0xd2,
-	0xa8, 0x3e, 0xf3, 0x89, 0x9b, 0x2a, 0xdb, 0xa9, 0x96, 0xeb, 0xb8, 0x76, 0x0d, 0x23, 0x57, 0x1f,
-	0xcd, 0x93, 0xe0, 0xa7, 0x07, 0xcd, 0x1b, 0x85, 0xd4, 0xe0, 0x6f, 0xb4, 0x0e, 0xd0, 0xf0, 0xfe,
-	0x89, 0x46, 0xe9, 0x8f, 0x34, 0xc8, 0x4b, 0x38, 0xd5, 0x86, 0x2a, 0xb3, 0x35, 0xd7, 0x99, 0x57,
-	0xb3, 0xa7, 0x6b, 0x7b, 0x3b, 0x50, 0xdb, 0x74, 0xa5, 0x06, 0x3f, 0x72, 0x17, 0x90, 0xf5, 0xa4,
-	0x16, 0xb7, 0xe0, 0x62, 0xd7, 0x61, 0x8e, 0xda, 0x89, 0x09, 0x7e, 0x78, 0x00, 0x5b, 0x85, 0xff,
-	0xd3, 0x72, 0xf2, 0x14, 0x8e, 0xd6, 0x2a, 0xac, 0x82, 0xe3, 0xf0, 0x71, 0xa6, 0x80, 0x5c, 0x40,
-	0xd5, 0xe5, 0xa7, 0x5d, 0xb1, 0x85, 0x8a, 0xcd, 0x4e, 0x30, 0x86, 0x56, 0x4e, 0x55, 0x88, 0x5a,
-	0xc6, 0x42, 0x23, 0xb9, 0x85, 0xfa, 0xf6, 0x69, 0x71, 0x4c, 0xf3, 0x5d, 0xee, 0x9e, 0x0c, 0x82,
-	0x43, 0xf9, 0xde, 0x7a, 0x10, 0xd6, 0xcc, 0xce, 0x0f, 0x07, 0xdf, 0xcb, 0xd0, 0xdc, 0x89, 0x80,
-	0x4a, 0xc9, 0x3a, 0xce, 0xe4, 0x1e, 0xce, 0xf3, 0x11, 0x21, 0xbd, 0x43, 0x00, 0xfb, 0xc3, 0xe4,
-	0x17, 0x20, 0x44, 0x3e, 0xc1, 0x59, 0x4e, 0x26, 0xb9, 0x2c, 0xf2, 0x4e, 0x37, 0xb7, 0xec, 0xf7,
-	0x0b, 0xb6, 0x6f, 0xec, 0xbb, 0x83, 0xfa, 0x83, 0x17, 0x49, 0xfe, 0x66, 0x31, 0x14, 0x12, 0x75,
-	0x07, 0xf5, 0x07, 0x0b, 0xe9, 0x30, 0xc2, 0x9e, 0xbd, 0x55, 0x04, 0xe1, 0xfa, 0xec, 0xa3, 0x8b,
-	0x80, 0x5d, 0xae, 0x4a, 0x4e, 0xc6, 0x55, 0xbb, 0x0b, 0x5f, 0xff, 0x0a, 0x00, 0x00, 0xff, 0xff,
-	0x65, 0xb3, 0xe8, 0xed, 0x75, 0x05, 0x00, 0x00,
+	// 525 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x54, 0xcd, 0x6e, 0xda, 0x40,
+	0x10, 0x96, 0x21, 0x50, 0x32, 0x81, 0xfc, 0x2c, 0x4a, 0x42, 0x69, 0x55, 0x21, 0xab, 0x07, 0xa4,
+	0x28, 0x20, 0xd1, 0x63, 0x4f, 0x49, 0x5a, 0x45, 0x3d, 0x54, 0x42, 0xa6, 0xa7, 0x5e, 0x9c, 0x05,
+	0x4f, 0x60, 0x05, 0xac, 0xb7, 0xbb, 0xeb, 0x46, 0xbc, 0x4a, 0x5f, 0xa0, 0xf7, 0x1e, 0xfb, 0x0c,
+	0x7d, 0xa8, 0xca, 0xbb, 0xc6, 0x26, 0x2e, 0x54, 0x6e, 0x0f, 0xb9, 0x59, 0x3b, 0xdf, 0x78, 0xbe,
+	0xef, 0x9b, 0x1f, 0x38, 0xd1, 0x33, 0x26, 0x03, 0x5f, 0x50, 0xa9, 0x57, 0x3d, 0x21, 0x43, 0x1d,
+	0x92, 0x33, 0x81, 0x02, 0x23, 0xbe, 0x60, 0x4b, 0xa6, 0x31, 0x88, 0x1f, 0x83, 0x68, 0xa2, 0x55,
+	0xfb, 0xc5, 0x34, 0x0c, 0xa7, 0x0b, 0xec, 0x1b, 0xd4, 0x38, 0xba, 0xef, 0xe3, 0x52, 0xac, 0x93,
+	0xda, 0xaf, 0xf2, 0xc1, 0x07, 0x49, 0x85, 0x40, 0xa9, 0x6c, 0xdc, 0xfd, 0xe6, 0x40, 0xf3, 0x3d,
+	0x0f, 0x3e, 0xc5, 0xd5, 0x86, 0x71, 0xb1, 0x21, 0x95, 0x74, 0xa9, 0xc8, 0x0d, 0x54, 0x85, 0xf9,
+	0x6a, 0x39, 0x1d, 0xa7, 0x7b, 0x30, 0xb8, 0xe8, 0x6d, 0xaf, 0xde, 0xbb, 0x45, 0x9d, 0x4f, 0xf6,
+	0x92, 0x54, 0xd2, 0x81, 0x3a, 0xf2, 0xc0, 0xa7, 0xda, 0x5f, 0x86, 0x5c, 0xcf, 0x5a, 0xa5, 0x8e,
+	0xd3, 0xad, 0x78, 0x80, 0x3c, 0xb8, 0xd2, 0x1f, 0xe3, 0x17, 0xf2, 0x12, 0x20, 0x41, 0x04, 0x74,
+	0xd5, 0x2a, 0x9b, 0x78, 0xcd, 0xc4, 0xdf, 0xd1, 0x95, 0xfb, 0xdd, 0x81, 0xe6, 0x96, 0xff, 0x93,
+	0xd7, 0x70, 0xb8, 0x61, 0x8f, 0xcf, 0x02, 0x43, 0xb2, 0xe2, 0xd5, 0x75, 0x8a, 0xfc, 0x10, 0x90,
+	0x4b, 0x68, 0x32, 0xee, 0x53, 0x21, 0x7c, 0x11, 0xc9, 0xc9, 0x8c, 0x2a, 0xf4, 0xd5, 0x3c, 0x32,
+	0x24, 0xf6, 0xbd, 0x63, 0xc6, 0xaf, 0x84, 0x18, 0x26, 0x81, 0xd1, 0x3c, 0x22, 0x6f, 0xa1, 0x6d,
+	0xbd, 0xf2, 0xc7, 0x6c, 0xb1, 0x60, 0x7c, 0xea, 0x2b, 0x94, 0x5f, 0xd9, 0xc4, 0x66, 0x95, 0x4d,
+	0xd6, 0xb9, 0x45, 0x5c, 0x5b, 0xc0, 0xc8, 0xc6, 0x47, 0xf3, 0xc8, 0xfd, 0xe5, 0xc0, 0xd9, 0x8d,
+	0x44, 0xaa, 0xf1, 0x0f, 0xb2, 0x3b, 0x68, 0x38, 0xff, 0x45, 0xa3, 0xf4, 0x57, 0x1a, 0xb1, 0x31,
+	0x4a, 0x53, 0xa9, 0x33, 0xcb, 0xad, 0xa5, 0x75, 0xf3, 0xba, 0x36, 0xbd, 0x03, 0xf5, 0x14, 0x15,
+	0xdb, 0xbe, 0x67, 0xdb, 0x92, 0x60, 0x62, 0xe3, 0x2f, 0xe0, 0x74, 0xd3, 0x77, 0x86, 0x2a, 0x11,
+	0x43, 0x60, 0x4f, 0xcd, 0xc2, 0x07, 0xc3, 0xbe, 0xe6, 0x99, 0x6f, 0xf7, 0xa7, 0x03, 0x90, 0xa9,
+	0x26, 0x87, 0x50, 0x4a, 0x1b, 0x52, 0x62, 0x4f, 0xda, 0x06, 0xf2, 0x1c, 0x6a, 0x6b, 0x65, 0x46,
+	0xd5, 0xbe, 0xf7, 0x2c, 0x51, 0x45, 0x4e, 0xa1, 0x6a, 0x27, 0xad, 0x55, 0x31, 0x81, 0x8a, 0x99,
+	0x32, 0x77, 0x0c, 0xe7, 0x39, 0xa5, 0x1e, 0x2a, 0x11, 0x72, 0x85, 0xe4, 0x16, 0x1a, 0xd9, 0x94,
+	0x31, 0x8c, 0x37, 0xa1, 0xdc, 0x3d, 0x18, 0xb8, 0xbb, 0x36, 0x21, 0xf3, 0x60, 0x63, 0x10, 0x19,
+	0xaa, 0xc1, 0x8f, 0x32, 0x9c, 0x64, 0xc1, 0x84, 0x2e, 0xb9, 0x87, 0xe3, 0xfc, 0xc4, 0x90, 0xde,
+	0xae, 0x7f, 0x6f, 0x9f, 0xad, 0x76, 0x01, 0x2e, 0xe4, 0x0b, 0x1c, 0xe5, 0x14, 0x92, 0xcb, 0x22,
+	0xcb, 0x9c, 0x36, 0xbd, 0xdd, 0x2f, 0x08, 0x4f, 0x9d, 0xbb, 0x83, 0xc6, 0xa3, 0xb5, 0x25, 0xff,
+	0x72, 0x3d, 0x0a, 0x89, 0xba, 0x83, 0xc6, 0xa3, 0xab, 0xb5, 0xbb, 0xc2, 0x96, 0xe3, 0x56, 0xa4,
+	0xc2, 0xf5, 0xd1, 0x67, 0xdb, 0x7d, 0x73, 0x62, 0xa4, 0x98, 0x8c, 0xab, 0xe6, 0x60, 0xbe, 0xf9,
+	0x1d, 0x00, 0x00, 0xff, 0xff, 0xf8, 0xd5, 0x9e, 0xf2, 0x9a, 0x05, 0x00, 0x00,
 }

@@ -6,21 +6,40 @@ USE products;
 # |products|
 #  --------
 CREATE TABLE products (
-    id                  BIGINT      NOT NULL AUTO_INCREMENT,
-    sku                 CHAR(32)    UNIQUE NOT NULL,
+    id          BIGINT      NOT NULL AUTO_INCREMENT,
+    sku         CHAR(32)    UNIQUE NOT NULL,
+    PRIMARY KEY (id)
+);
+#  ------------------
+# |third_party_prices|
+#  ------------------
+CREATE TABLE third_party_prices (
+    id                          TINYINT     NOT NULL AUTO_INCREMENT,
+    in_app_purchase_sku         CHAR(32)    UNIQUE NOT NULL,
+    google_billing_service_sku  CHAR(32)    UNIQUE NULL, # for the future
+    start_at                    DATETIME(3) NOT NULL,
+    end_at                      DATETIME(3) NOT NULL,
+    type                        CHAR(28)    NOT NULL, # CONSUMABLE, NON_CONSUMABLE, AUTO_RENEWABLE_SUBSCRIPTIONS, NON_RENEWING_SUBSCRIPTIONS
     PRIMARY KEY (id)
 );
 #  -------------
 # |subscriptions|
 #  -------------
 CREATE TABLE plans (
-   id            BIGINT      NOT NULL AUTO_INCREMENT,
-   title_i18n_id BIGINT      NOT NULL,
-   length        TINYINT     UNSIGNED NOT NULL,
-   unit          CHAR(7)     NOT NULL, #days, weeks, months
+   id                BIGINT      NOT NULL AUTO_INCREMENT,
+   title_i18n_id     BIGINT      NOT NULL,
+   start_at          DATETIME(3) NOT NULL,
+   end_at            DATETIME(3) NOT NULL,
+   price             MEDIUMINT   UNSIGNED DEFAULT 0,
+   discount          MEDIUMINT   UNSIGNED DEFAULT 0,
+   length            TINYINT     UNSIGNED NOT NULL,
+   unit              CHAR(7)     NOT NULL, # days, weeks, months
+   product_prices    BIGINT      NOT NULL, # product whose pricing this plan determines.
+   third_parties     TINYINT     NULL,     # if plans has option to use in-app-purchase
+   FOREIGN KEY (product_prices)  REFERENCES  products (id),
+   FOREIGN KEY (third_parties)   REFERENCES  third_party_prices (id),
    PRIMARY KEY (id)
 );
-# NOTE: not possible set same subscription's time sequence for plansId
 CREATE TABLE subscriptions (
    id                    BIGINT      NOT NULL AUTO_INCREMENT,
    user_id               BIGINT      NOT NULL,
@@ -33,26 +52,15 @@ CREATE TABLE subscriptions (
 #  ------
 # |prices|
 #  ------
-CREATE TABLE third_parties (
-    id                          TINYINT     NOT NULL AUTO_INCREMENT,
-    in_app_purchase_sku         CHAR(32)    UNIQUE NOT NULL,
-    google_billing_service_sku  CHAR(32)    UNIQUE NULL, # for the future
-    start_at                    DATETIME(3) NOT NULL,
-    end_at                      DATETIME(3) NOT NULL,
-    PRIMARY KEY (id)
-);
-# NOTE: not possible set multiple price's time sequence for productId
 CREATE TABLE prices (
-    id                                       BIGINT      NOT NULL AUTO_INCREMENT,
-    start_at                                 DATETIME(3) NOT NULL,
-    end_at                                   DATETIME(3) NOT NULL,
-    price                                    MEDIUMINT   UNSIGNED DEFAULT 0,
-    discount                                 MEDIUMINT   UNSIGNED DEFAULT 0,
-    product_prices                           BIGINT      NOT NULL, # actual product
-    plan_prices                              BIGINT      NULL, # if the price has option to subscriptions plans
-    third_party_prices                       TINYINT     NULL, # if the price has option for additional details of the in app purchases
-    FOREIGN KEY (plan_prices)                REFERENCES  plans (id),
-    FOREIGN KEY (product_prices)             REFERENCES  products (id),
-    FOREIGN KEY (third_party_prices)         REFERENCES  third_parties (id),
+    id                           BIGINT      NOT NULL AUTO_INCREMENT,
+    start_at                     DATETIME(3) NOT NULL,
+    end_at                       DATETIME(3) NOT NULL,
+    price                        MEDIUMINT   UNSIGNED DEFAULT 0,
+    discount                     MEDIUMINT   UNSIGNED DEFAULT 0,
+    product_prices               BIGINT      NOT NULL, # product whose pricing this determines.
+    third_parties                TINYINT     NULL,     # if price has option to use in-app-purchase
+    FOREIGN KEY (third_parties)  REFERENCES  third_party_prices (id),
+    FOREIGN KEY (product_prices) REFERENCES  products (id),
     PRIMARY KEY (id)
 );
