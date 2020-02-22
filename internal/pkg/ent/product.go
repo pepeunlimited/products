@@ -26,9 +26,11 @@ type Product struct {
 type ProductEdges struct {
 	// Prices holds the value of the prices edge.
 	Prices []*Price
+	// Plans holds the value of the plans edge.
+	Plans []*Plan
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // PricesOrErr returns the Prices value or an error if the edge
@@ -38,6 +40,15 @@ func (e ProductEdges) PricesOrErr() ([]*Price, error) {
 		return e.Prices, nil
 	}
 	return nil, &NotLoadedError{edge: "prices"}
+}
+
+// PlansOrErr returns the Plans value or an error if the edge
+// was not loaded in eager-loading.
+func (e ProductEdges) PlansOrErr() ([]*Plan, error) {
+	if e.loadedTypes[1] {
+		return e.Plans, nil
+	}
+	return nil, &NotLoadedError{edge: "plans"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -71,6 +82,11 @@ func (pr *Product) assignValues(values ...interface{}) error {
 // QueryPrices queries the prices edge of the Product.
 func (pr *Product) QueryPrices() *PriceQuery {
 	return (&ProductClient{pr.config}).QueryPrices(pr)
+}
+
+// QueryPlans queries the plans edge of the Product.
+func (pr *Product) QueryPlans() *PlanQuery {
+	return (&ProductClient{pr.config}).QueryPlans(pr)
 }
 
 // Update returns a builder for updating this Product.

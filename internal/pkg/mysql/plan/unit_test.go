@@ -1,4 +1,4 @@
-package planrepo
+package plan
 
 import (
 	"testing"

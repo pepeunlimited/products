@@ -9,6 +9,7 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
 )
@@ -18,6 +19,7 @@ type ProductCreate struct {
 	config
 	sku    *string
 	prices map[int]struct{}
+	plans  map[int]struct{}
 }
 
 // SetSku sets the sku field.
@@ -44,6 +46,26 @@ func (pc *ProductCreate) AddPrices(p ...*Price) *ProductCreate {
 		ids[i] = p[i].ID
 	}
 	return pc.AddPriceIDs(ids...)
+}
+
+// AddPlanIDs adds the plans edge to Plan by ids.
+func (pc *ProductCreate) AddPlanIDs(ids ...int) *ProductCreate {
+	if pc.plans == nil {
+		pc.plans = make(map[int]struct{})
+	}
+	for i := range ids {
+		pc.plans[ids[i]] = struct{}{}
+	}
+	return pc
+}
+
+// AddPlans adds the plans edges to Plan.
+func (pc *ProductCreate) AddPlans(p ...*Plan) *ProductCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pc.AddPlanIDs(ids...)
 }
 
 // Save creates the Product in the database.
@@ -96,6 +118,25 @@ func (pc *ProductCreate) sqlSave(ctx context.Context) (*Product, error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: price.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.plans; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.PlansTable,
+			Columns: []string{product.PlansColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: plan.FieldID,
 				},
 			},
 		}

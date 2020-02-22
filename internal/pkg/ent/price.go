@@ -8,10 +8,9 @@ import (
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdparty"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdpartyprice"
 )
 
 // Price is the model entity for the Price schema.
@@ -29,23 +28,20 @@ type Price struct {
 	Discount uint16 `json:"discount,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PriceQuery when eager-loading is set.
-	Edges              PriceEdges `json:"edges"`
-	plan_prices        *int
-	product_prices     *int
-	third_party_prices *int
+	Edges                    PriceEdges `json:"edges"`
+	product_prices           *int
+	third_party_price_prices *int
 }
 
 // PriceEdges holds the relations/edges for other nodes in the graph.
 type PriceEdges struct {
 	// Products holds the value of the products edge.
 	Products *Product
-	// ThirdParties holds the value of the third_parties edge.
-	ThirdParties *ThirdParty
-	// Plans holds the value of the plans edge.
-	Plans *Plan
+	// ThirdPartyPrices holds the value of the third_party_prices edge.
+	ThirdPartyPrices *ThirdPartyPrice
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [2]bool
 }
 
 // ProductsOrErr returns the Products value or an error if the edge
@@ -62,32 +58,18 @@ func (e PriceEdges) ProductsOrErr() (*Product, error) {
 	return nil, &NotLoadedError{edge: "products"}
 }
 
-// ThirdPartiesOrErr returns the ThirdParties value or an error if the edge
+// ThirdPartyPricesOrErr returns the ThirdPartyPrices value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e PriceEdges) ThirdPartiesOrErr() (*ThirdParty, error) {
+func (e PriceEdges) ThirdPartyPricesOrErr() (*ThirdPartyPrice, error) {
 	if e.loadedTypes[1] {
-		if e.ThirdParties == nil {
-			// The edge third_parties was loaded in eager-loading,
+		if e.ThirdPartyPrices == nil {
+			// The edge third_party_prices was loaded in eager-loading,
 			// but was not found.
-			return nil, &NotFoundError{label: thirdparty.Label}
+			return nil, &NotFoundError{label: thirdpartyprice.Label}
 		}
-		return e.ThirdParties, nil
+		return e.ThirdPartyPrices, nil
 	}
-	return nil, &NotLoadedError{edge: "third_parties"}
-}
-
-// PlansOrErr returns the Plans value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e PriceEdges) PlansOrErr() (*Plan, error) {
-	if e.loadedTypes[2] {
-		if e.Plans == nil {
-			// The edge plans was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: plan.Label}
-		}
-		return e.Plans, nil
-	}
-	return nil, &NotLoadedError{edge: "plans"}
+	return nil, &NotLoadedError{edge: "third_party_prices"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -104,9 +86,8 @@ func (*Price) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*Price) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // plan_prices
 		&sql.NullInt64{}, // product_prices
-		&sql.NullInt64{}, // third_party_prices
+		&sql.NullInt64{}, // third_party_price_prices
 	}
 }
 
@@ -145,22 +126,16 @@ func (pr *Price) assignValues(values ...interface{}) error {
 	values = values[4:]
 	if len(values) == len(price.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field plan_prices", value)
-		} else if value.Valid {
-			pr.plan_prices = new(int)
-			*pr.plan_prices = int(value.Int64)
-		}
-		if value, ok := values[1].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field product_prices", value)
 		} else if value.Valid {
 			pr.product_prices = new(int)
 			*pr.product_prices = int(value.Int64)
 		}
-		if value, ok := values[2].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field third_party_prices", value)
+		if value, ok := values[1].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field third_party_price_prices", value)
 		} else if value.Valid {
-			pr.third_party_prices = new(int)
-			*pr.third_party_prices = int(value.Int64)
+			pr.third_party_price_prices = new(int)
+			*pr.third_party_price_prices = int(value.Int64)
 		}
 	}
 	return nil
@@ -171,14 +146,9 @@ func (pr *Price) QueryProducts() *ProductQuery {
 	return (&PriceClient{pr.config}).QueryProducts(pr)
 }
 
-// QueryThirdParties queries the third_parties edge of the Price.
-func (pr *Price) QueryThirdParties() *ThirdPartyQuery {
-	return (&PriceClient{pr.config}).QueryThirdParties(pr)
-}
-
-// QueryPlans queries the plans edge of the Price.
-func (pr *Price) QueryPlans() *PlanQuery {
-	return (&PriceClient{pr.config}).QueryPlans(pr)
+// QueryThirdPartyPrices queries the third_party_prices edge of the Price.
+func (pr *Price) QueryThirdPartyPrices() *ThirdPartyPriceQuery {
+	return (&PriceClient{pr.config}).QueryThirdPartyPrices(pr)
 }
 
 // Update returns a builder for updating this Price.

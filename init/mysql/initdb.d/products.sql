@@ -34,10 +34,10 @@ CREATE TABLE plans (
    discount          MEDIUMINT   UNSIGNED DEFAULT 0,
    length            TINYINT     UNSIGNED NOT NULL,
    unit              CHAR(7)     NOT NULL, # days, weeks, months
-   product_prices    BIGINT      NOT NULL, # product whose pricing this plan determines.
-   third_parties     TINYINT     NULL,     # if plans has option to use in-app-purchase
-   FOREIGN KEY (product_prices)  REFERENCES  products (id),
-   FOREIGN KEY (third_parties)   REFERENCES  third_party_prices (id),
+   product_plans     BIGINT      NOT NULL, # product whose pricing this plan determines.
+   third_party_price_plans     TINYINT     NULL,     # if plans has option to use in-app-purchase
+   FOREIGN KEY (product_plans)  REFERENCES  products (id),
+   FOREIGN KEY (third_party_price_plans)   REFERENCES  third_party_prices (id),
    PRIMARY KEY (id)
 );
 CREATE TABLE subscriptions (
@@ -59,8 +59,8 @@ CREATE TABLE prices (
     price                        MEDIUMINT   UNSIGNED DEFAULT 0,
     discount                     MEDIUMINT   UNSIGNED DEFAULT 0,
     product_prices               BIGINT      NOT NULL, # product whose pricing this determines.
-    third_parties                TINYINT     NULL,     # if price has option to use in-app-purchase
-    FOREIGN KEY (third_parties)  REFERENCES  third_party_prices (id),
+    third_party_price_prices     TINYINT     NULL,     # if price has option to use in-app-purchase
+    FOREIGN KEY (third_party_price_prices)  REFERENCES  third_party_prices (id),
     FOREIGN KEY (product_prices) REFERENCES  products (id),
     PRIMARY KEY (id)
 );

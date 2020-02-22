@@ -14,8 +14,9 @@ import (
 	"github.com/facebookincubator/ent/schema/field"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/predicate"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/subscription"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdpartyprice"
 )
 
 // PlanQuery is the builder for querying Plan entities.
@@ -27,8 +28,10 @@ type PlanQuery struct {
 	unique     []string
 	predicates []predicate.Plan
 	// eager-loading edges.
-	withSubscriptions *SubscriptionQuery
-	withPrices        *PriceQuery
+	withSubscriptions    *SubscriptionQuery
+	withProducts         *ProductQuery
+	withThirdPartyPrices *ThirdPartyPriceQuery
+	withFKs              bool
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -69,13 +72,25 @@ func (pq *PlanQuery) QuerySubscriptions() *SubscriptionQuery {
 	return query
 }
 
-// QueryPrices chains the current query on the prices edge.
-func (pq *PlanQuery) QueryPrices() *PriceQuery {
-	query := &PriceQuery{config: pq.config}
+// QueryProducts chains the current query on the products edge.
+func (pq *PlanQuery) QueryProducts() *ProductQuery {
+	query := &ProductQuery{config: pq.config}
 	step := sqlgraph.NewStep(
 		sqlgraph.From(plan.Table, plan.FieldID, pq.sqlQuery()),
-		sqlgraph.To(price.Table, price.FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, plan.PricesTable, plan.PricesColumn),
+		sqlgraph.To(product.Table, product.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, plan.ProductsTable, plan.ProductsColumn),
+	)
+	query.sql = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+	return query
+}
+
+// QueryThirdPartyPrices chains the current query on the third_party_prices edge.
+func (pq *PlanQuery) QueryThirdPartyPrices() *ThirdPartyPriceQuery {
+	query := &ThirdPartyPriceQuery{config: pq.config}
+	step := sqlgraph.NewStep(
+		sqlgraph.From(plan.Table, plan.FieldID, pq.sqlQuery()),
+		sqlgraph.To(thirdpartyprice.Table, thirdpartyprice.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, plan.ThirdPartyPricesTable, plan.ThirdPartyPricesColumn),
 	)
 	query.sql = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 	return query
@@ -261,14 +276,25 @@ func (pq *PlanQuery) WithSubscriptions(opts ...func(*SubscriptionQuery)) *PlanQu
 	return pq
 }
 
-//  WithPrices tells the query-builder to eager-loads the nodes that are connected to
-// the "prices" edge. The optional arguments used to configure the query builder of the edge.
-func (pq *PlanQuery) WithPrices(opts ...func(*PriceQuery)) *PlanQuery {
-	query := &PriceQuery{config: pq.config}
+//  WithProducts tells the query-builder to eager-loads the nodes that are connected to
+// the "products" edge. The optional arguments used to configure the query builder of the edge.
+func (pq *PlanQuery) WithProducts(opts ...func(*ProductQuery)) *PlanQuery {
+	query := &ProductQuery{config: pq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	pq.withPrices = query
+	pq.withProducts = query
+	return pq
+}
+
+//  WithThirdPartyPrices tells the query-builder to eager-loads the nodes that are connected to
+// the "third_party_prices" edge. The optional arguments used to configure the query builder of the edge.
+func (pq *PlanQuery) WithThirdPartyPrices(opts ...func(*ThirdPartyPriceQuery)) *PlanQuery {
+	query := &ThirdPartyPriceQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withThirdPartyPrices = query
 	return pq
 }
 
@@ -316,16 +342,27 @@ func (pq *PlanQuery) Select(field string, fields ...string) *PlanSelect {
 func (pq *PlanQuery) sqlAll(ctx context.Context) ([]*Plan, error) {
 	var (
 		nodes       = []*Plan{}
+		withFKs     = pq.withFKs
 		_spec       = pq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			pq.withSubscriptions != nil,
-			pq.withPrices != nil,
+			pq.withProducts != nil,
+			pq.withThirdPartyPrices != nil,
 		}
 	)
+	if pq.withProducts != nil || pq.withThirdPartyPrices != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, plan.ForeignKeys...)
+	}
 	_spec.ScanValues = func() []interface{} {
 		node := &Plan{config: pq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
 		return values
 	}
 	_spec.Assign = func(values ...interface{}) error {
@@ -371,31 +408,53 @@ func (pq *PlanQuery) sqlAll(ctx context.Context) ([]*Plan, error) {
 		}
 	}
 
-	if query := pq.withPrices; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Plan)
+	if query := pq.withProducts; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Plan)
 		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
+			if fk := nodes[i].product_plans; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
 		}
-		query.withFKs = true
-		query.Where(predicate.Price(func(s *sql.Selector) {
-			s.Where(sql.InValues(plan.PricesColumn, fks...))
-		}))
+		query.Where(product.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.plan_prices
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "plan_prices" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "plan_prices" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "product_plans" returned %v`, n.ID)
 			}
-			node.Edges.Prices = append(node.Edges.Prices, n)
+			for i := range nodes {
+				nodes[i].Edges.Products = n
+			}
+		}
+	}
+
+	if query := pq.withThirdPartyPrices; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Plan)
+		for i := range nodes {
+			if fk := nodes[i].third_party_price_plans; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(thirdpartyprice.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "third_party_price_plans" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.ThirdPartyPrices = n
+			}
 		}
 	}
 

@@ -4,15 +4,15 @@ import (
 	"context"
 	validator2 "github.com/pepeunlimited/microservice-kit/validator"
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/productrepo"
+	"github.com/pepeunlimited/prices/internal/pkg/mysql/product"
 	"github.com/pepeunlimited/prices/internal/server/errorz"
 	"github.com/pepeunlimited/prices/internal/server/validator"
 	"github.com/pepeunlimited/prices/pkg/productrpc"
 )
 
 type ProductServer struct {
-	products productrepo.ProductRepository
-	valid validator.ProductValidator
+	products product.ProductRepository
+	valid    validator.ProductValidator
 }
 
 func (server ProductServer) GetProducts(ctx context.Context, params *productrpc.GetProductsParams) (*productrpc.GetProductsResponse, error) {
@@ -62,7 +62,7 @@ func (server ProductServer) GetProduct(ctx context.Context, params *productrpc.G
 
 func NewProductServer(client *ent.Client) ProductServer {
 	return ProductServer{
-		products:productrepo.NewProductRepository(client),
-		valid:validator.NewProductValidator(),
+		products: product.New(client),
+		valid:    validator.NewProductValidator(),
 	}
 }

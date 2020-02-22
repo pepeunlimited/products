@@ -9,6 +9,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/predicate"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
@@ -19,7 +20,9 @@ type ProductUpdate struct {
 	config
 	sku           *string
 	prices        map[int]struct{}
+	plans         map[int]struct{}
 	removedPrices map[int]struct{}
+	removedPlans  map[int]struct{}
 	predicates    []predicate.Product
 }
 
@@ -55,6 +58,26 @@ func (pu *ProductUpdate) AddPrices(p ...*Price) *ProductUpdate {
 	return pu.AddPriceIDs(ids...)
 }
 
+// AddPlanIDs adds the plans edge to Plan by ids.
+func (pu *ProductUpdate) AddPlanIDs(ids ...int) *ProductUpdate {
+	if pu.plans == nil {
+		pu.plans = make(map[int]struct{})
+	}
+	for i := range ids {
+		pu.plans[ids[i]] = struct{}{}
+	}
+	return pu
+}
+
+// AddPlans adds the plans edges to Plan.
+func (pu *ProductUpdate) AddPlans(p ...*Plan) *ProductUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pu.AddPlanIDs(ids...)
+}
+
 // RemovePriceIDs removes the prices edge to Price by ids.
 func (pu *ProductUpdate) RemovePriceIDs(ids ...int) *ProductUpdate {
 	if pu.removedPrices == nil {
@@ -73,6 +96,26 @@ func (pu *ProductUpdate) RemovePrices(p ...*Price) *ProductUpdate {
 		ids[i] = p[i].ID
 	}
 	return pu.RemovePriceIDs(ids...)
+}
+
+// RemovePlanIDs removes the plans edge to Plan by ids.
+func (pu *ProductUpdate) RemovePlanIDs(ids ...int) *ProductUpdate {
+	if pu.removedPlans == nil {
+		pu.removedPlans = make(map[int]struct{})
+	}
+	for i := range ids {
+		pu.removedPlans[ids[i]] = struct{}{}
+	}
+	return pu
+}
+
+// RemovePlans removes plans edges to Plan.
+func (pu *ProductUpdate) RemovePlans(p ...*Plan) *ProductUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pu.RemovePlanIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
@@ -170,6 +213,44 @@ func (pu *ProductUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if nodes := pu.removedPlans; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.PlansTable,
+			Columns: []string{product.PlansColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: plan.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.plans; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.PlansTable,
+			Columns: []string{product.PlansColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: plan.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -185,7 +266,9 @@ type ProductUpdateOne struct {
 	id            int
 	sku           *string
 	prices        map[int]struct{}
+	plans         map[int]struct{}
 	removedPrices map[int]struct{}
+	removedPlans  map[int]struct{}
 }
 
 // SetSku sets the sku field.
@@ -214,6 +297,26 @@ func (puo *ProductUpdateOne) AddPrices(p ...*Price) *ProductUpdateOne {
 	return puo.AddPriceIDs(ids...)
 }
 
+// AddPlanIDs adds the plans edge to Plan by ids.
+func (puo *ProductUpdateOne) AddPlanIDs(ids ...int) *ProductUpdateOne {
+	if puo.plans == nil {
+		puo.plans = make(map[int]struct{})
+	}
+	for i := range ids {
+		puo.plans[ids[i]] = struct{}{}
+	}
+	return puo
+}
+
+// AddPlans adds the plans edges to Plan.
+func (puo *ProductUpdateOne) AddPlans(p ...*Plan) *ProductUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return puo.AddPlanIDs(ids...)
+}
+
 // RemovePriceIDs removes the prices edge to Price by ids.
 func (puo *ProductUpdateOne) RemovePriceIDs(ids ...int) *ProductUpdateOne {
 	if puo.removedPrices == nil {
@@ -232,6 +335,26 @@ func (puo *ProductUpdateOne) RemovePrices(p ...*Price) *ProductUpdateOne {
 		ids[i] = p[i].ID
 	}
 	return puo.RemovePriceIDs(ids...)
+}
+
+// RemovePlanIDs removes the plans edge to Plan by ids.
+func (puo *ProductUpdateOne) RemovePlanIDs(ids ...int) *ProductUpdateOne {
+	if puo.removedPlans == nil {
+		puo.removedPlans = make(map[int]struct{})
+	}
+	for i := range ids {
+		puo.removedPlans[ids[i]] = struct{}{}
+	}
+	return puo
+}
+
+// RemovePlans removes plans edges to Plan.
+func (puo *ProductUpdateOne) RemovePlans(p ...*Plan) *ProductUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return puo.RemovePlanIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
@@ -315,6 +438,44 @@ func (puo *ProductUpdateOne) sqlSave(ctx context.Context) (pr *Product, err erro
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: price.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if nodes := puo.removedPlans; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.PlansTable,
+			Columns: []string{product.PlansColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: plan.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.plans; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.PlansTable,
+			Columns: []string{product.PlansColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: plan.FieldID,
 				},
 			},
 		}

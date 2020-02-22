@@ -1,4 +1,4 @@
-package thirdpartyrepo
+package thirdpartyprice
 
 import (
 	"context"
@@ -7,12 +7,12 @@ import (
 	"testing"
 )
 
-func TestIapSourceMySQL_Create(t *testing.T) {
+func TestPrice3rd_Create(t *testing.T) {
 	ctx := context.TODO()
-	repo := NewThirdPartyRepository(ent.NewEntClient())
+	repo := New(ent.NewEntClient())
 	repo.Wipe(ctx)
 	iapsku := "IPOD2008PINK"
-	iapSource, err := repo.Create(ctx, iapsku, nil)
+	iapSource, err := repo.Create(ctx, iapsku, nil, Consumable)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -40,7 +40,7 @@ func TestIapSourceMySQL_Create(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	sources, err := repo.GetThirdParties(ctx)
+	sources, err := repo.GetThirdPartyPrices(ctx)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -53,7 +53,7 @@ func TestIapSourceMySQL_Create(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	sources, err = repo.GetThirdParties(ctx)
+	sources, err = repo.GetThirdPartyPrices(ctx)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

@@ -1,4 +1,4 @@
-package productrepo
+package product
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 
 func TestProductMySQL_CreateProduct(t *testing.T) {
 	ctx := context.TODO()
-	repository := NewProductRepository(ent.NewEntClient())
+	repository := New(ent.NewEntClient())
 	repository.Wipe(ctx)
 	sku := "sku"
 	product, err := repository.CreateProduct(ctx, sku)
@@ -19,12 +19,12 @@ func TestProductMySQL_CreateProduct(t *testing.T) {
 	if product.Sku != sku {
 		t.FailNow()
 	}
-	_, err = repository.GetProductBySku(ctx, product.Sku)
+	_, err = repository.GetProductBySku(ctx, false, false, product.Sku)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	_, err = repository.GetProductByID(ctx, false, product.ID)
+	_, err = repository.GetProductByID(ctx, false, false, product.ID)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

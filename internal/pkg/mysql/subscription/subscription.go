@@ -1,4 +1,4 @@
-package subscriptionrepo
+package subscription
 
 import (
 	"context"
@@ -43,7 +43,7 @@ func (mysql subscriptionMySQL) GetSubscriptionByIdAndUserId(ctx context.Context,
 
 func (mysql subscriptionMySQL) Wipe(ctx context.Context) {
 	mysql.client.Subscription.Delete().ExecX(ctx)
-	mysql.client.ThirdParty.Delete().ExecX(ctx)
+	mysql.client.ThirdPartyPrice.Delete().ExecX(ctx)
 	mysql.client.Price.Delete().ExecX(ctx)
 	mysql.client.Plan.Delete().ExecX(ctx)
 	mysql.client.Product.Delete().ExecX(ctx)
@@ -95,6 +95,6 @@ func (mysql subscriptionMySQL) Create(ctx context.Context, userID int64, startAt
 	return mysql.GetSubscriptionByID(ctx, save.ID, true)
 }
 
-func NewSubscriptionRepository(client *ent.Client) SubscriptionRepository {
+func New(client *ent.Client) SubscriptionRepository {
 	return subscriptionMySQL{client:client}
 }

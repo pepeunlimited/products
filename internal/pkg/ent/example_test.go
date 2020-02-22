@@ -35,23 +35,18 @@ func ExamplePlan() {
 		SetEndAt(time.Now()).
 		SaveX(ctx)
 	log.Println("subscription created:", s0)
-	pr1 := client.Price.
-		Create().
-		SetStartAt(time.Now()).
-		SetEndAt(time.Now()).
-		SetPrice(1).
-		SetDiscount(1).
-		SaveX(ctx)
-	log.Println("price created:", pr1)
 
 	// create plan vertex with its edges.
 	pl := client.Plan.
 		Create().
 		SetTitleI18nID(1).
 		SetLength(1).
+		SetStartAt(time.Now()).
+		SetEndAt(time.Now()).
+		SetPrice(1).
+		SetDiscount(1).
 		SetUnit("string").
 		AddSubscriptions(s0).
-		AddPrices(pr1).
 		SaveX(ctx)
 	log.Println("plan created:", pl)
 
@@ -61,12 +56,6 @@ func ExamplePlan() {
 		log.Fatalf("failed querying subscriptions: %v", err)
 	}
 	log.Println("subscriptions found:", s0)
-
-	pr1, err = pl.QueryPrices().First(ctx)
-	if err != nil {
-		log.Fatalf("failed querying prices: %v", err)
-	}
-	log.Println("prices found:", pr1)
 
 	// Output:
 }
@@ -117,12 +106,24 @@ func ExampleProduct() {
 		SetDiscount(1).
 		SaveX(ctx)
 	log.Println("price created:", pr0)
+	pl1 := client.Plan.
+		Create().
+		SetTitleI18nID(1).
+		SetLength(1).
+		SetStartAt(time.Now()).
+		SetEndAt(time.Now()).
+		SetPrice(1).
+		SetDiscount(1).
+		SetUnit("string").
+		SaveX(ctx)
+	log.Println("plan created:", pl1)
 
 	// create product vertex with its edges.
 	pr := client.Product.
 		Create().
 		SetSku("string").
 		AddPrices(pr0).
+		AddPlans(pl1).
 		SaveX(ctx)
 	log.Println("product created:", pr)
 
@@ -132,6 +133,12 @@ func ExampleProduct() {
 		log.Fatalf("failed querying prices: %v", err)
 	}
 	log.Println("prices found:", pr0)
+
+	pl1, err = pr.QueryPlans().First(ctx)
+	if err != nil {
+		log.Fatalf("failed querying plans: %v", err)
+	}
+	log.Println("plans found:", pl1)
 
 	// Output:
 }
@@ -161,7 +168,7 @@ func ExampleSubscription() {
 
 	// Output:
 }
-func ExampleThirdParty() {
+func ExampleThirdPartyPrice() {
 	if dsn == "" {
 		return
 	}
@@ -172,7 +179,7 @@ func ExampleThirdParty() {
 	}
 	defer drv.Close()
 	client := NewClient(Driver(drv))
-	// creating vertices for the thirdparty's edges.
+	// creating vertices for the thirdpartyprice's edges.
 	pr0 := client.Price.
 		Create().
 		SetStartAt(time.Now()).
@@ -181,24 +188,43 @@ func ExampleThirdParty() {
 		SetDiscount(1).
 		SaveX(ctx)
 	log.Println("price created:", pr0)
+	pl1 := client.Plan.
+		Create().
+		SetTitleI18nID(1).
+		SetLength(1).
+		SetStartAt(time.Now()).
+		SetEndAt(time.Now()).
+		SetPrice(1).
+		SetDiscount(1).
+		SetUnit("string").
+		SaveX(ctx)
+	log.Println("plan created:", pl1)
 
-	// create thirdparty vertex with its edges.
-	tp := client.ThirdParty.
+	// create thirdpartyprice vertex with its edges.
+	tpp := client.ThirdPartyPrice.
 		Create().
 		SetInAppPurchaseSku("string").
 		SetGoogleBillingServiceSku("string").
 		SetStartAt(time.Now()).
 		SetEndAt(time.Now()).
+		SetType("string").
 		AddPrices(pr0).
+		AddPlans(pl1).
 		SaveX(ctx)
-	log.Println("thirdparty created:", tp)
+	log.Println("thirdpartyprice created:", tpp)
 
 	// query edges.
-	pr0, err = tp.QueryPrices().First(ctx)
+	pr0, err = tpp.QueryPrices().First(ctx)
 	if err != nil {
 		log.Fatalf("failed querying prices: %v", err)
 	}
 	log.Println("prices found:", pr0)
+
+	pl1, err = tpp.QueryPlans().First(ctx)
+	if err != nil {
+		log.Fatalf("failed querying plans: %v", err)
+	}
+	log.Println("plans found:", pl1)
 
 	// Output:
 }

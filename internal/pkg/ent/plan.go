@@ -5,9 +5,12 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdpartyprice"
 )
 
 // Plan is the model entity for the Plan schema.
@@ -19,22 +22,34 @@ type Plan struct {
 	TitleI18nID int64 `json:"title_i18n_id,omitempty"`
 	// Length holds the value of the "length" field.
 	Length uint8 `json:"length,omitempty"`
+	// StartAt holds the value of the "start_at" field.
+	StartAt time.Time `json:"start_at,omitempty"`
+	// EndAt holds the value of the "end_at" field.
+	EndAt time.Time `json:"end_at,omitempty"`
+	// Price holds the value of the "price" field.
+	Price uint16 `json:"price,omitempty"`
+	// Discount holds the value of the "discount" field.
+	Discount uint16 `json:"discount,omitempty"`
 	// Unit holds the value of the "unit" field.
 	Unit string `json:"unit,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PlanQuery when eager-loading is set.
-	Edges PlanEdges `json:"edges"`
+	Edges                   PlanEdges `json:"edges"`
+	product_plans           *int
+	third_party_price_plans *int
 }
 
 // PlanEdges holds the relations/edges for other nodes in the graph.
 type PlanEdges struct {
 	// Subscriptions holds the value of the subscriptions edge.
 	Subscriptions []*Subscription
-	// Prices holds the value of the prices edge.
-	Prices []*Price
+	// Products holds the value of the products edge.
+	Products *Product
+	// ThirdPartyPrices holds the value of the third_party_prices edge.
+	ThirdPartyPrices *ThirdPartyPrice
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // SubscriptionsOrErr returns the Subscriptions value or an error if the edge
@@ -46,13 +61,32 @@ func (e PlanEdges) SubscriptionsOrErr() ([]*Subscription, error) {
 	return nil, &NotLoadedError{edge: "subscriptions"}
 }
 
-// PricesOrErr returns the Prices value or an error if the edge
-// was not loaded in eager-loading.
-func (e PlanEdges) PricesOrErr() ([]*Price, error) {
+// ProductsOrErr returns the Products value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PlanEdges) ProductsOrErr() (*Product, error) {
 	if e.loadedTypes[1] {
-		return e.Prices, nil
+		if e.Products == nil {
+			// The edge products was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: product.Label}
+		}
+		return e.Products, nil
 	}
-	return nil, &NotLoadedError{edge: "prices"}
+	return nil, &NotLoadedError{edge: "products"}
+}
+
+// ThirdPartyPricesOrErr returns the ThirdPartyPrices value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PlanEdges) ThirdPartyPricesOrErr() (*ThirdPartyPrice, error) {
+	if e.loadedTypes[2] {
+		if e.ThirdPartyPrices == nil {
+			// The edge third_party_prices was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: thirdpartyprice.Label}
+		}
+		return e.ThirdPartyPrices, nil
+	}
+	return nil, &NotLoadedError{edge: "third_party_prices"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -61,7 +95,19 @@ func (*Plan) scanValues() []interface{} {
 		&sql.NullInt64{},  // id
 		&sql.NullInt64{},  // title_i18n_id
 		&sql.NullInt64{},  // length
+		&sql.NullTime{},   // start_at
+		&sql.NullTime{},   // end_at
+		&sql.NullInt64{},  // price
+		&sql.NullInt64{},  // discount
 		&sql.NullString{}, // unit
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*Plan) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{}, // product_plans
+		&sql.NullInt64{}, // third_party_price_plans
 	}
 }
 
@@ -87,10 +133,45 @@ func (pl *Plan) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		pl.Length = uint8(value.Int64)
 	}
-	if value, ok := values[2].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field unit", values[2])
+	if value, ok := values[2].(*sql.NullTime); !ok {
+		return fmt.Errorf("unexpected type %T for field start_at", values[2])
+	} else if value.Valid {
+		pl.StartAt = value.Time
+	}
+	if value, ok := values[3].(*sql.NullTime); !ok {
+		return fmt.Errorf("unexpected type %T for field end_at", values[3])
+	} else if value.Valid {
+		pl.EndAt = value.Time
+	}
+	if value, ok := values[4].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field price", values[4])
+	} else if value.Valid {
+		pl.Price = uint16(value.Int64)
+	}
+	if value, ok := values[5].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field discount", values[5])
+	} else if value.Valid {
+		pl.Discount = uint16(value.Int64)
+	}
+	if value, ok := values[6].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field unit", values[6])
 	} else if value.Valid {
 		pl.Unit = value.String
+	}
+	values = values[7:]
+	if len(values) == len(plan.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field product_plans", value)
+		} else if value.Valid {
+			pl.product_plans = new(int)
+			*pl.product_plans = int(value.Int64)
+		}
+		if value, ok := values[1].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field third_party_price_plans", value)
+		} else if value.Valid {
+			pl.third_party_price_plans = new(int)
+			*pl.third_party_price_plans = int(value.Int64)
+		}
 	}
 	return nil
 }
@@ -100,9 +181,14 @@ func (pl *Plan) QuerySubscriptions() *SubscriptionQuery {
 	return (&PlanClient{pl.config}).QuerySubscriptions(pl)
 }
 
-// QueryPrices queries the prices edge of the Plan.
-func (pl *Plan) QueryPrices() *PriceQuery {
-	return (&PlanClient{pl.config}).QueryPrices(pl)
+// QueryProducts queries the products edge of the Plan.
+func (pl *Plan) QueryProducts() *ProductQuery {
+	return (&PlanClient{pl.config}).QueryProducts(pl)
+}
+
+// QueryThirdPartyPrices queries the third_party_prices edge of the Plan.
+func (pl *Plan) QueryThirdPartyPrices() *ThirdPartyPriceQuery {
+	return (&PlanClient{pl.config}).QueryThirdPartyPrices(pl)
 }
 
 // Update returns a builder for updating this Plan.
@@ -132,6 +218,14 @@ func (pl *Plan) String() string {
 	builder.WriteString(fmt.Sprintf("%v", pl.TitleI18nID))
 	builder.WriteString(", length=")
 	builder.WriteString(fmt.Sprintf("%v", pl.Length))
+	builder.WriteString(", start_at=")
+	builder.WriteString(pl.StartAt.Format(time.ANSIC))
+	builder.WriteString(", end_at=")
+	builder.WriteString(pl.EndAt.Format(time.ANSIC))
+	builder.WriteString(", price=")
+	builder.WriteString(fmt.Sprintf("%v", pl.Price))
+	builder.WriteString(", discount=")
+	builder.WriteString(fmt.Sprintf("%v", pl.Discount))
 	builder.WriteString(", unit=")
 	builder.WriteString(pl.Unit)
 	builder.WriteByte(')')

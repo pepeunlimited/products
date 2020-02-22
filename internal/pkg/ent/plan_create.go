@@ -6,22 +6,29 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/subscription"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdpartyprice"
 )
 
 // PlanCreate is the builder for creating a Plan entity.
 type PlanCreate struct {
 	config
-	title_i18n_id *int64
-	length        *uint8
-	unit          *string
-	subscriptions map[int]struct{}
-	prices        map[int]struct{}
+	title_i18n_id      *int64
+	length             *uint8
+	start_at           *time.Time
+	end_at             *time.Time
+	price              *uint16
+	discount           *uint16
+	unit               *string
+	subscriptions      map[int]struct{}
+	products           map[int]struct{}
+	third_party_prices map[int]struct{}
 }
 
 // SetTitleI18nID sets the title_i18n_id field.
@@ -33,6 +40,30 @@ func (pc *PlanCreate) SetTitleI18nID(i int64) *PlanCreate {
 // SetLength sets the length field.
 func (pc *PlanCreate) SetLength(u uint8) *PlanCreate {
 	pc.length = &u
+	return pc
+}
+
+// SetStartAt sets the start_at field.
+func (pc *PlanCreate) SetStartAt(t time.Time) *PlanCreate {
+	pc.start_at = &t
+	return pc
+}
+
+// SetEndAt sets the end_at field.
+func (pc *PlanCreate) SetEndAt(t time.Time) *PlanCreate {
+	pc.end_at = &t
+	return pc
+}
+
+// SetPrice sets the price field.
+func (pc *PlanCreate) SetPrice(u uint16) *PlanCreate {
+	pc.price = &u
+	return pc
+}
+
+// SetDiscount sets the discount field.
+func (pc *PlanCreate) SetDiscount(u uint16) *PlanCreate {
+	pc.discount = &u
 	return pc
 }
 
@@ -62,24 +93,48 @@ func (pc *PlanCreate) AddSubscriptions(s ...*Subscription) *PlanCreate {
 	return pc.AddSubscriptionIDs(ids...)
 }
 
-// AddPriceIDs adds the prices edge to Price by ids.
-func (pc *PlanCreate) AddPriceIDs(ids ...int) *PlanCreate {
-	if pc.prices == nil {
-		pc.prices = make(map[int]struct{})
+// SetProductsID sets the products edge to Product by id.
+func (pc *PlanCreate) SetProductsID(id int) *PlanCreate {
+	if pc.products == nil {
+		pc.products = make(map[int]struct{})
 	}
-	for i := range ids {
-		pc.prices[ids[i]] = struct{}{}
+	pc.products[id] = struct{}{}
+	return pc
+}
+
+// SetNillableProductsID sets the products edge to Product by id if the given value is not nil.
+func (pc *PlanCreate) SetNillableProductsID(id *int) *PlanCreate {
+	if id != nil {
+		pc = pc.SetProductsID(*id)
 	}
 	return pc
 }
 
-// AddPrices adds the prices edges to Price.
-func (pc *PlanCreate) AddPrices(p ...*Price) *PlanCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetProducts sets the products edge to Product.
+func (pc *PlanCreate) SetProducts(p *Product) *PlanCreate {
+	return pc.SetProductsID(p.ID)
+}
+
+// SetThirdPartyPricesID sets the third_party_prices edge to ThirdPartyPrice by id.
+func (pc *PlanCreate) SetThirdPartyPricesID(id int) *PlanCreate {
+	if pc.third_party_prices == nil {
+		pc.third_party_prices = make(map[int]struct{})
 	}
-	return pc.AddPriceIDs(ids...)
+	pc.third_party_prices[id] = struct{}{}
+	return pc
+}
+
+// SetNillableThirdPartyPricesID sets the third_party_prices edge to ThirdPartyPrice by id if the given value is not nil.
+func (pc *PlanCreate) SetNillableThirdPartyPricesID(id *int) *PlanCreate {
+	if id != nil {
+		pc = pc.SetThirdPartyPricesID(*id)
+	}
+	return pc
+}
+
+// SetThirdPartyPrices sets the third_party_prices edge to ThirdPartyPrice.
+func (pc *PlanCreate) SetThirdPartyPrices(t *ThirdPartyPrice) *PlanCreate {
+	return pc.SetThirdPartyPricesID(t.ID)
 }
 
 // Save creates the Plan in the database.
@@ -90,11 +145,29 @@ func (pc *PlanCreate) Save(ctx context.Context) (*Plan, error) {
 	if pc.length == nil {
 		return nil, errors.New("ent: missing required field \"length\"")
 	}
+	if pc.start_at == nil {
+		return nil, errors.New("ent: missing required field \"start_at\"")
+	}
+	if pc.end_at == nil {
+		return nil, errors.New("ent: missing required field \"end_at\"")
+	}
+	if pc.price == nil {
+		return nil, errors.New("ent: missing required field \"price\"")
+	}
+	if pc.discount == nil {
+		return nil, errors.New("ent: missing required field \"discount\"")
+	}
 	if pc.unit == nil {
 		return nil, errors.New("ent: missing required field \"unit\"")
 	}
 	if err := plan.UnitValidator(*pc.unit); err != nil {
 		return nil, fmt.Errorf("ent: validator failed for field \"unit\": %v", err)
+	}
+	if len(pc.products) > 1 {
+		return nil, errors.New("ent: multiple assignments on a unique edge \"products\"")
+	}
+	if len(pc.third_party_prices) > 1 {
+		return nil, errors.New("ent: multiple assignments on a unique edge \"third_party_prices\"")
 	}
 	return pc.sqlSave(ctx)
 }
@@ -135,6 +208,38 @@ func (pc *PlanCreate) sqlSave(ctx context.Context) (*Plan, error) {
 		})
 		pl.Length = *value
 	}
+	if value := pc.start_at; value != nil {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  *value,
+			Column: plan.FieldStartAt,
+		})
+		pl.StartAt = *value
+	}
+	if value := pc.end_at; value != nil {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  *value,
+			Column: plan.FieldEndAt,
+		})
+		pl.EndAt = *value
+	}
+	if value := pc.price; value != nil {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint16,
+			Value:  *value,
+			Column: plan.FieldPrice,
+		})
+		pl.Price = *value
+	}
+	if value := pc.discount; value != nil {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint16,
+			Value:  *value,
+			Column: plan.FieldDiscount,
+		})
+		pl.Discount = *value
+	}
 	if value := pc.unit; value != nil {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -162,17 +267,36 @@ func (pc *PlanCreate) sqlSave(ctx context.Context) (*Plan, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pc.prices; len(nodes) > 0 {
+	if nodes := pc.products; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   plan.PricesTable,
-			Columns: []string{plan.PricesColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   plan.ProductsTable,
+			Columns: []string{plan.ProductsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: price.FieldID,
+					Column: product.FieldID,
+				},
+			},
+		}
+		for k, _ := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.third_party_prices; len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   plan.ThirdPartyPricesTable,
+			Columns: []string{plan.ThirdPartyPricesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: thirdpartyprice.FieldID,
 				},
 			},
 		}

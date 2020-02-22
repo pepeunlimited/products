@@ -5,10 +5,10 @@ import (
 	validator2 "github.com/pepeunlimited/microservice-kit/validator"
 	"github.com/pepeunlimited/prices/internal/pkg/clock"
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/thirdpartyrepo"
+	"github.com/pepeunlimited/prices/internal/pkg/mysql/thirdpartyprice"
 	"github.com/pepeunlimited/prices/internal/server/errorz"
 	"github.com/pepeunlimited/prices/internal/server/validator"
-	"github.com/pepeunlimited/prices/pkg/thirdpartyrpc"
+	"github.com/pepeunlimited/prices/pkg/thirdpartypricerpc"
 	"time"
 )
 
@@ -17,7 +17,7 @@ type ThirdPartyServer struct {
 	valid validator.ThirdPartyServerValidator
 }
 
-func (server ThirdPartyServer) EndThirdParty(ctx context.Context, params *thirdpartyrpc.EndThirdPartyParams) (*thirdpartyrpc.ThirdParty, error) {
+func (server ThirdPartyServer) EndThirdParty(ctx context.Context, params *thirdpartypricerpc.EndThirdPartyParams) (*thirdpartypricerpc.ThirdParty, error) {
 	err := server.valid.EndThirdParty(params)
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func (server ThirdPartyServer) EndThirdParty(ctx context.Context, params *thirdp
 	return ToThirdParty(ended), nil
 }
 
-func (server ThirdPartyServer) CreateThirdParty(ctx context.Context, params *thirdpartyrpc.CreateThirdPartyParams) (*thirdpartyrpc.ThirdParty, error) {
+func (server ThirdPartyServer) CreateThirdParty(ctx context.Context, params *thirdpartypricerpc.CreateThirdPartyParams) (*thirdpartypricerpc.ThirdParty, error) {
 	err := server.valid.CreateThirdParty(params)
 
 	if err != nil {
@@ -58,7 +58,7 @@ func (server ThirdPartyServer) CreateThirdParty(ctx context.Context, params *thi
 	return ToThirdParty(thirdparty), nil
 }
 
-func (server ThirdPartyServer) GetThirdParties(ctx context.Context, params *thirdpartyrpc.GetThirdPartiesParams) (*thirdpartyrpc.GetThirdPartiesResponse, error) {
+func (server ThirdPartyServer) GetThirdParties(ctx context.Context, params *thirdpartypricerpc.GetThirdPartiesParams) (*thirdpartypricerpc.GetThirdPartiesResponse, error) {
 	err := server.valid.GetThirdParties(params)
 	if err != nil {
 		return nil, err
@@ -67,10 +67,10 @@ func (server ThirdPartyServer) GetThirdParties(ctx context.Context, params *thir
 	if err != nil {
 		return nil, errorz.ThirdParty(err)
 	}
-	return &thirdpartyrpc.GetThirdPartiesResponse{ThirdParties: ToThirdParties(thirdParties)}, nil
+	return &thirdpartypricerpc.GetThirdPartiesResponse{ThirdParties: ToThirdParties(thirdParties)}, nil
 }
 
-func (server ThirdPartyServer) GetThirdParty(ctx context.Context, params *thirdpartyrpc.GetThirdPartyParams) (*thirdpartyrpc.ThirdParty, error) {
+func (server ThirdPartyServer) GetThirdParty(ctx context.Context, params *thirdpartypricerpc.GetThirdPartyParams) (*thirdpartypricerpc.ThirdParty, error) {
 	err := server.valid.GetThirdParty(params)
 	if err != nil {
 		return nil, err

@@ -23,6 +23,13 @@ const (
 	PricesInverseTable = "prices"
 	// PricesColumn is the table column denoting the prices relation/edge.
 	PricesColumn = "product_prices"
+	// PlansTable is the table the holds the plans relation/edge.
+	PlansTable = "plans"
+	// PlansInverseTable is the table name for the Plan entity.
+	// It exists in this package in order to avoid circular dependency with the "plan" package.
+	PlansInverseTable = "plans"
+	// PlansColumn is the table column denoting the plans relation/edge.
+	PlansColumn = "product_plans"
 )
 
 // Columns holds all SQL columns for product fields.

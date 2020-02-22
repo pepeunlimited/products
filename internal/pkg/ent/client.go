@@ -13,7 +13,7 @@ import (
 	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/subscription"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdparty"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdpartyprice"
 
 	"github.com/facebookincubator/ent/dialect"
 	"github.com/facebookincubator/ent/dialect/sql"
@@ -33,8 +33,8 @@ type Client struct {
 	Product *ProductClient
 	// Subscription is the client for interacting with the Subscription builders.
 	Subscription *SubscriptionClient
-	// ThirdParty is the client for interacting with the ThirdParty builders.
-	ThirdParty *ThirdPartyClient
+	// ThirdPartyPrice is the client for interacting with the ThirdPartyPrice builders.
+	ThirdPartyPrice *ThirdPartyPriceClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -42,13 +42,13 @@ func NewClient(opts ...Option) *Client {
 	c := config{log: log.Println}
 	c.options(opts...)
 	return &Client{
-		config:       c,
-		Schema:       migrate.NewSchema(c.driver),
-		Plan:         NewPlanClient(c),
-		Price:        NewPriceClient(c),
-		Product:      NewProductClient(c),
-		Subscription: NewSubscriptionClient(c),
-		ThirdParty:   NewThirdPartyClient(c),
+		config:          c,
+		Schema:          migrate.NewSchema(c.driver),
+		Plan:            NewPlanClient(c),
+		Price:           NewPriceClient(c),
+		Product:         NewProductClient(c),
+		Subscription:    NewSubscriptionClient(c),
+		ThirdPartyPrice: NewThirdPartyPriceClient(c),
 	}
 }
 
@@ -79,12 +79,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	cfg := config{driver: tx, log: c.log, debug: c.debug}
 	return &Tx{
-		config:       cfg,
-		Plan:         NewPlanClient(cfg),
-		Price:        NewPriceClient(cfg),
-		Product:      NewProductClient(cfg),
-		Subscription: NewSubscriptionClient(cfg),
-		ThirdParty:   NewThirdPartyClient(cfg),
+		config:          cfg,
+		Plan:            NewPlanClient(cfg),
+		Price:           NewPriceClient(cfg),
+		Product:         NewProductClient(cfg),
+		Subscription:    NewSubscriptionClient(cfg),
+		ThirdPartyPrice: NewThirdPartyPriceClient(cfg),
 	}, nil
 }
 
@@ -101,13 +101,13 @@ func (c *Client) Debug() *Client {
 	}
 	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true}
 	return &Client{
-		config:       cfg,
-		Schema:       migrate.NewSchema(cfg.driver),
-		Plan:         NewPlanClient(cfg),
-		Price:        NewPriceClient(cfg),
-		Product:      NewProductClient(cfg),
-		Subscription: NewSubscriptionClient(cfg),
-		ThirdParty:   NewThirdPartyClient(cfg),
+		config:          cfg,
+		Schema:          migrate.NewSchema(cfg.driver),
+		Plan:            NewPlanClient(cfg),
+		Price:           NewPriceClient(cfg),
+		Product:         NewProductClient(cfg),
+		Subscription:    NewSubscriptionClient(cfg),
+		ThirdPartyPrice: NewThirdPartyPriceClient(cfg),
 	}
 }
 
@@ -194,14 +194,28 @@ func (c *PlanClient) QuerySubscriptions(pl *Plan) *SubscriptionQuery {
 	return query
 }
 
-// QueryPrices queries the prices edge of a Plan.
-func (c *PlanClient) QueryPrices(pl *Plan) *PriceQuery {
-	query := &PriceQuery{config: c.config}
+// QueryProducts queries the products edge of a Plan.
+func (c *PlanClient) QueryProducts(pl *Plan) *ProductQuery {
+	query := &ProductQuery{config: c.config}
 	id := pl.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(plan.Table, plan.FieldID, id),
-		sqlgraph.To(price.Table, price.FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, plan.PricesTable, plan.PricesColumn),
+		sqlgraph.To(product.Table, product.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, plan.ProductsTable, plan.ProductsColumn),
+	)
+	query.sql = sqlgraph.Neighbors(pl.driver.Dialect(), step)
+
+	return query
+}
+
+// QueryThirdPartyPrices queries the third_party_prices edge of a Plan.
+func (c *PlanClient) QueryThirdPartyPrices(pl *Plan) *ThirdPartyPriceQuery {
+	query := &ThirdPartyPriceQuery{config: c.config}
+	id := pl.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(plan.Table, plan.FieldID, id),
+		sqlgraph.To(thirdpartyprice.Table, thirdpartyprice.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, plan.ThirdPartyPricesTable, plan.ThirdPartyPricesColumn),
 	)
 	query.sql = sqlgraph.Neighbors(pl.driver.Dialect(), step)
 
@@ -286,28 +300,14 @@ func (c *PriceClient) QueryProducts(pr *Price) *ProductQuery {
 	return query
 }
 
-// QueryThirdParties queries the third_parties edge of a Price.
-func (c *PriceClient) QueryThirdParties(pr *Price) *ThirdPartyQuery {
-	query := &ThirdPartyQuery{config: c.config}
+// QueryThirdPartyPrices queries the third_party_prices edge of a Price.
+func (c *PriceClient) QueryThirdPartyPrices(pr *Price) *ThirdPartyPriceQuery {
+	query := &ThirdPartyPriceQuery{config: c.config}
 	id := pr.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From(price.Table, price.FieldID, id),
-		sqlgraph.To(thirdparty.Table, thirdparty.FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, price.ThirdPartiesTable, price.ThirdPartiesColumn),
-	)
-	query.sql = sqlgraph.Neighbors(pr.driver.Dialect(), step)
-
-	return query
-}
-
-// QueryPlans queries the plans edge of a Price.
-func (c *PriceClient) QueryPlans(pr *Price) *PlanQuery {
-	query := &PlanQuery{config: c.config}
-	id := pr.ID
-	step := sqlgraph.NewStep(
-		sqlgraph.From(price.Table, price.FieldID, id),
-		sqlgraph.To(plan.Table, plan.FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, price.PlansTable, price.PlansColumn),
+		sqlgraph.To(thirdpartyprice.Table, thirdpartyprice.FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, price.ThirdPartyPricesTable, price.ThirdPartyPricesColumn),
 	)
 	query.sql = sqlgraph.Neighbors(pr.driver.Dialect(), step)
 
@@ -392,6 +392,20 @@ func (c *ProductClient) QueryPrices(pr *Product) *PriceQuery {
 	return query
 }
 
+// QueryPlans queries the plans edge of a Product.
+func (c *ProductClient) QueryPlans(pr *Product) *PlanQuery {
+	query := &PlanQuery{config: c.config}
+	id := pr.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(product.Table, product.FieldID, id),
+		sqlgraph.To(plan.Table, plan.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, product.PlansTable, product.PlansColumn),
+	)
+	query.sql = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+
+	return query
+}
+
 // SubscriptionClient is a client for the Subscription schema.
 type SubscriptionClient struct {
 	config
@@ -470,80 +484,94 @@ func (c *SubscriptionClient) QueryPlans(s *Subscription) *PlanQuery {
 	return query
 }
 
-// ThirdPartyClient is a client for the ThirdParty schema.
-type ThirdPartyClient struct {
+// ThirdPartyPriceClient is a client for the ThirdPartyPrice schema.
+type ThirdPartyPriceClient struct {
 	config
 }
 
-// NewThirdPartyClient returns a client for the ThirdParty from the given config.
-func NewThirdPartyClient(c config) *ThirdPartyClient {
-	return &ThirdPartyClient{config: c}
+// NewThirdPartyPriceClient returns a client for the ThirdPartyPrice from the given config.
+func NewThirdPartyPriceClient(c config) *ThirdPartyPriceClient {
+	return &ThirdPartyPriceClient{config: c}
 }
 
-// Create returns a create builder for ThirdParty.
-func (c *ThirdPartyClient) Create() *ThirdPartyCreate {
-	return &ThirdPartyCreate{config: c.config}
+// Create returns a create builder for ThirdPartyPrice.
+func (c *ThirdPartyPriceClient) Create() *ThirdPartyPriceCreate {
+	return &ThirdPartyPriceCreate{config: c.config}
 }
 
-// Update returns an update builder for ThirdParty.
-func (c *ThirdPartyClient) Update() *ThirdPartyUpdate {
-	return &ThirdPartyUpdate{config: c.config}
+// Update returns an update builder for ThirdPartyPrice.
+func (c *ThirdPartyPriceClient) Update() *ThirdPartyPriceUpdate {
+	return &ThirdPartyPriceUpdate{config: c.config}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *ThirdPartyClient) UpdateOne(tp *ThirdParty) *ThirdPartyUpdateOne {
-	return c.UpdateOneID(tp.ID)
+func (c *ThirdPartyPriceClient) UpdateOne(tpp *ThirdPartyPrice) *ThirdPartyPriceUpdateOne {
+	return c.UpdateOneID(tpp.ID)
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ThirdPartyClient) UpdateOneID(id int) *ThirdPartyUpdateOne {
-	return &ThirdPartyUpdateOne{config: c.config, id: id}
+func (c *ThirdPartyPriceClient) UpdateOneID(id int) *ThirdPartyPriceUpdateOne {
+	return &ThirdPartyPriceUpdateOne{config: c.config, id: id}
 }
 
-// Delete returns a delete builder for ThirdParty.
-func (c *ThirdPartyClient) Delete() *ThirdPartyDelete {
-	return &ThirdPartyDelete{config: c.config}
+// Delete returns a delete builder for ThirdPartyPrice.
+func (c *ThirdPartyPriceClient) Delete() *ThirdPartyPriceDelete {
+	return &ThirdPartyPriceDelete{config: c.config}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *ThirdPartyClient) DeleteOne(tp *ThirdParty) *ThirdPartyDeleteOne {
-	return c.DeleteOneID(tp.ID)
+func (c *ThirdPartyPriceClient) DeleteOne(tpp *ThirdPartyPrice) *ThirdPartyPriceDeleteOne {
+	return c.DeleteOneID(tpp.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *ThirdPartyClient) DeleteOneID(id int) *ThirdPartyDeleteOne {
-	return &ThirdPartyDeleteOne{c.Delete().Where(thirdparty.ID(id))}
+func (c *ThirdPartyPriceClient) DeleteOneID(id int) *ThirdPartyPriceDeleteOne {
+	return &ThirdPartyPriceDeleteOne{c.Delete().Where(thirdpartyprice.ID(id))}
 }
 
-// Create returns a query builder for ThirdParty.
-func (c *ThirdPartyClient) Query() *ThirdPartyQuery {
-	return &ThirdPartyQuery{config: c.config}
+// Create returns a query builder for ThirdPartyPrice.
+func (c *ThirdPartyPriceClient) Query() *ThirdPartyPriceQuery {
+	return &ThirdPartyPriceQuery{config: c.config}
 }
 
-// Get returns a ThirdParty entity by its id.
-func (c *ThirdPartyClient) Get(ctx context.Context, id int) (*ThirdParty, error) {
-	return c.Query().Where(thirdparty.ID(id)).Only(ctx)
+// Get returns a ThirdPartyPrice entity by its id.
+func (c *ThirdPartyPriceClient) Get(ctx context.Context, id int) (*ThirdPartyPrice, error) {
+	return c.Query().Where(thirdpartyprice.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ThirdPartyClient) GetX(ctx context.Context, id int) *ThirdParty {
-	tp, err := c.Get(ctx, id)
+func (c *ThirdPartyPriceClient) GetX(ctx context.Context, id int) *ThirdPartyPrice {
+	tpp, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return tp
+	return tpp
 }
 
-// QueryPrices queries the prices edge of a ThirdParty.
-func (c *ThirdPartyClient) QueryPrices(tp *ThirdParty) *PriceQuery {
+// QueryPrices queries the prices edge of a ThirdPartyPrice.
+func (c *ThirdPartyPriceClient) QueryPrices(tpp *ThirdPartyPrice) *PriceQuery {
 	query := &PriceQuery{config: c.config}
-	id := tp.ID
+	id := tpp.ID
 	step := sqlgraph.NewStep(
-		sqlgraph.From(thirdparty.Table, thirdparty.FieldID, id),
+		sqlgraph.From(thirdpartyprice.Table, thirdpartyprice.FieldID, id),
 		sqlgraph.To(price.Table, price.FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, thirdparty.PricesTable, thirdparty.PricesColumn),
+		sqlgraph.Edge(sqlgraph.O2M, false, thirdpartyprice.PricesTable, thirdpartyprice.PricesColumn),
 	)
-	query.sql = sqlgraph.Neighbors(tp.driver.Dialect(), step)
+	query.sql = sqlgraph.Neighbors(tpp.driver.Dialect(), step)
+
+	return query
+}
+
+// QueryPlans queries the plans edge of a ThirdPartyPrice.
+func (c *ThirdPartyPriceClient) QueryPlans(tpp *ThirdPartyPrice) *PlanQuery {
+	query := &PlanQuery{config: c.config}
+	id := tpp.ID
+	step := sqlgraph.NewStep(
+		sqlgraph.From(thirdpartyprice.Table, thirdpartyprice.FieldID, id),
+		sqlgraph.To(plan.Table, plan.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, thirdpartyprice.PlansTable, thirdpartyprice.PlansColumn),
+	)
+	query.sql = sqlgraph.Neighbors(tpp.driver.Dialect(), step)
 
 	return query
 }

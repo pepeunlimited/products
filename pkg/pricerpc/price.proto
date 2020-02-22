@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package pepeunlimited.products;
+option go_package = "pricerpc";
+
+service PriceService {
+
+    rpc CreatePrice(CreatePriceParams)                      returns (Price);
+
+    rpc GetPrice(GetPriceParams)                            returns (Price);
+
+    rpc EndPriceAt(EndPriceAtParams)                        returns (Price);
+}
+
+message EndPriceAtParams {
+    GetPriceParams params        = 1;
+    int32          end_at_day    = 2; // optional
+    int32          end_at_month  = 3; // optional
+}
+
+message Price {
+    int64   id              = 1;
+    uint32  price           = 2;
+    uint32  discount        = 3;
+    string  start_at        = 4;
+    string  end_at          = 5;
+    int32   third_party_id  = 7;
+    int64   product_id      = 9;
+}
+
+message CreatePriceParams {
+    int32   start_at_day     = 1; // optional
+    int32   start_at_month   = 2; // optional
+    int32   end_at_day       = 3; // optional
+    int32   end_at_month     = 4; // optional
+    uint32  price            = 5;  // => required
+    uint32  discount         = 6;  // optional
+    int64   product_id       = 7;  // => required
+    int32   third_party_id   = 9;  // optional
+}
+
+message GetPriceParams {
+    int64   product_id      = 1; // will check if the price is active
+    string  product_sku     = 2; // will check if the price is active
+    int64   price_id        = 3; // not check if the price is active
+}

@@ -6,12 +6,12 @@ import (
 	"github.com/pepeunlimited/prices/pkg/pricerpc"
 	"github.com/pepeunlimited/prices/pkg/productrpc"
 	"github.com/pepeunlimited/prices/pkg/subscriptionrpc"
-	"github.com/pepeunlimited/prices/pkg/thirdpartyrpc"
+	"github.com/pepeunlimited/prices/pkg/thirdpartypricerpc"
 	"time"
 )
 
-func ToThirdParty(thirdparty *ent.ThirdParty) *thirdpartyrpc.ThirdParty {
-	return &thirdpartyrpc.ThirdParty{
+func ToThirdParty(thirdparty *ent.ThirdParty) *thirdpartypricerpc.ThirdParty {
+	return &thirdpartypricerpc.ThirdParty{
 		Id:                      int32(thirdparty.ID),
 		InAppPurchaseSku:        thirdparty.InAppPurchaseSku,
 		GoogleBillingServiceSku: thirdparty.GoogleBillingServiceSku,
@@ -20,8 +20,8 @@ func ToThirdParty(thirdparty *ent.ThirdParty) *thirdpartyrpc.ThirdParty {
 	}
 }
 
-func ToThirdParties(parties []*ent.ThirdParty) []*thirdpartyrpc.ThirdParty {
-	list := make([]*thirdpartyrpc.ThirdParty, 0)
+func ToThirdParties(parties []*ent.ThirdParty) []*thirdpartypricerpc.ThirdParty {
+	list := make([]*thirdpartypricerpc.ThirdParty, 0)
 	for _, party := range parties {
 		list = append(list, ToThirdParty(party))
 	}

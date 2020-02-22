@@ -3,9 +3,9 @@ package twirp
 import (
 	"context"
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/planrepo"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/pricerepo"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/subscriptionrepo"
+	"github.com/pepeunlimited/prices/internal/pkg/mysql/plan"
+	"github.com/pepeunlimited/prices/internal/pkg/mysql/price"
+	"github.com/pepeunlimited/prices/internal/pkg/mysql/subscription"
 	"github.com/pepeunlimited/prices/internal/server/errorz"
 	"github.com/pepeunlimited/prices/internal/server/validator"
 	"github.com/pepeunlimited/prices/pkg/subscriptionrpc"
@@ -13,10 +13,10 @@ import (
 )
 
 type SubscriptionServer struct {
-	valid 			validator.SubscriptionServerValidator
-	plans 			planrepo.PlanRepository
-	subscriptions 	subscriptionrepo.SubscriptionRepository
-	prices          pricerepo.PriceRepository
+	valid         validator.SubscriptionServerValidator
+	plans         plan.PlanRepository
+	subscriptions subscription.SubscriptionRepository
+	prices        price.PriceRepository
 }
 
 func (server SubscriptionServer) StartSubscription(ctx context.Context, params *subscriptionrpc.StartSubscriptionParams) (*subscriptionrpc.Subscription, error) {
@@ -77,9 +77,9 @@ func (server SubscriptionServer) GetSubscriptions(ctx context.Context, params *s
 
 func NewSubscriptionServer(client *ent.Client) SubscriptionServer {
 	return SubscriptionServer{
-		valid:validator.NewSubscriptionServerValidator(),
-		plans:planrepo.NewPlanRepository(client),
-		subscriptions:subscriptionrepo.NewSubscriptionRepository(client),
-		prices:pricerepo.NewPriceRepository(client),
+		valid:         validator.NewSubscriptionServerValidator(),
+		plans:         plan.NewPlanRepository(client),
+		subscriptions: subscription.New(client),
+		prices:        price.New(client),
 	}
 }

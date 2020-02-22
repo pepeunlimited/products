@@ -18,5 +18,5 @@ type Product func(*sql.Selector)
 // Subscription is the predicate function for subscription builders.
 type Subscription func(*sql.Selector)
 
-// ThirdParty is the predicate function for thirdparty builders.
-type ThirdParty func(*sql.Selector)
+// ThirdPartyPrice is the predicate function for thirdpartyprice builders.
+type ThirdPartyPrice func(*sql.Selector)

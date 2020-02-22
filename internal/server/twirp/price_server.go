@@ -5,10 +5,10 @@ import (
 	validator2 "github.com/pepeunlimited/microservice-kit/validator"
 	"github.com/pepeunlimited/prices/internal/pkg/clock"
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/planrepo"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/pricerepo"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/productrepo"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/thirdpartyrepo"
+	"github.com/pepeunlimited/prices/internal/pkg/mysql/plan"
+	"github.com/pepeunlimited/prices/internal/pkg/mysql/price"
+	"github.com/pepeunlimited/prices/internal/pkg/mysql/product"
+	"github.com/pepeunlimited/prices/internal/pkg/mysql/thirdpartyprice"
 	"github.com/pepeunlimited/prices/internal/server/errorz"
 	"github.com/pepeunlimited/prices/internal/server/validator"
 	"github.com/pepeunlimited/prices/pkg/pricerpc"
@@ -17,11 +17,11 @@ import (
 )
 
 type PriceServer struct {
-	prices 				pricerepo.PriceRepository
-	valid 				validator.PriceServerValidator
-	products			productrepo.ProductRepository
-	thirdparties    	thirdpartyrepo.ThirdPartyRepository
-	plans				planrepo.PlanRepository
+	prices       price.PriceRepository
+	valid        validator.PriceServerValidator
+	products     product.ProductRepository
+	thirdparties thirdpartyrepo.ThirdPartyRepository
+	plans        plan.PlanRepository
 }
 
 func (server PriceServer) EndPrice(ctx context.Context, params *pricerpc.EndPriceParams) (*pricerpc.Price, error) {
@@ -176,10 +176,10 @@ func (server PriceServer) isProductSubscribableById(ctx context.Context, product
 
 func NewPriceServer(client *ent.Client) PriceServer {
 	return PriceServer{
-		prices:pricerepo.NewPriceRepository(client),
-		valid:validator.NewPriceServerValidator(),
-		products:productrepo.NewProductRepository(client),
-		thirdparties:thirdpartyrepo.NewThirdPartyRepository(client),
-		plans:planrepo.NewPlanRepository(client),
+		prices:       price.New(client),
+		valid:        validator.NewPriceServerValidator(),
+		products:     product.New(client),
+		thirdparties: thirdpartyrepo.NewThirdPartyRepository(client),
+		plans:        plan.NewPlanRepository(client),
 	}
 }

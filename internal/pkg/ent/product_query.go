@@ -12,6 +12,7 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/predicate"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
@@ -27,6 +28,7 @@ type ProductQuery struct {
 	predicates []predicate.Product
 	// eager-loading edges.
 	withPrices *PriceQuery
+	withPlans  *PlanQuery
 	// intermediate query.
 	sql *sql.Selector
 }
@@ -62,6 +64,18 @@ func (pq *ProductQuery) QueryPrices() *PriceQuery {
 		sqlgraph.From(product.Table, product.FieldID, pq.sqlQuery()),
 		sqlgraph.To(price.Table, price.FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, product.PricesTable, product.PricesColumn),
+	)
+	query.sql = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+	return query
+}
+
+// QueryPlans chains the current query on the plans edge.
+func (pq *ProductQuery) QueryPlans() *PlanQuery {
+	query := &PlanQuery{config: pq.config}
+	step := sqlgraph.NewStep(
+		sqlgraph.From(product.Table, product.FieldID, pq.sqlQuery()),
+		sqlgraph.To(plan.Table, plan.FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, product.PlansTable, product.PlansColumn),
 	)
 	query.sql = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 	return query
@@ -247,6 +261,17 @@ func (pq *ProductQuery) WithPrices(opts ...func(*PriceQuery)) *ProductQuery {
 	return pq
 }
 
+//  WithPlans tells the query-builder to eager-loads the nodes that are connected to
+// the "plans" edge. The optional arguments used to configure the query builder of the edge.
+func (pq *ProductQuery) WithPlans(opts ...func(*PlanQuery)) *ProductQuery {
+	query := &PlanQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withPlans = query
+	return pq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -292,8 +317,9 @@ func (pq *ProductQuery) sqlAll(ctx context.Context) ([]*Product, error) {
 	var (
 		nodes       = []*Product{}
 		_spec       = pq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			pq.withPrices != nil,
+			pq.withPlans != nil,
 		}
 	)
 	_spec.ScanValues = func() []interface{} {
@@ -342,6 +368,34 @@ func (pq *ProductQuery) sqlAll(ctx context.Context) ([]*Product, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "product_prices" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Prices = append(node.Edges.Prices, n)
+		}
+	}
+
+	if query := pq.withPlans; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Product)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.Plan(func(s *sql.Selector) {
+			s.Where(sql.InValues(product.PlansColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.product_plans
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "product_plans" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "product_plans" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Plans = append(node.Edges.Plans, n)
 		}
 	}
 

@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdparty"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdpartyprice"
 )
 
-// ThirdParty is the model entity for the ThirdParty schema.
-type ThirdParty struct {
+// ThirdPartyPrice is the model entity for the ThirdPartyPrice schema.
+type ThirdPartyPrice struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -24,120 +24,146 @@ type ThirdParty struct {
 	StartAt time.Time `json:"start_at,omitempty"`
 	// EndAt holds the value of the "end_at" field.
 	EndAt time.Time `json:"end_at,omitempty"`
+	// Type holds the value of the "type" field.
+	Type string `json:"type,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the ThirdPartyQuery when eager-loading is set.
-	Edges ThirdPartyEdges `json:"edges"`
+	// The values are being populated by the ThirdPartyPriceQuery when eager-loading is set.
+	Edges ThirdPartyPriceEdges `json:"edges"`
 }
 
-// ThirdPartyEdges holds the relations/edges for other nodes in the graph.
-type ThirdPartyEdges struct {
+// ThirdPartyPriceEdges holds the relations/edges for other nodes in the graph.
+type ThirdPartyPriceEdges struct {
 	// Prices holds the value of the prices edge.
 	Prices []*Price
+	// Plans holds the value of the plans edge.
+	Plans []*Plan
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // PricesOrErr returns the Prices value or an error if the edge
 // was not loaded in eager-loading.
-func (e ThirdPartyEdges) PricesOrErr() ([]*Price, error) {
+func (e ThirdPartyPriceEdges) PricesOrErr() ([]*Price, error) {
 	if e.loadedTypes[0] {
 		return e.Prices, nil
 	}
 	return nil, &NotLoadedError{edge: "prices"}
 }
 
+// PlansOrErr returns the Plans value or an error if the edge
+// was not loaded in eager-loading.
+func (e ThirdPartyPriceEdges) PlansOrErr() ([]*Plan, error) {
+	if e.loadedTypes[1] {
+		return e.Plans, nil
+	}
+	return nil, &NotLoadedError{edge: "plans"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
-func (*ThirdParty) scanValues() []interface{} {
+func (*ThirdPartyPrice) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{},  // id
 		&sql.NullString{}, // in_app_purchase_sku
 		&sql.NullString{}, // google_billing_service_sku
 		&sql.NullTime{},   // start_at
 		&sql.NullTime{},   // end_at
+		&sql.NullString{}, // type
 	}
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the ThirdParty fields.
-func (tp *ThirdParty) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(thirdparty.Columns); m < n {
+// to the ThirdPartyPrice fields.
+func (tpp *ThirdPartyPrice) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(thirdpartyprice.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)
 	if !ok {
 		return fmt.Errorf("unexpected type %T for field id", value)
 	}
-	tp.ID = int(value.Int64)
+	tpp.ID = int(value.Int64)
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullString); !ok {
 		return fmt.Errorf("unexpected type %T for field in_app_purchase_sku", values[0])
 	} else if value.Valid {
-		tp.InAppPurchaseSku = value.String
+		tpp.InAppPurchaseSku = value.String
 	}
 	if value, ok := values[1].(*sql.NullString); !ok {
 		return fmt.Errorf("unexpected type %T for field google_billing_service_sku", values[1])
 	} else if value.Valid {
-		tp.GoogleBillingServiceSku = value.String
+		tpp.GoogleBillingServiceSku = value.String
 	}
 	if value, ok := values[2].(*sql.NullTime); !ok {
 		return fmt.Errorf("unexpected type %T for field start_at", values[2])
 	} else if value.Valid {
-		tp.StartAt = value.Time
+		tpp.StartAt = value.Time
 	}
 	if value, ok := values[3].(*sql.NullTime); !ok {
 		return fmt.Errorf("unexpected type %T for field end_at", values[3])
 	} else if value.Valid {
-		tp.EndAt = value.Time
+		tpp.EndAt = value.Time
+	}
+	if value, ok := values[4].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field type", values[4])
+	} else if value.Valid {
+		tpp.Type = value.String
 	}
 	return nil
 }
 
-// QueryPrices queries the prices edge of the ThirdParty.
-func (tp *ThirdParty) QueryPrices() *PriceQuery {
-	return (&ThirdPartyClient{tp.config}).QueryPrices(tp)
+// QueryPrices queries the prices edge of the ThirdPartyPrice.
+func (tpp *ThirdPartyPrice) QueryPrices() *PriceQuery {
+	return (&ThirdPartyPriceClient{tpp.config}).QueryPrices(tpp)
 }
 
-// Update returns a builder for updating this ThirdParty.
-// Note that, you need to call ThirdParty.Unwrap() before calling this method, if this ThirdParty
+// QueryPlans queries the plans edge of the ThirdPartyPrice.
+func (tpp *ThirdPartyPrice) QueryPlans() *PlanQuery {
+	return (&ThirdPartyPriceClient{tpp.config}).QueryPlans(tpp)
+}
+
+// Update returns a builder for updating this ThirdPartyPrice.
+// Note that, you need to call ThirdPartyPrice.Unwrap() before calling this method, if this ThirdPartyPrice
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (tp *ThirdParty) Update() *ThirdPartyUpdateOne {
-	return (&ThirdPartyClient{tp.config}).UpdateOne(tp)
+func (tpp *ThirdPartyPrice) Update() *ThirdPartyPriceUpdateOne {
+	return (&ThirdPartyPriceClient{tpp.config}).UpdateOne(tpp)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,
 // so that all next queries will be executed through the driver which created the transaction.
-func (tp *ThirdParty) Unwrap() *ThirdParty {
-	tx, ok := tp.config.driver.(*txDriver)
+func (tpp *ThirdPartyPrice) Unwrap() *ThirdPartyPrice {
+	tx, ok := tpp.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: ThirdParty is not a transactional entity")
+		panic("ent: ThirdPartyPrice is not a transactional entity")
 	}
-	tp.config.driver = tx.drv
-	return tp
+	tpp.config.driver = tx.drv
+	return tpp
 }
 
 // String implements the fmt.Stringer.
-func (tp *ThirdParty) String() string {
+func (tpp *ThirdPartyPrice) String() string {
 	var builder strings.Builder
-	builder.WriteString("ThirdParty(")
-	builder.WriteString(fmt.Sprintf("id=%v", tp.ID))
+	builder.WriteString("ThirdPartyPrice(")
+	builder.WriteString(fmt.Sprintf("id=%v", tpp.ID))
 	builder.WriteString(", in_app_purchase_sku=")
-	builder.WriteString(tp.InAppPurchaseSku)
+	builder.WriteString(tpp.InAppPurchaseSku)
 	builder.WriteString(", google_billing_service_sku=")
-	builder.WriteString(tp.GoogleBillingServiceSku)
+	builder.WriteString(tpp.GoogleBillingServiceSku)
 	builder.WriteString(", start_at=")
-	builder.WriteString(tp.StartAt.Format(time.ANSIC))
+	builder.WriteString(tpp.StartAt.Format(time.ANSIC))
 	builder.WriteString(", end_at=")
-	builder.WriteString(tp.EndAt.Format(time.ANSIC))
+	builder.WriteString(tpp.EndAt.Format(time.ANSIC))
+	builder.WriteString(", type=")
+	builder.WriteString(tpp.Type)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// ThirdParties is a parsable slice of ThirdParty.
-type ThirdParties []*ThirdParty
+// ThirdPartyPrices is a parsable slice of ThirdPartyPrice.
+type ThirdPartyPrices []*ThirdPartyPrice
 
-func (tp ThirdParties) config(cfg config) {
-	for _i := range tp {
-		tp[_i].config = cfg
+func (tpp ThirdPartyPrices) config(cfg config) {
+	for _i := range tpp {
+		tpp[_i].config = cfg
 	}
 }

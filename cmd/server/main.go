@@ -8,7 +8,7 @@ import (
 	"github.com/pepeunlimited/prices/pkg/pricerpc"
 	"github.com/pepeunlimited/prices/pkg/productrpc"
 	"github.com/pepeunlimited/prices/pkg/subscriptionrpc"
-	"github.com/pepeunlimited/prices/pkg/thirdpartyrpc"
+	"github.com/pepeunlimited/prices/pkg/thirdpartypricerpc"
 	"log"
 	"net/http"
 )
@@ -28,7 +28,7 @@ func main() {
 	ps := productrpc.NewProductServiceServer(twirp.NewProductServer(client), nil)
 	pls := planrpc.NewPlanServiceServer(twirp.NewPlanServer(client), nil)
 	ss := subscriptionrpc.NewSubscriptionServiceServer(twirp.NewSubscriptionServer(client), nil)
-	tp := thirdpartyrpc.NewThirdPartyServiceServer(twirp.NewThirdPartyServer(client), nil)
+	tp := thirdpartypricerpc.NewThirdPartyServiceServer(twirp.NewThirdPartyServer(client), nil)
 	prs := pricerpc.NewPriceServiceServer(twirp.NewPriceServer(client), nil)
 
 	mux := http.NewServeMux()

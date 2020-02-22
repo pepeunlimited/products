@@ -2,7 +2,7 @@ package validator
 
 import (
 	"github.com/pepeunlimited/microservice-kit/validator"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/planrepo"
+	"github.com/pepeunlimited/prices/internal/pkg/mysql/plan"
 	"github.com/pepeunlimited/prices/pkg/planrpc"
 	"github.com/twitchtv/twirp"
 )
@@ -16,7 +16,7 @@ func (v PlanServerValidator) CreatePlan(params *planrpc.CreatePlanParams) error 
 	if validator.IsEmpty(params.Unit) {
 		return twirp.RequiredArgumentError("unit")
 	}
-	fromString := planrepo.PlanUnitFromString(params.Unit)
+	fromString := plan.PlanUnitFromString(params.Unit)
 	if fromString.String() == "UNKNOWN" {
 		return twirp.InvalidArgumentError("unit", "unknown_unit")
 	}

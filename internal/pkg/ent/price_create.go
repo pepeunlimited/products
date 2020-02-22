@@ -9,22 +9,20 @@ import (
 
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdparty"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdpartyprice"
 )
 
 // PriceCreate is the builder for creating a Price entity.
 type PriceCreate struct {
 	config
-	start_at      *time.Time
-	end_at        *time.Time
-	price         *uint16
-	discount      *uint16
-	products      map[int]struct{}
-	third_parties map[int]struct{}
-	plans         map[int]struct{}
+	start_at           *time.Time
+	end_at             *time.Time
+	price              *uint16
+	discount           *uint16
+	products           map[int]struct{}
+	third_party_prices map[int]struct{}
 }
 
 // SetStartAt sets the start_at field.
@@ -73,48 +71,26 @@ func (pc *PriceCreate) SetProducts(p *Product) *PriceCreate {
 	return pc.SetProductsID(p.ID)
 }
 
-// SetThirdPartiesID sets the third_parties edge to ThirdParty by id.
-func (pc *PriceCreate) SetThirdPartiesID(id int) *PriceCreate {
-	if pc.third_parties == nil {
-		pc.third_parties = make(map[int]struct{})
+// SetThirdPartyPricesID sets the third_party_prices edge to ThirdPartyPrice by id.
+func (pc *PriceCreate) SetThirdPartyPricesID(id int) *PriceCreate {
+	if pc.third_party_prices == nil {
+		pc.third_party_prices = make(map[int]struct{})
 	}
-	pc.third_parties[id] = struct{}{}
+	pc.third_party_prices[id] = struct{}{}
 	return pc
 }
 
-// SetNillableThirdPartiesID sets the third_parties edge to ThirdParty by id if the given value is not nil.
-func (pc *PriceCreate) SetNillableThirdPartiesID(id *int) *PriceCreate {
+// SetNillableThirdPartyPricesID sets the third_party_prices edge to ThirdPartyPrice by id if the given value is not nil.
+func (pc *PriceCreate) SetNillableThirdPartyPricesID(id *int) *PriceCreate {
 	if id != nil {
-		pc = pc.SetThirdPartiesID(*id)
+		pc = pc.SetThirdPartyPricesID(*id)
 	}
 	return pc
 }
 
-// SetThirdParties sets the third_parties edge to ThirdParty.
-func (pc *PriceCreate) SetThirdParties(t *ThirdParty) *PriceCreate {
-	return pc.SetThirdPartiesID(t.ID)
-}
-
-// SetPlansID sets the plans edge to Plan by id.
-func (pc *PriceCreate) SetPlansID(id int) *PriceCreate {
-	if pc.plans == nil {
-		pc.plans = make(map[int]struct{})
-	}
-	pc.plans[id] = struct{}{}
-	return pc
-}
-
-// SetNillablePlansID sets the plans edge to Plan by id if the given value is not nil.
-func (pc *PriceCreate) SetNillablePlansID(id *int) *PriceCreate {
-	if id != nil {
-		pc = pc.SetPlansID(*id)
-	}
-	return pc
-}
-
-// SetPlans sets the plans edge to Plan.
-func (pc *PriceCreate) SetPlans(p *Plan) *PriceCreate {
-	return pc.SetPlansID(p.ID)
+// SetThirdPartyPrices sets the third_party_prices edge to ThirdPartyPrice.
+func (pc *PriceCreate) SetThirdPartyPrices(t *ThirdPartyPrice) *PriceCreate {
+	return pc.SetThirdPartyPricesID(t.ID)
 }
 
 // Save creates the Price in the database.
@@ -134,11 +110,8 @@ func (pc *PriceCreate) Save(ctx context.Context) (*Price, error) {
 	if len(pc.products) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"products\"")
 	}
-	if len(pc.third_parties) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"third_parties\"")
-	}
-	if len(pc.plans) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"plans\"")
+	if len(pc.third_party_prices) > 1 {
+		return nil, errors.New("ent: multiple assignments on a unique edge \"third_party_prices\"")
 	}
 	return pc.sqlSave(ctx)
 }
@@ -214,36 +187,17 @@ func (pc *PriceCreate) sqlSave(ctx context.Context) (*Price, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pc.third_parties; len(nodes) > 0 {
+	if nodes := pc.third_party_prices; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   price.ThirdPartiesTable,
-			Columns: []string{price.ThirdPartiesColumn},
+			Table:   price.ThirdPartyPricesTable,
+			Columns: []string{price.ThirdPartyPricesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: thirdparty.FieldID,
-				},
-			},
-		}
-		for k, _ := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := pc.plans; len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   price.PlansTable,
-			Columns: []string{price.PlansColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: plan.FieldID,
+					Column: thirdpartyprice.FieldID,
 				},
 			},
 		}

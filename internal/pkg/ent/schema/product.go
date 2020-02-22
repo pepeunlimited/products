@@ -23,5 +23,6 @@ func (Product) Fields() []ent.Field {
 func (Product) Edges() []ent.Edge {
 	return []ent.Edge {
 		edge.To("prices", Price.Type),     // one-to-many
+		edge.To("plans", Plan.Type),     // one-to-many
 	}
 }

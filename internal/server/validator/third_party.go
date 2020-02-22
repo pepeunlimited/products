@@ -2,7 +2,7 @@ package validator
 
 import (
 	"github.com/pepeunlimited/microservice-kit/validator"
-	"github.com/pepeunlimited/prices/pkg/thirdpartyrpc"
+	"github.com/pepeunlimited/prices/pkg/thirdpartypricerpc"
 	"github.com/twitchtv/twirp"
 )
 
@@ -13,7 +13,7 @@ func NewThirdPartyServerValidator() ThirdPartyServerValidator {
 }
 
 
-func (ThirdPartyServerValidator) CreateThirdParty(params *thirdpartyrpc.CreateThirdPartyParams) error {
+func (ThirdPartyServerValidator) CreateThirdParty(params *thirdpartypricerpc.CreateThirdPartyParams) error {
 	//if validator.IsEmpty(params.GoogleBillingServiceSku) {
 	//	return twirp.RequiredArgumentError("google_billing_service_sku")
 	//}
@@ -29,7 +29,7 @@ func (ThirdPartyServerValidator) CreateThirdParty(params *thirdpartyrpc.CreateTh
 	return nil
 }
 
-func (v ThirdPartyServerValidator) GetThirdParty(params *thirdpartyrpc.GetThirdPartyParams) error {
+func (v ThirdPartyServerValidator) GetThirdParty(params *thirdpartypricerpc.GetThirdPartyParams) error {
 	if validator.IsEmpty(params.GoogleBillingServiceSku) &&
 		validator.IsEmpty(params.InAppPurchaseSku) && params.ThirdPartyId == 0 {
 		return twirp.RequiredArgumentError("at_least_third_party_id")
@@ -37,7 +37,7 @@ func (v ThirdPartyServerValidator) GetThirdParty(params *thirdpartyrpc.GetThirdP
 	return nil
 }
 
-func (v ThirdPartyServerValidator) EndThirdParty(params *thirdpartyrpc.EndThirdPartyParams) error {
+func (v ThirdPartyServerValidator) EndThirdParty(params *thirdpartypricerpc.EndThirdPartyParams) error {
 	if params.Params == nil {
 		return twirp.RequiredArgumentError("params")
 	}
@@ -54,6 +54,6 @@ func (v ThirdPartyServerValidator) EndThirdParty(params *thirdpartyrpc.EndThirdP
 	return nil
 }
 
-func (v ThirdPartyServerValidator) GetThirdParties(params *thirdpartyrpc.GetThirdPartiesParams) error {
+func (v ThirdPartyServerValidator) GetThirdParties(params *thirdpartypricerpc.GetThirdPartiesParams) error {
 	return nil
 }

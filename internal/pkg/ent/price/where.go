@@ -453,53 +453,25 @@ func HasProductsWith(preds ...predicate.Product) predicate.Price {
 	})
 }
 
-// HasThirdParties applies the HasEdge predicate on the "third_parties" edge.
-func HasThirdParties() predicate.Price {
+// HasThirdPartyPrices applies the HasEdge predicate on the "third_party_prices" edge.
+func HasThirdPartyPrices() predicate.Price {
 	return predicate.Price(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ThirdPartiesTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ThirdPartiesTable, ThirdPartiesColumn),
+			sqlgraph.To(ThirdPartyPricesTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ThirdPartyPricesTable, ThirdPartyPricesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasThirdPartiesWith applies the HasEdge predicate on the "third_parties" edge with a given conditions (other predicates).
-func HasThirdPartiesWith(preds ...predicate.ThirdParty) predicate.Price {
+// HasThirdPartyPricesWith applies the HasEdge predicate on the "third_party_prices" edge with a given conditions (other predicates).
+func HasThirdPartyPricesWith(preds ...predicate.ThirdPartyPrice) predicate.Price {
 	return predicate.Price(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ThirdPartiesInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ThirdPartiesTable, ThirdPartiesColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasPlans applies the HasEdge predicate on the "plans" edge.
-func HasPlans() predicate.Price {
-	return predicate.Price(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PlansTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, PlansTable, PlansColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasPlansWith applies the HasEdge predicate on the "plans" edge with a given conditions (other predicates).
-func HasPlansWith(preds ...predicate.Plan) predicate.Price {
-	return predicate.Price(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PlansInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, PlansTable, PlansColumn),
+			sqlgraph.To(ThirdPartyPricesInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ThirdPartyPricesTable, ThirdPartyPricesColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

@@ -25,20 +25,13 @@ const (
 	ProductsInverseTable = "products"
 	// ProductsColumn is the table column denoting the products relation/edge.
 	ProductsColumn = "product_prices"
-	// ThirdPartiesTable is the table the holds the third_parties relation/edge.
-	ThirdPartiesTable = "prices"
-	// ThirdPartiesInverseTable is the table name for the ThirdParty entity.
-	// It exists in this package in order to avoid circular dependency with the "thirdparty" package.
-	ThirdPartiesInverseTable = "third_parties"
-	// ThirdPartiesColumn is the table column denoting the third_parties relation/edge.
-	ThirdPartiesColumn = "third_party_prices"
-	// PlansTable is the table the holds the plans relation/edge.
-	PlansTable = "prices"
-	// PlansInverseTable is the table name for the Plan entity.
-	// It exists in this package in order to avoid circular dependency with the "plan" package.
-	PlansInverseTable = "plans"
-	// PlansColumn is the table column denoting the plans relation/edge.
-	PlansColumn = "plan_prices"
+	// ThirdPartyPricesTable is the table the holds the third_party_prices relation/edge.
+	ThirdPartyPricesTable = "prices"
+	// ThirdPartyPricesInverseTable is the table name for the ThirdPartyPrice entity.
+	// It exists in this package in order to avoid circular dependency with the "thirdpartyprice" package.
+	ThirdPartyPricesInverseTable = "third_party_prices"
+	// ThirdPartyPricesColumn is the table column denoting the third_party_prices relation/edge.
+	ThirdPartyPricesColumn = "third_party_price_prices"
 )
 
 // Columns holds all SQL columns for price fields.
@@ -52,7 +45,6 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Price type.
 var ForeignKeys = []string{
-	"plan_prices",
 	"product_prices",
-	"third_party_prices",
+	"third_party_price_prices",
 }

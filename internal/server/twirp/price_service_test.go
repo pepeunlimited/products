@@ -3,9 +3,9 @@ package twirp
 import (
 	"context"
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/planrepo"
+	"github.com/pepeunlimited/prices/internal/pkg/mysql/plan"
 	"github.com/pepeunlimited/prices/pkg/pricerpc"
-	"github.com/pepeunlimited/prices/pkg/thirdpartyrpc"
+	"github.com/pepeunlimited/prices/pkg/thirdpartypricerpc"
 	"github.com/twitchtv/twirp"
 	"testing"
 	"time"
@@ -84,7 +84,7 @@ func TestPriceServer_CreatePrice(t *testing.T) {
 		t.FailNow()
 	}
 	thirdPartyServer := NewThirdPartyServer(ent.NewEntClient())
-	party,_ := thirdPartyServer.CreateThirdParty(ctx, &thirdpartyrpc.CreateThirdPartyParams{
+	party,_ := thirdPartyServer.CreateThirdParty(ctx, &thirdpartypricerpc.CreateThirdPartyParams{
 		InAppPurchaseSku: "in-app-purchase-sku",
 	})
 	price, err = server.CreatePrice(ctx, &pricerpc.CreatePriceParams{
@@ -136,8 +136,8 @@ func TestPriceServer_GetPriceByProductIdIsSubscribableTrue(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	planrepos := planrepo.NewPlanRepository(ent.NewEntClient())
-	plan, err := planrepos.Create(ctx, 1, 1, planrepo.Days)
+	planrepos := plan.NewPlanRepository(ent.NewEntClient())
+	plan, err := planrepos.Create(ctx, 1, 1, plan.Days)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -254,13 +254,13 @@ func  TestPriceServer_GetSubscriptionPrices(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	plan, err := server.plans.Create(ctx, 1, uint8(12), planrepo.Days)
+	plan, err := server.plans.Create(ctx, 1, uint8(12), plan.Days)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
 	thirdpartyServer := NewThirdPartyServer(ent.NewEntClient())
-	thirdparty, err := thirdpartyServer.CreateThirdParty(ctx, &thirdpartyrpc.CreateThirdPartyParams{
+	thirdparty, err := thirdpartyServer.CreateThirdParty(ctx, &thirdpartypricerpc.CreateThirdPartyParams{
 		InAppPurchaseSku: "in-app-sku",
 	})
 	if err != nil {

@@ -20,8 +20,8 @@ type Tx struct {
 	Product *ProductClient
 	// Subscription is the client for interacting with the Subscription builders.
 	Subscription *SubscriptionClient
-	// ThirdParty is the client for interacting with the ThirdParty builders.
-	ThirdParty *ThirdPartyClient
+	// ThirdPartyPrice is the client for interacting with the ThirdPartyPrice builders.
+	ThirdPartyPrice *ThirdPartyPriceClient
 }
 
 // Commit commits the transaction.
@@ -37,13 +37,13 @@ func (tx *Tx) Rollback() error {
 // Client returns a Client that binds to current transaction.
 func (tx *Tx) Client() *Client {
 	return &Client{
-		config:       tx.config,
-		Schema:       migrate.NewSchema(tx.driver),
-		Plan:         NewPlanClient(tx.config),
-		Price:        NewPriceClient(tx.config),
-		Product:      NewProductClient(tx.config),
-		Subscription: NewSubscriptionClient(tx.config),
-		ThirdParty:   NewThirdPartyClient(tx.config),
+		config:          tx.config,
+		Schema:          migrate.NewSchema(tx.driver),
+		Plan:            NewPlanClient(tx.config),
+		Price:           NewPriceClient(tx.config),
+		Product:         NewProductClient(tx.config),
+		Subscription:    NewSubscriptionClient(tx.config),
+		ThirdPartyPrice: NewThirdPartyPriceClient(tx.config),
 	}
 }
 

@@ -15,6 +15,14 @@ const (
 	FieldTitleI18nID = "title_i18n_id"
 	// FieldLength holds the string denoting the length vertex property in the database.
 	FieldLength = "length"
+	// FieldStartAt holds the string denoting the start_at vertex property in the database.
+	FieldStartAt = "start_at"
+	// FieldEndAt holds the string denoting the end_at vertex property in the database.
+	FieldEndAt = "end_at"
+	// FieldPrice holds the string denoting the price vertex property in the database.
+	FieldPrice = "price"
+	// FieldDiscount holds the string denoting the discount vertex property in the database.
+	FieldDiscount = "discount"
 	// FieldUnit holds the string denoting the unit vertex property in the database.
 	FieldUnit = "unit"
 
@@ -27,13 +35,20 @@ const (
 	SubscriptionsInverseTable = "subscriptions"
 	// SubscriptionsColumn is the table column denoting the subscriptions relation/edge.
 	SubscriptionsColumn = "plan_subscriptions"
-	// PricesTable is the table the holds the prices relation/edge.
-	PricesTable = "prices"
-	// PricesInverseTable is the table name for the Price entity.
-	// It exists in this package in order to avoid circular dependency with the "price" package.
-	PricesInverseTable = "prices"
-	// PricesColumn is the table column denoting the prices relation/edge.
-	PricesColumn = "plan_prices"
+	// ProductsTable is the table the holds the products relation/edge.
+	ProductsTable = "plans"
+	// ProductsInverseTable is the table name for the Product entity.
+	// It exists in this package in order to avoid circular dependency with the "product" package.
+	ProductsInverseTable = "products"
+	// ProductsColumn is the table column denoting the products relation/edge.
+	ProductsColumn = "product_plans"
+	// ThirdPartyPricesTable is the table the holds the third_party_prices relation/edge.
+	ThirdPartyPricesTable = "plans"
+	// ThirdPartyPricesInverseTable is the table name for the ThirdPartyPrice entity.
+	// It exists in this package in order to avoid circular dependency with the "thirdpartyprice" package.
+	ThirdPartyPricesInverseTable = "third_party_prices"
+	// ThirdPartyPricesColumn is the table column denoting the third_party_prices relation/edge.
+	ThirdPartyPricesColumn = "third_party_price_plans"
 )
 
 // Columns holds all SQL columns for plan fields.
@@ -41,14 +56,24 @@ var Columns = []string{
 	FieldID,
 	FieldTitleI18nID,
 	FieldLength,
+	FieldStartAt,
+	FieldEndAt,
+	FieldPrice,
+	FieldDiscount,
 	FieldUnit,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the Plan type.
+var ForeignKeys = []string{
+	"product_plans",
+	"third_party_price_plans",
 }
 
 var (
 	fields = schema.Plan{}.Fields()
 
 	// descUnit is the schema descriptor for unit field.
-	descUnit = fields[2].Descriptor()
+	descUnit = fields[6].Descriptor()
 	// UnitValidator is a validator for the "unit" field. It is called by the builders before save.
 	UnitValidator = descUnit.Validators[0].(func(string) error)
 )

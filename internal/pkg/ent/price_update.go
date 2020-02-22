@@ -10,29 +10,26 @@ import (
 	"github.com/facebookincubator/ent/dialect/sql"
 	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
 	"github.com/facebookincubator/ent/schema/field"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/plan"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/predicate"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/price"
 	"github.com/pepeunlimited/prices/internal/pkg/ent/product"
-	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdparty"
+	"github.com/pepeunlimited/prices/internal/pkg/ent/thirdpartyprice"
 )
 
 // PriceUpdate is the builder for updating Price entities.
 type PriceUpdate struct {
 	config
-	start_at            *time.Time
-	end_at              *time.Time
-	price               *uint16
-	addprice            *uint16
-	discount            *uint16
-	adddiscount         *uint16
-	products            map[int]struct{}
-	third_parties       map[int]struct{}
-	plans               map[int]struct{}
-	clearedProducts     bool
-	clearedThirdParties bool
-	clearedPlans        bool
-	predicates          []predicate.Price
+	start_at                *time.Time
+	end_at                  *time.Time
+	price                   *uint16
+	addprice                *uint16
+	discount                *uint16
+	adddiscount             *uint16
+	products                map[int]struct{}
+	third_party_prices      map[int]struct{}
+	clearedProducts         bool
+	clearedThirdPartyPrices bool
+	predicates              []predicate.Price
 }
 
 // Where adds a new predicate for the builder.
@@ -109,48 +106,26 @@ func (pu *PriceUpdate) SetProducts(p *Product) *PriceUpdate {
 	return pu.SetProductsID(p.ID)
 }
 
-// SetThirdPartiesID sets the third_parties edge to ThirdParty by id.
-func (pu *PriceUpdate) SetThirdPartiesID(id int) *PriceUpdate {
-	if pu.third_parties == nil {
-		pu.third_parties = make(map[int]struct{})
+// SetThirdPartyPricesID sets the third_party_prices edge to ThirdPartyPrice by id.
+func (pu *PriceUpdate) SetThirdPartyPricesID(id int) *PriceUpdate {
+	if pu.third_party_prices == nil {
+		pu.third_party_prices = make(map[int]struct{})
 	}
-	pu.third_parties[id] = struct{}{}
+	pu.third_party_prices[id] = struct{}{}
 	return pu
 }
 
-// SetNillableThirdPartiesID sets the third_parties edge to ThirdParty by id if the given value is not nil.
-func (pu *PriceUpdate) SetNillableThirdPartiesID(id *int) *PriceUpdate {
+// SetNillableThirdPartyPricesID sets the third_party_prices edge to ThirdPartyPrice by id if the given value is not nil.
+func (pu *PriceUpdate) SetNillableThirdPartyPricesID(id *int) *PriceUpdate {
 	if id != nil {
-		pu = pu.SetThirdPartiesID(*id)
+		pu = pu.SetThirdPartyPricesID(*id)
 	}
 	return pu
 }
 
-// SetThirdParties sets the third_parties edge to ThirdParty.
-func (pu *PriceUpdate) SetThirdParties(t *ThirdParty) *PriceUpdate {
-	return pu.SetThirdPartiesID(t.ID)
-}
-
-// SetPlansID sets the plans edge to Plan by id.
-func (pu *PriceUpdate) SetPlansID(id int) *PriceUpdate {
-	if pu.plans == nil {
-		pu.plans = make(map[int]struct{})
-	}
-	pu.plans[id] = struct{}{}
-	return pu
-}
-
-// SetNillablePlansID sets the plans edge to Plan by id if the given value is not nil.
-func (pu *PriceUpdate) SetNillablePlansID(id *int) *PriceUpdate {
-	if id != nil {
-		pu = pu.SetPlansID(*id)
-	}
-	return pu
-}
-
-// SetPlans sets the plans edge to Plan.
-func (pu *PriceUpdate) SetPlans(p *Plan) *PriceUpdate {
-	return pu.SetPlansID(p.ID)
+// SetThirdPartyPrices sets the third_party_prices edge to ThirdPartyPrice.
+func (pu *PriceUpdate) SetThirdPartyPrices(t *ThirdPartyPrice) *PriceUpdate {
+	return pu.SetThirdPartyPricesID(t.ID)
 }
 
 // ClearProducts clears the products edge to Product.
@@ -159,15 +134,9 @@ func (pu *PriceUpdate) ClearProducts() *PriceUpdate {
 	return pu
 }
 
-// ClearThirdParties clears the third_parties edge to ThirdParty.
-func (pu *PriceUpdate) ClearThirdParties() *PriceUpdate {
-	pu.clearedThirdParties = true
-	return pu
-}
-
-// ClearPlans clears the plans edge to Plan.
-func (pu *PriceUpdate) ClearPlans() *PriceUpdate {
-	pu.clearedPlans = true
+// ClearThirdPartyPrices clears the third_party_prices edge to ThirdPartyPrice.
+func (pu *PriceUpdate) ClearThirdPartyPrices() *PriceUpdate {
+	pu.clearedThirdPartyPrices = true
 	return pu
 }
 
@@ -176,11 +145,8 @@ func (pu *PriceUpdate) Save(ctx context.Context) (int, error) {
 	if len(pu.products) > 1 {
 		return 0, errors.New("ent: multiple assignments on a unique edge \"products\"")
 	}
-	if len(pu.third_parties) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"third_parties\"")
-	}
-	if len(pu.plans) > 1 {
-		return 0, errors.New("ent: multiple assignments on a unique edge \"plans\"")
+	if len(pu.third_party_prices) > 1 {
+		return 0, errors.New("ent: multiple assignments on a unique edge \"third_party_prices\"")
 	}
 	return pu.sqlSave(ctx)
 }
@@ -302,68 +268,33 @@ func (pu *PriceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pu.clearedThirdParties {
+	if pu.clearedThirdPartyPrices {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   price.ThirdPartiesTable,
-			Columns: []string{price.ThirdPartiesColumn},
+			Table:   price.ThirdPartyPricesTable,
+			Columns: []string{price.ThirdPartyPricesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: thirdparty.FieldID,
+					Column: thirdpartyprice.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pu.third_parties; len(nodes) > 0 {
+	if nodes := pu.third_party_prices; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   price.ThirdPartiesTable,
-			Columns: []string{price.ThirdPartiesColumn},
+			Table:   price.ThirdPartyPricesTable,
+			Columns: []string{price.ThirdPartyPricesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: thirdparty.FieldID,
-				},
-			},
-		}
-		for k, _ := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if pu.clearedPlans {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   price.PlansTable,
-			Columns: []string{price.PlansColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: plan.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pu.plans; len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   price.PlansTable,
-			Columns: []string{price.PlansColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: plan.FieldID,
+					Column: thirdpartyprice.FieldID,
 				},
 			},
 		}
@@ -384,19 +315,17 @@ func (pu *PriceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // PriceUpdateOne is the builder for updating a single Price entity.
 type PriceUpdateOne struct {
 	config
-	id                  int
-	start_at            *time.Time
-	end_at              *time.Time
-	price               *uint16
-	addprice            *uint16
-	discount            *uint16
-	adddiscount         *uint16
-	products            map[int]struct{}
-	third_parties       map[int]struct{}
-	plans               map[int]struct{}
-	clearedProducts     bool
-	clearedThirdParties bool
-	clearedPlans        bool
+	id                      int
+	start_at                *time.Time
+	end_at                  *time.Time
+	price                   *uint16
+	addprice                *uint16
+	discount                *uint16
+	adddiscount             *uint16
+	products                map[int]struct{}
+	third_party_prices      map[int]struct{}
+	clearedProducts         bool
+	clearedThirdPartyPrices bool
 }
 
 // SetStartAt sets the start_at field.
@@ -467,48 +396,26 @@ func (puo *PriceUpdateOne) SetProducts(p *Product) *PriceUpdateOne {
 	return puo.SetProductsID(p.ID)
 }
 
-// SetThirdPartiesID sets the third_parties edge to ThirdParty by id.
-func (puo *PriceUpdateOne) SetThirdPartiesID(id int) *PriceUpdateOne {
-	if puo.third_parties == nil {
-		puo.third_parties = make(map[int]struct{})
+// SetThirdPartyPricesID sets the third_party_prices edge to ThirdPartyPrice by id.
+func (puo *PriceUpdateOne) SetThirdPartyPricesID(id int) *PriceUpdateOne {
+	if puo.third_party_prices == nil {
+		puo.third_party_prices = make(map[int]struct{})
 	}
-	puo.third_parties[id] = struct{}{}
+	puo.third_party_prices[id] = struct{}{}
 	return puo
 }
 
-// SetNillableThirdPartiesID sets the third_parties edge to ThirdParty by id if the given value is not nil.
-func (puo *PriceUpdateOne) SetNillableThirdPartiesID(id *int) *PriceUpdateOne {
+// SetNillableThirdPartyPricesID sets the third_party_prices edge to ThirdPartyPrice by id if the given value is not nil.
+func (puo *PriceUpdateOne) SetNillableThirdPartyPricesID(id *int) *PriceUpdateOne {
 	if id != nil {
-		puo = puo.SetThirdPartiesID(*id)
+		puo = puo.SetThirdPartyPricesID(*id)
 	}
 	return puo
 }
 
-// SetThirdParties sets the third_parties edge to ThirdParty.
-func (puo *PriceUpdateOne) SetThirdParties(t *ThirdParty) *PriceUpdateOne {
-	return puo.SetThirdPartiesID(t.ID)
-}
-
-// SetPlansID sets the plans edge to Plan by id.
-func (puo *PriceUpdateOne) SetPlansID(id int) *PriceUpdateOne {
-	if puo.plans == nil {
-		puo.plans = make(map[int]struct{})
-	}
-	puo.plans[id] = struct{}{}
-	return puo
-}
-
-// SetNillablePlansID sets the plans edge to Plan by id if the given value is not nil.
-func (puo *PriceUpdateOne) SetNillablePlansID(id *int) *PriceUpdateOne {
-	if id != nil {
-		puo = puo.SetPlansID(*id)
-	}
-	return puo
-}
-
-// SetPlans sets the plans edge to Plan.
-func (puo *PriceUpdateOne) SetPlans(p *Plan) *PriceUpdateOne {
-	return puo.SetPlansID(p.ID)
+// SetThirdPartyPrices sets the third_party_prices edge to ThirdPartyPrice.
+func (puo *PriceUpdateOne) SetThirdPartyPrices(t *ThirdPartyPrice) *PriceUpdateOne {
+	return puo.SetThirdPartyPricesID(t.ID)
 }
 
 // ClearProducts clears the products edge to Product.
@@ -517,15 +424,9 @@ func (puo *PriceUpdateOne) ClearProducts() *PriceUpdateOne {
 	return puo
 }
 
-// ClearThirdParties clears the third_parties edge to ThirdParty.
-func (puo *PriceUpdateOne) ClearThirdParties() *PriceUpdateOne {
-	puo.clearedThirdParties = true
-	return puo
-}
-
-// ClearPlans clears the plans edge to Plan.
-func (puo *PriceUpdateOne) ClearPlans() *PriceUpdateOne {
-	puo.clearedPlans = true
+// ClearThirdPartyPrices clears the third_party_prices edge to ThirdPartyPrice.
+func (puo *PriceUpdateOne) ClearThirdPartyPrices() *PriceUpdateOne {
+	puo.clearedThirdPartyPrices = true
 	return puo
 }
 
@@ -534,11 +435,8 @@ func (puo *PriceUpdateOne) Save(ctx context.Context) (*Price, error) {
 	if len(puo.products) > 1 {
 		return nil, errors.New("ent: multiple assignments on a unique edge \"products\"")
 	}
-	if len(puo.third_parties) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"third_parties\"")
-	}
-	if len(puo.plans) > 1 {
-		return nil, errors.New("ent: multiple assignments on a unique edge \"plans\"")
+	if len(puo.third_party_prices) > 1 {
+		return nil, errors.New("ent: multiple assignments on a unique edge \"third_party_prices\"")
 	}
 	return puo.sqlSave(ctx)
 }
@@ -654,68 +552,33 @@ func (puo *PriceUpdateOne) sqlSave(ctx context.Context) (pr *Price, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if puo.clearedThirdParties {
+	if puo.clearedThirdPartyPrices {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   price.ThirdPartiesTable,
-			Columns: []string{price.ThirdPartiesColumn},
+			Table:   price.ThirdPartyPricesTable,
+			Columns: []string{price.ThirdPartyPricesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: thirdparty.FieldID,
+					Column: thirdpartyprice.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := puo.third_parties; len(nodes) > 0 {
+	if nodes := puo.third_party_prices; len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   price.ThirdPartiesTable,
-			Columns: []string{price.ThirdPartiesColumn},
+			Table:   price.ThirdPartyPricesTable,
+			Columns: []string{price.ThirdPartyPricesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: thirdparty.FieldID,
-				},
-			},
-		}
-		for k, _ := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if puo.clearedPlans {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   price.PlansTable,
-			Columns: []string{price.PlansColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: plan.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := puo.plans; len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   price.PlansTable,
-			Columns: []string{price.PlansColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: plan.FieldID,
+					Column: thirdpartyprice.FieldID,
 				},
 			},
 		}
