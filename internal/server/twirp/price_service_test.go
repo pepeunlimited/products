@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
 	"github.com/pepeunlimited/prices/internal/pkg/mysql/plan"
-	"github.com/pepeunlimited/prices/pkg/pricerpc"
-	"github.com/pepeunlimited/prices/pkg/thirdpartypricerpc"
+	"github.com/pepeunlimited/prices/pkg/rpc/price"
+	"github.com/pepeunlimited/prices/pkg/rpc/thirdpartyprice"
 	"github.com/twitchtv/twirp"
 	"testing"
 	"time"
@@ -17,7 +17,7 @@ func TestPriceServer_GetPrice(t *testing.T) {
 	server := NewPriceServer(ent.NewEntClient())
 	server.products.Wipe(ctx)
 	product, err := server.products.CreateProduct(ctx, "sku")
-	price, err := server.CreatePrice(ctx, &pricerpc.CreatePriceParams{
+	price, err := server.CreatePrice(ctx, &price.CreatePriceParams{
 		StartAtDay:   0,
 		StartAtMonth: 0,
 		EndAtDay:     0,
@@ -47,7 +47,7 @@ func TestPriceServer_CreatePrice(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	price, err := server.CreatePrice(ctx, &pricerpc.CreatePriceParams{
+	price, err := server.CreatePrice(ctx, &price.CreatePriceParams{
 		StartAtDay:   0,
 		StartAtMonth: 0,
 		EndAtDay:     0,
@@ -62,7 +62,7 @@ func TestPriceServer_CreatePrice(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	fromServer, err := server.GetPrice(ctx, &pricerpc.GetPriceParams{
+	fromServer, err := server.GetPrice(ctx, &price.GetPriceParams{
 		ProductSku: "sku",
 	})
 	if err != nil {
@@ -72,10 +72,10 @@ func TestPriceServer_CreatePrice(t *testing.T) {
 	if fromServer.Id != price.Id {
 		t.FailNow()
 	}
-	_, err = server.EndPrice(ctx, &pricerpc.EndPriceParams{
+	_, err = server.EndPrice(ctx, &price.EndPriceParams{
 		EndAtDay:   int32(now.Day()),
 		EndAtMonth: int32(now.Month()),
-		Params: &pricerpc.GetPriceParams{
+		Params: &price.GetPriceParams{
 			ProductId: int64(product.ID),
 		},
 	})
@@ -84,10 +84,10 @@ func TestPriceServer_CreatePrice(t *testing.T) {
 		t.FailNow()
 	}
 	thirdPartyServer := NewThirdPartyServer(ent.NewEntClient())
-	party,_ := thirdPartyServer.CreateThirdParty(ctx, &thirdpartypricerpc.CreateThirdPartyParams{
+	party,_ := thirdPartyServer.CreateThirdParty(ctx, &thirdpartyprice.CreateThirdPartyParams{
 		InAppPurchaseSku: "in-app-purchase-sku",
 	})
-	price, err = server.CreatePrice(ctx, &pricerpc.CreatePriceParams{
+	price, err = server.CreatePrice(ctx, &price.CreatePriceParams{
 		StartAtDay:   int32(now.Day()),
 		StartAtMonth: int32(now.Month()),
 		EndAtDay:     0,
@@ -102,7 +102,7 @@ func TestPriceServer_CreatePrice(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	fromServer, err = server.GetPrice(ctx, &pricerpc.GetPriceParams{
+	fromServer, err = server.GetPrice(ctx, &price.GetPriceParams{
 		ProductSku: "sku",
 	})
 	if err != nil {
@@ -142,7 +142,7 @@ func TestPriceServer_GetPriceByProductIdIsSubscribableTrue(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	_, err = server.CreatePrice(ctx, &pricerpc.CreatePriceParams{
+	_, err = server.CreatePrice(ctx, &price.CreatePriceParams{
 		StartAtDay:   0,
 		StartAtMonth: 0,
 		EndAtDay:     0,
@@ -157,7 +157,7 @@ func TestPriceServer_GetPriceByProductIdIsSubscribableTrue(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	_, err = server.GetPrice(ctx, &pricerpc.GetPriceParams{
+	_, err = server.GetPrice(ctx, &price.GetPriceParams{
 		ProductId: int64(product.ID),
 	})
 	if err == nil {
@@ -166,7 +166,7 @@ func TestPriceServer_GetPriceByProductIdIsSubscribableTrue(t *testing.T) {
 	if err.(twirp.Error).Code() != twirp.InvalidArgument {
 		t.FailNow()
 	}
-	_, err = server.GetPrice(ctx, &pricerpc.GetPriceParams{
+	_, err = server.GetPrice(ctx, &price.GetPriceParams{
 		ProductSku: "sku",
 	})
 	if err == nil {
@@ -175,7 +175,7 @@ func TestPriceServer_GetPriceByProductIdIsSubscribableTrue(t *testing.T) {
 	if err.(twirp.Error).Code() != twirp.InvalidArgument {
 		t.FailNow()
 	}
-	price, err := server.GetPrice(ctx, &pricerpc.GetPriceParams{
+	price, err := server.GetPrice(ctx, &price.GetPriceParams{
 		PlanId: int64(plan.ID),
 	})
 	if err != nil {
@@ -199,7 +199,7 @@ func TestPriceServer_GetPriceByProductIdIsSubscribableFalse(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	_, err = server.CreatePrice(ctx, &pricerpc.CreatePriceParams{
+	_, err = server.CreatePrice(ctx, &price.CreatePriceParams{
 		StartAtDay:   0,
 		StartAtMonth: 0,
 		EndAtDay:     0,
@@ -213,7 +213,7 @@ func TestPriceServer_GetPriceByProductIdIsSubscribableFalse(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	fromServer, err := server.GetPrice(ctx, &pricerpc.GetPriceParams{
+	fromServer, err := server.GetPrice(ctx, &price.GetPriceParams{
 		ProductId: int64(product.ID),
 	})
 	if err != nil {
@@ -228,7 +228,7 @@ func TestPriceServer_GetPriceByProductIdIsSubscribableFalse(t *testing.T) {
 	if fromDB.Price != uint16(fromServer.Price) {
 		t.FailNow()
 	}
-	fromServer, err = server.GetPrice(ctx, &pricerpc.GetPriceParams{
+	fromServer, err = server.GetPrice(ctx, &price.GetPriceParams{
 		ProductSku: "sku",
 	})
 	if err != nil {
@@ -260,14 +260,14 @@ func  TestPriceServer_GetSubscriptionPrices(t *testing.T) {
 		t.FailNow()
 	}
 	thirdpartyServer := NewThirdPartyServer(ent.NewEntClient())
-	thirdparty, err := thirdpartyServer.CreateThirdParty(ctx, &thirdpartypricerpc.CreateThirdPartyParams{
+	thirdparty, err := thirdpartyServer.CreateThirdParty(ctx, &thirdpartyprice.CreateThirdPartyParams{
 		InAppPurchaseSku: "in-app-sku",
 	})
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	prices, err := server.CreatePrice(ctx, &pricerpc.CreatePriceParams{
+	prices, err := server.CreatePrice(ctx, &price.CreatePriceParams{
 		StartAtDay:   0,
 		StartAtMonth: 0,
 		EndAtDay:     0,
@@ -283,14 +283,14 @@ func  TestPriceServer_GetSubscriptionPrices(t *testing.T) {
 		t.FailNow()
 	}
 	now := time.Now().UTC()
-	server.EndPrice(ctx, &pricerpc.EndPriceParams{
-		Params: &pricerpc.GetPriceParams{
+	server.EndPrice(ctx, &price.EndPriceParams{
+		Params: &price.GetPriceParams{
 			PriceId: prices.Id,
 		},
 		EndAtDay:   int32(now.Day()),
 		EndAtMonth: int32(now.Month()),
 	})
-	_, err = server.CreatePrice(ctx, &pricerpc.CreatePriceParams{
+	_, err = server.CreatePrice(ctx, &price.CreatePriceParams{
 		StartAtDay:   int32(now.Day()),
 		StartAtMonth: int32(now.Month()),
 		EndAtDay:     0,
@@ -305,7 +305,7 @@ func  TestPriceServer_GetSubscriptionPrices(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	subscriptions, err := server.GetSubscriptionPrices(ctx, &pricerpc.GetSubscriptionPricesParams{
+	subscriptions, err := server.GetSubscriptionPrices(ctx, &price.GetSubscriptionPricesParams{
 		ProductId: int64(product.ID),
 	})
 	if err != nil {
@@ -318,7 +318,7 @@ func  TestPriceServer_GetSubscriptionPrices(t *testing.T) {
 	if subscriptions.Prices[0].Price != 3 {
 		t.FailNow()
 	}
-	price, err := server.GetPrice(ctx, &pricerpc.GetPriceParams{PlanId: int64(plan.ID)})
+	price, err := server.GetPrice(ctx, &price.GetPriceParams{PlanId: int64(plan.ID)})
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

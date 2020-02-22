@@ -1,13 +1,13 @@
 package validator
 
 import (
-	"github.com/pepeunlimited/prices/pkg/subscriptionrpc"
+	"github.com/pepeunlimited/prices/pkg/rpc/subscription"
 	"github.com/twitchtv/twirp"
 )
 
 type SubscriptionServerValidator struct {}
 
-func (v SubscriptionServerValidator) StartSubscription(params *subscriptionrpc.StartSubscriptionParams) error {
+func (v SubscriptionServerValidator) StartSubscription(params *subscription.StartSubscriptionParams) error {
 	if params.PlanId == 0 {
 		return twirp.RequiredArgumentError("plan_id")
 	}
@@ -17,11 +17,11 @@ func (v SubscriptionServerValidator) StartSubscription(params *subscriptionrpc.S
 	return nil
 }
 
-func (v SubscriptionServerValidator) StopSubscription(params *subscriptionrpc.StopSubscriptionParams) error {
+func (v SubscriptionServerValidator) StopSubscription(params *subscription.StopSubscriptionParams) error {
 	return nil
 }
 
-func (v SubscriptionServerValidator) GetSubscription(params *subscriptionrpc.GetSubscriptionParams) error {
+func (v SubscriptionServerValidator) GetSubscription(params *subscription.GetSubscriptionParams) error {
 	if params.UserId == 0 {
 		return twirp.RequiredArgumentError("user_id")
 	}
@@ -31,7 +31,7 @@ func (v SubscriptionServerValidator) GetSubscription(params *subscriptionrpc.Get
 	return nil
 }
 
-func (v SubscriptionServerValidator) GetSubscriptions(params *subscriptionrpc.GetSubscriptionsParams) error {
+func (v SubscriptionServerValidator) GetSubscriptions(params *subscription.GetSubscriptionsParams) error {
 	if params.UserId == 0 {
 		return twirp.RequiredArgumentError("user_id")
 	}

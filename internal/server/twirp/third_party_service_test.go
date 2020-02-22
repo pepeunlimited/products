@@ -3,7 +3,7 @@ package twirp
 import (
 	"context"
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/pkg/thirdpartypricerpc"
+	"github.com/pepeunlimited/prices/pkg/rpc/thirdpartyprice"
 	"github.com/twitchtv/twirp"
 	"log"
 	"testing"
@@ -15,7 +15,7 @@ func TestThirdPartyServer_CreateThirdParty(t *testing.T) {
 	client := ent.NewEntClient()
 	server := NewThirdPartyServer(client)
 	server.thirdparty.Wipe(ctx)
-	party, err := server.CreateThirdParty(ctx, &thirdpartypricerpc.CreateThirdPartyParams {
+	party, err := server.CreateThirdParty(ctx, &thirdpartyprice.CreateThirdPartyParams{
 		InAppPurchaseSku: "sku",
 		StartAtMonth:2,
 		StartAtDay:12,
@@ -24,7 +24,7 @@ func TestThirdPartyServer_CreateThirdParty(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	thirdParty, err := server.GetThirdParty(ctx, &thirdpartypricerpc.GetThirdPartyParams{
+	thirdParty, err := server.GetThirdParty(ctx, &thirdpartyprice.GetThirdPartyParams{
 		Id: party.Id,
 	})
 	if err != nil {
@@ -41,7 +41,7 @@ func TestThirdPartyServer_CreateThirdParty(t *testing.T) {
 	if query.StartAt.Day() != 12 {
 		t.FailNow()
 	}
-	thirdParty, err = server.GetThirdParty(ctx, &thirdpartypricerpc.GetThirdPartyParams{
+	thirdParty, err = server.GetThirdParty(ctx, &thirdpartyprice.GetThirdPartyParams{
 		InAppPurchaseSku: "sku",
 	})
 	if err != nil {
@@ -51,7 +51,7 @@ func TestThirdPartyServer_CreateThirdParty(t *testing.T) {
 	if thirdParty.Id != party.Id {
 		t.FailNow()
 	}
-	thirdParty, err = server.GetThirdParty(ctx, &thirdpartypricerpc.GetThirdPartyParams{
+	thirdParty, err = server.GetThirdParty(ctx, &thirdpartyprice.GetThirdPartyParams{
 		GoogleBillingServiceSku:"sku",
 	})
 	if err == nil {
@@ -60,7 +60,7 @@ func TestThirdPartyServer_CreateThirdParty(t *testing.T) {
 	if err.(twirp.Error).Code() != twirp.NotFound {
 		t.FailNow()
 	}
-	party, err = server.CreateThirdParty(ctx, &thirdpartypricerpc.CreateThirdPartyParams {
+	party, err = server.CreateThirdParty(ctx, &thirdpartyprice.CreateThirdPartyParams{
 		InAppPurchaseSku: "sku2",
 	})
 	if err != nil {
@@ -86,28 +86,28 @@ func TestThirdPartyServer_GetThirdParties(t *testing.T) {
 	ctx := context.TODO()
 	server := NewThirdPartyServer(ent.NewEntClient())
 	server.thirdparty.Wipe(ctx)
-	_, err := server.CreateThirdParty(ctx, &thirdpartypricerpc.CreateThirdPartyParams{
+	_, err := server.CreateThirdParty(ctx, &thirdpartyprice.CreateThirdPartyParams{
 		InAppPurchaseSku: "sku0",
 	})
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	sku1, err := server.CreateThirdParty(ctx, &thirdpartypricerpc.CreateThirdPartyParams{
+	sku1, err := server.CreateThirdParty(ctx, &thirdpartyprice.CreateThirdPartyParams{
 		InAppPurchaseSku: "sku1",
 	})
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	_, err = server.CreateThirdParty(ctx, &thirdpartypricerpc.CreateThirdPartyParams{
+	_, err = server.CreateThirdParty(ctx, &thirdpartyprice.CreateThirdPartyParams{
 		InAppPurchaseSku: "sku2",
 	})
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	_, err = server.CreateThirdParty(ctx, &thirdpartypricerpc.CreateThirdPartyParams{
+	_, err = server.CreateThirdParty(ctx, &thirdpartyprice.CreateThirdPartyParams{
 		InAppPurchaseSku: "sku3",
 	})
 	if err != nil {
@@ -115,7 +115,7 @@ func TestThirdPartyServer_GetThirdParties(t *testing.T) {
 		t.FailNow()
 	}
 	now := time.Now().Add(24 * time.Hour)
-	_, err = server.CreateThirdParty(ctx, &thirdpartypricerpc.CreateThirdPartyParams{
+	_, err = server.CreateThirdParty(ctx, &thirdpartyprice.CreateThirdPartyParams{
 		InAppPurchaseSku: "sku4",
 		StartAtMonth:     int32(now.Month()),
 		StartAtDay:       int32(now.Day()),
@@ -125,8 +125,8 @@ func TestThirdPartyServer_GetThirdParties(t *testing.T) {
 		t.FailNow()
 	}
 	now = now.Add(-24 * time.Hour)
-	_, err = server.EndThirdParty(ctx, &thirdpartypricerpc.EndThirdPartyParams{
-		Params: &thirdpartypricerpc.GetThirdPartyParams{
+	_, err = server.EndThirdParty(ctx, &thirdpartyprice.EndThirdPartyParams{
+		Params: &thirdpartyprice.GetThirdPartyParams{
 			Id: sku1.Id,
 		},
 		EndAtMonth: int32(now.Month()),
@@ -142,7 +142,7 @@ func TestThirdPartyServer_GetThirdParties(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	fromServer, err := server.GetThirdParties(ctx, &thirdpartypricerpc.GetThirdPartiesParams{})
+	fromServer, err := server.GetThirdParties(ctx, &thirdpartyprice.GetThirdPartiesParams{})
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

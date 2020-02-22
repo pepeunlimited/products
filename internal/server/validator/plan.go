@@ -3,13 +3,13 @@ package validator
 import (
 	"github.com/pepeunlimited/microservice-kit/validator"
 	"github.com/pepeunlimited/prices/internal/pkg/mysql/plan"
-	"github.com/pepeunlimited/prices/pkg/planrpc"
+	"github.com/pepeunlimited/prices/pkg/rpc/plan"
 	"github.com/twitchtv/twirp"
 )
 
 type PlanServerValidator struct {}
 
-func (v PlanServerValidator) CreatePlan(params *planrpc.CreatePlanParams) error {
+func (v PlanServerValidator) CreatePlan(params *plan.CreatePlanParams) error {
 	if params.Length == 0 {
 		return twirp.RequiredArgumentError("length")
 	}
@@ -23,14 +23,14 @@ func (v PlanServerValidator) CreatePlan(params *planrpc.CreatePlanParams) error 
 	return nil
 }
 
-func (v PlanServerValidator) GetPlan(params *planrpc.GetPlanParams) error {
+func (v PlanServerValidator) GetPlan(params *plan.GetPlanParams) error {
 	if params.PlanId == 0 {
 		return twirp.RequiredArgumentError("plan_id")
 	}
 	return nil
 }
 
-func (v PlanServerValidator) GetPlans(params *planrpc.GetPlansParams) error {
+func (v PlanServerValidator) GetPlans(params *plan.GetPlansParams) error {
 	return nil
 }
 

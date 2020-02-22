@@ -7,7 +7,7 @@ import (
 	"github.com/pepeunlimited/prices/internal/pkg/mysql/product"
 	"github.com/pepeunlimited/prices/internal/server/errorz"
 	"github.com/pepeunlimited/prices/internal/server/validator"
-	"github.com/pepeunlimited/prices/pkg/productrpc"
+	"github.com/pepeunlimited/prices/pkg/rpc/product"
 )
 
 type ProductServer struct {
@@ -15,7 +15,7 @@ type ProductServer struct {
 	valid    validator.ProductValidator
 }
 
-func (server ProductServer) GetProducts(ctx context.Context, params *productrpc.GetProductsParams) (*productrpc.GetProductsResponse, error) {
+func (server ProductServer) GetProducts(ctx context.Context, params *product.GetProductsParams) (*product.GetProductsResponse, error) {
 	err := server.valid.GetProducts(params)
 	if err != nil {
 		return nil, err
@@ -24,13 +24,13 @@ func (server ProductServer) GetProducts(ctx context.Context, params *productrpc.
 	if err != nil {
 		return nil, errorz.Product(err)
 	}
-	return &productrpc.GetProductsResponse{
+	return &product.GetProductsResponse{
 		Products:      ToProducts(products),
 		NextPageToken: nextPageToken,
 	}, nil
 }
 
-func (server ProductServer) CreateProduct(ctx context.Context, params *productrpc.CreateProductParams) (*productrpc.Product, error) {
+func (server ProductServer) CreateProduct(ctx context.Context, params *product.CreateProductParams) (*product.Product, error) {
 	err := server.valid.CreateProduct(params)
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func (server ProductServer) CreateProduct(ctx context.Context, params *productrp
 	return ToProduct(product), nil
 }
 
-func (server ProductServer) GetProduct(ctx context.Context, params *productrpc.GetProductParams) (*productrpc.Product, error) {
+func (server ProductServer) GetProduct(ctx context.Context, params *product.GetProductParams) (*product.Product, error) {
 	err := server.valid.GetProduct(params)
 	if err != nil {
 		return nil, err

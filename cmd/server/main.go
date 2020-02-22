@@ -4,11 +4,11 @@ import (
 	"github.com/pepeunlimited/microservice-kit/middleware"
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
 	"github.com/pepeunlimited/prices/internal/server/twirp"
-	"github.com/pepeunlimited/prices/pkg/planrpc"
-	"github.com/pepeunlimited/prices/pkg/pricerpc"
-	"github.com/pepeunlimited/prices/pkg/productrpc"
-	"github.com/pepeunlimited/prices/pkg/subscriptionrpc"
-	"github.com/pepeunlimited/prices/pkg/thirdpartypricerpc"
+	"github.com/pepeunlimited/prices/pkg/rpc/plan"
+	"github.com/pepeunlimited/prices/pkg/rpc/price"
+	"github.com/pepeunlimited/prices/pkg/rpc/product"
+	"github.com/pepeunlimited/prices/pkg/rpc/subscription"
+	"github.com/pepeunlimited/prices/pkg/rpc/thirdpartyprice"
 	"log"
 	"net/http"
 )
@@ -25,11 +25,11 @@ func main() {
 	log.Printf("Starting the ProductsServer... version=[%v]", Version)
 
 	client := ent.NewEntClient()
-	ps := productrpc.NewProductServiceServer(twirp.NewProductServer(client), nil)
-	pls := planrpc.NewPlanServiceServer(twirp.NewPlanServer(client), nil)
-	ss := subscriptionrpc.NewSubscriptionServiceServer(twirp.NewSubscriptionServer(client), nil)
-	tp := thirdpartypricerpc.NewThirdPartyServiceServer(twirp.NewThirdPartyServer(client), nil)
-	prs := pricerpc.NewPriceServiceServer(twirp.NewPriceServer(client), nil)
+	ps := product.NewProductServiceServer(twirp.NewProductServer(client), nil)
+	pls := plan.NewPlanServiceServer(twirp.NewPlanServer(client), nil)
+	ss := subscription.NewSubscriptionServiceServer(twirp.NewSubscriptionServer(client), nil)
+	tp := thirdpartyprice.NewThirdPartyServiceServer(twirp.NewThirdPartyServer(client), nil)
+	prs := price.NewPriceServiceServer(twirp.NewPriceServer(client), nil)
 
 	mux := http.NewServeMux()
 	mux.Handle(ps.PathPrefix(), middleware.Adapt(ps))

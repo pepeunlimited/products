@@ -2,16 +2,16 @@ package twirp
 
 import (
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/pkg/planrpc"
-	"github.com/pepeunlimited/prices/pkg/pricerpc"
-	"github.com/pepeunlimited/prices/pkg/productrpc"
-	"github.com/pepeunlimited/prices/pkg/subscriptionrpc"
-	"github.com/pepeunlimited/prices/pkg/thirdpartypricerpc"
+	"github.com/pepeunlimited/prices/pkg/rpc/plan"
+	"github.com/pepeunlimited/prices/pkg/rpc/price"
+	"github.com/pepeunlimited/prices/pkg/rpc/product"
+	"github.com/pepeunlimited/prices/pkg/rpc/subscription"
+	"github.com/pepeunlimited/prices/pkg/rpc/thirdpartyprice"
 	"time"
 )
 
-func ToThirdParty(thirdparty *ent.ThirdParty) *thirdpartypricerpc.ThirdParty {
-	return &thirdpartypricerpc.ThirdParty{
+func ToThirdParty(thirdparty *ent.ThirdParty) *thirdpartyprice.ThirdParty {
+	return &thirdpartyprice.ThirdParty{
 		Id:                      int32(thirdparty.ID),
 		InAppPurchaseSku:        thirdparty.InAppPurchaseSku,
 		GoogleBillingServiceSku: thirdparty.GoogleBillingServiceSku,
@@ -20,16 +20,16 @@ func ToThirdParty(thirdparty *ent.ThirdParty) *thirdpartypricerpc.ThirdParty {
 	}
 }
 
-func ToThirdParties(parties []*ent.ThirdParty) []*thirdpartypricerpc.ThirdParty {
-	list := make([]*thirdpartypricerpc.ThirdParty, 0)
+func ToThirdParties(parties []*ent.ThirdParty) []*thirdpartyprice.ThirdParty {
+	list := make([]*thirdpartyprice.ThirdParty, 0)
 	for _, party := range parties {
 		list = append(list, ToThirdParty(party))
 	}
 	return list
 }
 
-func ToPrice(price *ent.Price) *pricerpc.Price {
-	p := &pricerpc.Price{
+func ToPrice(price *ent.Price) *price.Price {
+	p := &price.Price{
 		Id:       int64(price.ID),
 		Price:    uint32(price.Price),
 		Discount: uint32(price.Discount),
@@ -48,16 +48,16 @@ func ToPrice(price *ent.Price) *pricerpc.Price {
 	return p
 }
 
-func ToPrices(prices []*ent.Price) []*pricerpc.Price {
-	list := make([]*pricerpc.Price, 0)
+func ToPrices(prices []*ent.Price) []*price.Price {
+	list := make([]*price.Price, 0)
 	for _, price := range prices {
 		list = append(list, ToPrice(price))
 	}
 	return list
 }
 
-func ToPlan(plan *ent.Plan) *planrpc.Plan {
-	return &planrpc.Plan{
+func ToPlan(plan *ent.Plan) *plan.Plan {
+	return &plan.Plan{
 		Id:          int64(plan.ID),
 		TitleI18NId: plan.TitleI18nID,
 		Unit:        plan.Unit,
@@ -65,15 +65,15 @@ func ToPlan(plan *ent.Plan) *planrpc.Plan {
 	}
 }
 
-func ToProduct(product *ent.Product) *productrpc.Product {
-	return &productrpc.Product{
+func ToProduct(product *ent.Product) *product.Product {
+	return &product.Product{
 		Sku: product.Sku,
 		Id:  int64(product.ID),
 	}
 }
 
-func ToSubscription(subscription *ent.Subscription) *subscriptionrpc.Subscription {
-	s := &subscriptionrpc.Subscription{
+func ToSubscription(subscription *ent.Subscription) *subscription.Subscription {
+	s := &subscription.Subscription{
 		Id:     	int64(subscription.ID),
 		UserId: 	subscription.UserID,
 		StartAt:	subscription.StartAt.Format(time.RFC3339),
@@ -85,24 +85,24 @@ func ToSubscription(subscription *ent.Subscription) *subscriptionrpc.Subscriptio
 	return s
 }
 
-func ToSubscriptions(subscriptions []*ent.Subscription) []*subscriptionrpc.Subscription {
-	list := make([]*subscriptionrpc.Subscription, 0)
+func ToSubscriptions(subscriptions []*ent.Subscription) []*subscription.Subscription {
+	list := make([]*subscription.Subscription, 0)
 	for _, subscription := range subscriptions {
 		list = append(list, ToSubscription(subscription))
 	}
 	return list
 }
 
-func ToProducts(products []*ent.Product) []*productrpc.Product {
-	list := make([]*productrpc.Product, 0)
+func ToProducts(products []*ent.Product) []*product.Product {
+	list := make([]*product.Product, 0)
 	for _,product := range products {
 		list = append(list, ToProduct(product))
 	}
 	return list
 }
 
-func ToPlans(plans []*ent.Plan) []*planrpc.Plan {
-	list := make([]*planrpc.Plan, 0)
+func ToPlans(plans []*ent.Plan) []*plan.Plan {
+	list := make([]*plan.Plan, 0)
 	for _, plan := range plans {
 		list = append(list, ToPlan(plan))
 	}

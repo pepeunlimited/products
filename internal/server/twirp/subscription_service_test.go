@@ -3,10 +3,10 @@ package twirp
 import (
 	"context"
 	"github.com/pepeunlimited/prices/internal/pkg/ent"
-	"github.com/pepeunlimited/prices/pkg/planrpc"
-	"github.com/pepeunlimited/prices/pkg/pricerpc"
-	"github.com/pepeunlimited/prices/pkg/productrpc"
-	"github.com/pepeunlimited/prices/pkg/subscriptionrpc"
+	"github.com/pepeunlimited/prices/pkg/rpc/plan"
+	"github.com/pepeunlimited/prices/pkg/rpc/price"
+	"github.com/pepeunlimited/prices/pkg/rpc/product"
+	"github.com/pepeunlimited/prices/pkg/rpc/subscription"
 	"testing"
 	"time"
 )
@@ -18,7 +18,7 @@ func TestSubscriptionServer_StartSubscription(t *testing.T) {
 	server.plans.Wipe(ctx)
 	planServer := NewPlanServer(client)
 	length := 5
-	plan, err := planServer.CreatePlan(ctx, &planrpc.CreatePlanParams{
+	plan, err := planServer.CreatePlan(ctx, &plan.CreatePlanParams{
 		TitleI18NId: 1,
 		Length:      int32(length),
 		Unit:        "days",
@@ -28,7 +28,7 @@ func TestSubscriptionServer_StartSubscription(t *testing.T) {
 		t.FailNow()
 	}
 	productServer := NewProductServer(client)
-	product, err := productServer.CreateProduct(ctx, &productrpc.CreateProductParams{
+	product, err := productServer.CreateProduct(ctx, &product.CreateProductParams{
 		Sku: "sku-product",
 	})
 	if err != nil {
@@ -36,7 +36,7 @@ func TestSubscriptionServer_StartSubscription(t *testing.T) {
 		t.FailNow()
 	}
 	priceServer 	 := NewPriceServer(client)
-	_, err 			  = priceServer.CreatePrice(ctx, &pricerpc.CreatePriceParams{
+	_, err 			  = priceServer.CreatePrice(ctx, &price.CreatePriceParams{
 		StartAtDay:   0,
 		StartAtMonth: 0,
 		EndAtDay:     0,
@@ -51,7 +51,7 @@ func TestSubscriptionServer_StartSubscription(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	subscription, err := server.StartSubscription(ctx, &subscriptionrpc.StartSubscriptionParams{
+	subscription, err := server.StartSubscription(ctx, &subscription.StartSubscriptionParams{
 		UserId: 1,
 		PlanId: plan.Id,
 	})
@@ -82,7 +82,7 @@ func TestSubscriptionServer_StartSubscription(t *testing.T) {
 	if now.Add((24 * time.Hour) * time.Duration(length)).Day() != endAt.Day() {
 		t.FailNow()
 	}
-	fromServer, err := server.GetSubscription(ctx, &subscriptionrpc.GetSubscriptionParams{
+	fromServer, err := server.GetSubscription(ctx, &subscription.GetSubscriptionParams{
 		SubscriptionId: subscription.Id,
 		UserId:         1,
 	})
@@ -93,7 +93,7 @@ func TestSubscriptionServer_StartSubscription(t *testing.T) {
 	if fromServer.Id != subscription.Id {
 		t.FailNow()
 	}
-	subscriptions, err := server.GetSubscriptions(ctx, &subscriptionrpc.GetSubscriptionsParams{
+	subscriptions, err := server.GetSubscriptions(ctx, &subscription.GetSubscriptionsParams{
 		UserId:    2,
 		PageSize:  20,
 		PageToken: 0,

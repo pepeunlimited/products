@@ -8,10 +8,9 @@ import (
 	"github.com/pepeunlimited/prices/internal/pkg/mysql/plan"
 	"github.com/pepeunlimited/prices/internal/pkg/mysql/price"
 	"github.com/pepeunlimited/prices/internal/pkg/mysql/product"
-	"github.com/pepeunlimited/prices/internal/pkg/mysql/thirdpartyprice"
 	"github.com/pepeunlimited/prices/internal/server/errorz"
 	"github.com/pepeunlimited/prices/internal/server/validator"
-	"github.com/pepeunlimited/prices/pkg/pricerpc"
+	"github.com/pepeunlimited/prices/pkg/rpc/price"
 	"github.com/twitchtv/twirp"
 	"time"
 )
@@ -24,7 +23,7 @@ type PriceServer struct {
 	plans        plan.PlanRepository
 }
 
-func (server PriceServer) EndPrice(ctx context.Context, params *pricerpc.EndPriceParams) (*pricerpc.Price, error) {
+func (server PriceServer) EndPrice(ctx context.Context, params *price.EndPriceParams) (*price.Price, error) {
 	err := server.valid.EndPrice(params)
 	if err != nil {
 		return nil, err
@@ -37,7 +36,7 @@ func (server PriceServer) EndPrice(ctx context.Context, params *pricerpc.EndPric
 	return ToPrice(at), nil
 }
 
-func (server PriceServer) GetSubscriptionPrices(ctx context.Context, params *pricerpc.GetSubscriptionPricesParams) (*pricerpc.GetSubscriptionPricesResponse, error) {
+func (server PriceServer) GetSubscriptionPrices(ctx context.Context, params *price.GetSubscriptionPricesParams) (*price.GetSubscriptionPricesResponse, error) {
 	err := server.valid.GetSubscriptionPrices(params)
 	if err != nil {
 		return nil, err
@@ -66,10 +65,10 @@ func (server PriceServer) GetSubscriptionPrices(ctx context.Context, params *pri
 	if err != nil {
 		return nil, errorz.Price(err)
 	}
-	return &pricerpc.GetSubscriptionPricesResponse{Prices: ToPrices(prices)}, nil
+	return &price.GetSubscriptionPricesResponse{Prices: ToPrices(prices)}, nil
 }
 
-func (server PriceServer) CreatePrice(ctx context.Context, params *pricerpc.CreatePriceParams) (*pricerpc.Price, error) {
+func (server PriceServer) CreatePrice(ctx context.Context, params *price.CreatePriceParams) (*price.Price, error) {
 	err := server.valid.CreatePrice(params)
 	if err != nil {
 		return nil, err
@@ -120,7 +119,7 @@ func (server PriceServer) CreatePrice(ctx context.Context, params *pricerpc.Crea
 	return ToPrice(price), nil
 }
 
-func (server PriceServer) GetPrice(ctx context.Context, params *pricerpc.GetPriceParams) (*pricerpc.Price, error) {
+func (server PriceServer) GetPrice(ctx context.Context, params *price.GetPriceParams) (*price.Price, error) {
 	err := server.valid.GetPrice(params)
 	if err != nil {
 		return nil, err

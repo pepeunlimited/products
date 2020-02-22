@@ -2,7 +2,7 @@ package validator
 
 import (
 	"github.com/pepeunlimited/microservice-kit/validator"
-	"github.com/pepeunlimited/prices/pkg/productrpc"
+	"github.com/pepeunlimited/prices/pkg/rpc/product"
 	"github.com/twitchtv/twirp"
 )
 
@@ -10,21 +10,21 @@ type ProductValidator struct {
 
 }
 
-func (v ProductValidator) CreateProduct(params *productrpc.CreateProductParams) error {
+func (v ProductValidator) CreateProduct(params *product.CreateProductParams) error {
 	if validator.IsEmpty(params.Sku) {
 		return twirp.RequiredArgumentError("sku")
 	}
 	return nil
 }
 
-func (v ProductValidator) GetProduct(params *productrpc.GetProductParams) error {
+func (v ProductValidator) GetProduct(params *product.GetProductParams) error {
 	if params.ProductId == 0 && validator.IsEmpty(params.Sku) {
 		return twirp.RequiredArgumentError("at_least_product_id")
 	}
 	return nil
 }
 
-func (v ProductValidator) GetProducts(params *productrpc.GetProductsParams) error {
+func (v ProductValidator) GetProducts(params *product.GetProductsParams) error {
 	if params.PageSize == 0 {
 		return twirp.RequiredArgumentError("page_size")
 	}

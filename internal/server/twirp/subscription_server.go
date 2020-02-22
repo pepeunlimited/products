@@ -8,7 +8,7 @@ import (
 	"github.com/pepeunlimited/prices/internal/pkg/mysql/subscription"
 	"github.com/pepeunlimited/prices/internal/server/errorz"
 	"github.com/pepeunlimited/prices/internal/server/validator"
-	"github.com/pepeunlimited/prices/pkg/subscriptionrpc"
+	"github.com/pepeunlimited/prices/pkg/rpc/subscription"
 	"time"
 )
 
@@ -19,7 +19,7 @@ type SubscriptionServer struct {
 	prices        price.PriceRepository
 }
 
-func (server SubscriptionServer) StartSubscription(ctx context.Context, params *subscriptionrpc.StartSubscriptionParams) (*subscriptionrpc.Subscription, error) {
+func (server SubscriptionServer) StartSubscription(ctx context.Context, params *subscription.StartSubscriptionParams) (*subscription.Subscription, error) {
 	err := server.valid.StartSubscription(params)
 	if err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func (server SubscriptionServer) StartSubscription(ctx context.Context, params *
 	return ToSubscription(subscription), nil
 }
 
-func (server SubscriptionServer) StopSubscription(ctx context.Context, params *subscriptionrpc.StopSubscriptionParams) (*subscriptionrpc.Subscription, error) {
+func (server SubscriptionServer) StopSubscription(ctx context.Context, params *subscription.StopSubscriptionParams) (*subscription.Subscription, error) {
 	err := server.valid.StopSubscription(params)
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func (server SubscriptionServer) StopSubscription(ctx context.Context, params *s
 	return nil, nil
 }
 
-func (server SubscriptionServer) GetSubscription(ctx context.Context, params *subscriptionrpc.GetSubscriptionParams) (*subscriptionrpc.Subscription, error) {
+func (server SubscriptionServer) GetSubscription(ctx context.Context, params *subscription.GetSubscriptionParams) (*subscription.Subscription, error) {
 	err := server.valid.GetSubscription(params)
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (server SubscriptionServer) GetSubscription(ctx context.Context, params *su
 	return ToSubscription(subscription), nil
 }
 
-func (server SubscriptionServer) GetSubscriptions(ctx context.Context, params *subscriptionrpc.GetSubscriptionsParams) (*subscriptionrpc.GetSubscriptionsResponse, error) {
+func (server SubscriptionServer) GetSubscriptions(ctx context.Context, params *subscription.GetSubscriptionsParams) (*subscription.GetSubscriptionsResponse, error) {
 	err := server.valid.GetSubscriptions(params)
 	if err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func (server SubscriptionServer) GetSubscriptions(ctx context.Context, params *s
 	if err != nil {
 		return nil, errorz.Subscription(err)
 	}
-	return &subscriptionrpc.GetSubscriptionsResponse{
+	return &subscription.GetSubscriptionsResponse{
 		Subscriptions: ToSubscriptions(subscriptions),
 		NextPageToken: nextPageToken,
 	}, nil

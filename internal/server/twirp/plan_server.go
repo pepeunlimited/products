@@ -6,7 +6,7 @@ import (
 	"github.com/pepeunlimited/prices/internal/pkg/mysql/plan"
 	"github.com/pepeunlimited/prices/internal/server/errorz"
 	"github.com/pepeunlimited/prices/internal/server/validator"
-	"github.com/pepeunlimited/prices/pkg/planrpc"
+	"github.com/pepeunlimited/prices/pkg/rpc/plan"
 	"github.com/twitchtv/twirp"
 	"time"
 )
@@ -16,7 +16,7 @@ type PlanServer struct {
 	valid validator.PlanServerValidator
 }
 
-func (server PlanServer) CreatePlan(ctx context.Context, params *planrpc.CreatePlanParams) (*planrpc.Plan, error) {
+func (server PlanServer) CreatePlan(ctx context.Context, params *plan.CreatePlanParams) (*plan.Plan, error) {
 	err := server.valid.CreatePlan(params)
 	if err != nil {
 		return nil, err
@@ -28,7 +28,7 @@ func (server PlanServer) CreatePlan(ctx context.Context, params *planrpc.CreateP
 	return ToPlan(create), nil
 }
 
-func (server PlanServer) GetPlans(ctx context.Context, params *planrpc.GetPlansParams) (*planrpc.GetPlansResponse, error) {
+func (server PlanServer) GetPlans(ctx context.Context, params *plan.GetPlansParams) (*plan.GetPlansResponse, error) {
 	err := server.valid.GetPlans(params)
 	if err != nil {
 		return nil, err
@@ -37,10 +37,10 @@ func (server PlanServer) GetPlans(ctx context.Context, params *planrpc.GetPlansP
 	if err != nil {
 		return nil, errorz.Plan(err)
 	}
-	return &planrpc.GetPlansResponse{Plans:ToPlans(plans)}, nil
+	return &plan.GetPlansResponse{Plans: ToPlans(plans)}, nil
 }
 
-func (server PlanServer) GetPlan(ctx context.Context, params *planrpc.GetPlanParams) (*planrpc.Plan, error) {
+func (server PlanServer) GetPlan(ctx context.Context, params *plan.GetPlanParams) (*plan.Plan, error) {
 	err := server.valid.GetPlan(params)
 	if err != nil {
 		return nil, err
