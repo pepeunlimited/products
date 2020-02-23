@@ -43,12 +43,12 @@ func (server ThirdPartyPriceServer) CreateThirdPartyPrice(ctx context.Context, p
 	return ToThirdParty(thirdparty), nil
 }
 
-func (server ThirdPartyPriceServer) GetThirdPartyPrices(ctx context.Context, params *thirdpartyprice.GetThirdPartiesParams) (*thirdpartyprice.GetThirdPartyPricesResponse, error) {
-	err := server.valid.GetThirdParties(params)
+func (server ThirdPartyPriceServer) GetThirdPartyPrices(ctx context.Context, params *thirdpartyprice.GetThirdPartyPricesParams) (*thirdpartyprice.GetThirdPartyPricesResponse, error) {
+	err := server.valid.GetThirdPartyPrices(params)
 	if err != nil {
 		return nil, err
 	}
-	thirdParties, err := server.thirdpartyprice.GetThirdPartyPrices(ctx)
+	thirdParties, err := server.thirdpartyprice.GetThirdPartyPrices(ctx, params.Type)
 	if err != nil {
 		return nil, errorz.ThirdParty(err)
 	}
@@ -76,7 +76,7 @@ func (server ThirdPartyPriceServer) GetThirdPartyPrice(ctx context.Context, para
 	return ToThirdParty(price), nil
 }
 
-func (server ThirdPartyPriceServer) EndThirdParty(ctx context.Context, params *thirdpartyprice.EndThirdPartyPriceParams) (*thirdpartyprice.ThirdPartyPrice, error) {
+func (server ThirdPartyPriceServer) EndThirdPartyPrice(ctx context.Context, params *thirdpartyprice.EndThirdPartyPriceParams) (*thirdpartyprice.ThirdPartyPrice, error) {
 	err := server.valid.EndThirdParty(params)
 	if err != nil {
 		return nil, err

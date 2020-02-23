@@ -13,6 +13,9 @@ import (
 var (
 	ErrPlanNotExist 			= errors.New("plans: plan not exist")
 	ErrUnknownPlanUnit 			= errors.New("plans: unknown plan unit")
+	ErrInvalidStartAt 			= errors.New("plans: invalid startAt")
+	ErrInvalidEndAt 			= errors.New("plans: invalid endAt")
+	ErrInvalidStartAtEndAt 		= errors.New("plans: startAt and endAt are equal")
 )
 
 type PlanRepository interface {
@@ -115,6 +118,15 @@ func (mysql planMySQL) Wipe(ctx context.Context) {
 }
 
 func (mysql planMySQL) CreatePlan(ctx context.Context, i18nId int64, length uint8, unit Unit, price uint16, discount uint16, productId int, startAt time.Time, endAt time.Time, price3rdId *int) (*ent.Plan, error) {
+	if endAt.Equal(startAt) {
+		return nil, ErrInvalidStartAtEndAt
+	}
+	if endAt.Before(startAt) {
+		return nil, ErrInvalidEndAt
+	}
+	if startAt.After(endAt) {
+		return nil, ErrInvalidStartAt
+	}
 	if price3rdId != nil {
 		if *price3rdId == 0 {
 			price3rdId = nil

@@ -25,7 +25,7 @@ message CreatePlanParams {
     uint32  price                 = 8;  // => required
     uint32  discount              = 9;  // optional
     int64   product_id            = 10;  // => required
-    int32   third_party_price_id  = 11;  // optional
+    int64   third_party_price_id  = 11;  // optional
 }
 
 message Plan {
@@ -37,7 +37,7 @@ message Plan {
     uint32  discount             = 6;
     string  start_at             = 7;
     string  end_at               = 8;
-    int32   third_party_price_id = 9;
+    int64   third_party_price_id = 9;
     int64   product_id           = 10;
 }
 

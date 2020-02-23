@@ -17,19 +17,21 @@ func TestSubscriptionServer_StartSubscription(t *testing.T) {
 	server := NewSubscriptionServer(client)
 	server.plans.Wipe(ctx)
 	planServer := NewPlanServer(client)
-	length := 5
-	plan, err := planServer.CreatePlan(ctx, &plan.CreatePlanParams{
-		TitleI18NId: 1,
-		Length:      int32(length),
-		Unit:        "days",
+
+	productServer := NewProductServer(client)
+	product, err := productServer.CreateProduct(ctx, &product.CreateProductParams{
+		Sku: "sku-product",
 	})
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	productServer := NewProductServer(client)
-	product, err := productServer.CreateProduct(ctx, &product.CreateProductParams{
-		Sku: "sku-product",
+	length := 5
+	plan, err := planServer.CreatePlan(ctx, &plan.CreatePlanParams{
+		TitleI18NId: 1,
+		Length:      int32(length),
+		Unit:        "days",
+		ProductId:	product.Id,
 	})
 	if err != nil {
 		t.Error(err)
@@ -58,7 +60,7 @@ func TestSubscriptionServer_StartSubscription(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	now := time.Now()
+	now := time.Now().UTC()
 	startAt, err := time.Parse(time.RFC3339, fromServer.StartAt)
 	if err != nil {
 		t.Error(err)
@@ -69,7 +71,7 @@ func TestSubscriptionServer_StartSubscription(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	if now.Month() != startAt.Month() {
+	if now.Month() != startAt.UTC().Month() {
 		t.FailNow()
 	}
 	if now.Day() != startAt.Day() {
@@ -93,7 +95,7 @@ func TestSubscriptionServer_StartSubscription(t *testing.T) {
 		t.FailNow()
 	}
 	subscriptions, err := server.GetSubscriptions(ctx, &subscription.GetSubscriptionsParams{
-		UserId:    2,
+		UserId:    1,
 		PageSize:  20,
 		PageToken: 0,
 	})

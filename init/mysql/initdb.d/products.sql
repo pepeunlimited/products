@@ -14,7 +14,7 @@ CREATE TABLE products (
 # |third_party_prices|
 #  ------------------
 CREATE TABLE third_party_prices (
-    id                          TINYINT     NOT NULL AUTO_INCREMENT,
+    id                          BIGINT      NOT NULL AUTO_INCREMENT,
     in_app_purchase_sku         CHAR(32)    UNIQUE NOT NULL,
     google_billing_service_sku  CHAR(32)    UNIQUE NULL, # for the future
     start_at                    DATETIME(3) NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE plans (
    length            TINYINT     UNSIGNED NOT NULL,
    unit              CHAR(7)     NOT NULL, # days, weeks, months
    product_plans     BIGINT      NOT NULL, # product whose pricing this plan determines.
-   third_party_price_plans     TINYINT     NULL,     # if plans has option to use in-app-purchase
+   third_party_price_plans      BIGINT     NULL,     # if plans has option to use in-app-purchase
    FOREIGN KEY (product_plans)  REFERENCES  products (id),
    FOREIGN KEY (third_party_price_plans)   REFERENCES  third_party_prices (id),
    PRIMARY KEY (id)
@@ -59,7 +59,7 @@ CREATE TABLE prices (
     price                        MEDIUMINT   UNSIGNED DEFAULT 0,
     discount                     MEDIUMINT   UNSIGNED DEFAULT 0,
     product_prices               BIGINT      NOT NULL, # product whose pricing this determines.
-    third_party_price_prices     TINYINT     NULL,     # if price has option to use in-app-purchase
+    third_party_price_prices     BIGINT     NULL,     # if price has option to use in-app-purchase
     FOREIGN KEY (third_party_price_prices)  REFERENCES  third_party_prices (id),
     FOREIGN KEY (product_prices) REFERENCES  products (id),
     PRIMARY KEY (id)

@@ -14,6 +14,7 @@ var (
 	ErrPriceNotExist 		= errors.New("prices: not exist")
 	ErrInvalidStartAt 		= errors.New("prices: invalid startAt")
 	ErrInvalidEndAt 		= errors.New("prices: invalid endAt")
+	ErrInvalidStartAtEndAt 	= errors.New("price: startAt and endAt are equal")
 	ErrInvalidProduct 		= errors.New("prices: invalid product")
 )
 
@@ -95,6 +96,9 @@ func (mysql priceMySQL) GetPriceByProductIDAndTime(ctx context.Context, productI
 //1   |    Jan 1, 1970, 00:00:00 |  Dec 20, 2011, 00:00:00  |   10$ |   10$
 //1   |   Dec 20, 2011, 00:00:01 |  Dec 26, 2011, 00:00:00  |  	10$ |   10$
 func (mysql priceMySQL) CreatePrice(ctx context.Context, price uint16, discount uint16, productId int, startAt time.Time, endAt time.Time, thirdPartyID *int) (*ent.Price, error) {
+	if startAt.Equal(endAt) {
+		return nil, ErrInvalidStartAtEndAt
+	}
 	if endAt.Before(startAt) {
 		return nil, ErrInvalidEndAt
 	}

@@ -20,6 +20,9 @@ func (v PlanServerValidator) CreatePlan(params *plan.CreatePlanParams) error {
 	if fromString.String() == "UNKNOWN" {
 		return twirp.InvalidArgumentError("unit", "unknown_unit")
 	}
+	if params.ProductId == 0 {
+		return twirp.RequiredArgumentError("product_id")
+	}
 	return nil
 }
 

@@ -23,8 +23,11 @@ type ThirdPartyPriceRepository interface {
 	Create(ctx context.Context, apple string, google *string, types Types)  					(*ent.ThirdPartyPrice, error)
 	CreateStartAt(ctx context.Context, apple string, google *string, startAt time.Time, types Types) (*ent.ThirdPartyPrice, error)
 	EndAt(ctx context.Context, month time.Month, day int, id int)								(*ent.ThirdPartyPrice, error)
-	GetThirdPartyPrices(ctx context.Context) 										  			([]*ent.ThirdPartyPrice, error)
-	GetThirdPartyPricesByTime(ctx context.Context, now time.Time) 								([]*ent.ThirdPartyPrice, error)
+	GetThirdPartyPrices(ctx context.Context, types string) 										([]*ent.ThirdPartyPrice, error)
+	GetThirdPartyPricesByTime(ctx context.Context, types string, now time.Time) 				([]*ent.ThirdPartyPrice, error)
+
+
+
 	Wipe(ctx context.Context)
 }
 
@@ -61,8 +64,11 @@ func (mysql price3rd) CreateStartAt(ctx context.Context, apple string, google *s
 	return save, nil
 }
 
-func (mysql price3rd) GetThirdPartyPricesByTime(ctx context.Context, now time.Time) ([]*ent.ThirdPartyPrice, error) {
+func (mysql price3rd) GetThirdPartyPricesByTime(ctx context.Context, types string, now time.Time) ([]*ent.ThirdPartyPrice, error) {
 	query := mysql.client.ThirdPartyPrice.Query().Where(thirdpartyprice.StartAtLTE(now), thirdpartyprice.EndAtGTE(now))
+	if !validator.IsEmpty(types) {
+		query.Where(thirdpartyprice.Type(types))
+	}
 	return query.All(ctx)
 }
 
@@ -127,9 +133,9 @@ func (mysql price3rd) EndAt(ctx context.Context, month time.Month, day int, id i
 	return updated, nil
 }
 
-func (mysql price3rd) GetThirdPartyPrices(ctx context.Context) ([]*ent.ThirdPartyPrice, error) {
+func (mysql price3rd) GetThirdPartyPrices(ctx context.Context, types string) ([]*ent.ThirdPartyPrice, error) {
 	now := time.Now().UTC()
-	return mysql.GetThirdPartyPricesByTime(ctx, now)
+	return mysql.GetThirdPartyPricesByTime(ctx,types, now)
 }
 
 func New(client *ent.Client) ThirdPartyPriceRepository {

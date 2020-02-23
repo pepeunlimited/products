@@ -24,7 +24,7 @@ message Price {
     uint32  discount        = 3;
     string  start_at        = 4;
     string  end_at          = 5;
-    int32   third_party_id  = 7;
+    int64   third_party_id  = 7;
     int64   product_id      = 9;
 }
 
@@ -36,7 +36,7 @@ message CreatePriceParams {
     uint32  price            = 5;  // => required
     uint32  discount         = 6;  // optional
     int64   product_id       = 7;  // => required
-    int32   third_party_id   = 9;  // optional
+    int64   third_party_id   = 9;  // optional
 }
 
 message GetPriceParams {

@@ -39,7 +39,7 @@ func TestPriceServer_CreatePrice(t *testing.T) {
 	server := NewPriceServer(ent.NewEntClient())
 	server.products.Wipe(ctx)
 	product, err := server.products.CreateProduct(ctx, "sku")
-	now := time.Now()
+	now := time.Now().Add(-24  * time.Hour)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

@@ -16,6 +16,8 @@ func Price(err error) error {
 		return twirp.InvalidArgumentError("product_id", "invalid_product_id")
 	case price.ErrPriceNotExist:
 		return twirp.NotFoundError("price_not_found")
+	case price.ErrInvalidStartAtEndAt:
+		return twirp.InvalidArgumentError("start_at_end_at","equal")
 	}
 	log.Print("price-service: unknown error: "+err.Error())
 	return twirp.InternalErrorWith(err)

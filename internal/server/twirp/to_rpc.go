@@ -12,7 +12,7 @@ import (
 
 func ToThirdParty(from *ent.ThirdPartyPrice) *thirdpartyprice.ThirdPartyPrice {
 	return &thirdpartyprice.ThirdPartyPrice{
-		Id:                      int32(from.ID),
+		Id:                      int64(from.ID),
 		InAppPurchaseSku:        from.InAppPurchaseSku,
 		GoogleBillingServiceSku: from.GoogleBillingServiceSku,
 		StartAt:                 from.StartAt.Format(time.RFC3339),
@@ -37,7 +37,7 @@ func ToPrice(from *ent.Price) *price.Price {
 		EndAt:    from.EndAt.Format(time.RFC3339),
 	}
 	if from.Edges.ThirdPartyPrices != nil {
-		p.ThirdPartyId = int32(from.Edges.ThirdPartyPrices.ID)
+		p.ThirdPartyId = int64(from.Edges.ThirdPartyPrices.ID)
 	}
 	if from.Edges.Products != nil {
 		p.ProductId = int64(from.Edges.Products.ID)
@@ -68,7 +68,7 @@ func ToPlan(from *ent.Plan) *plan.Plan {
 		p.ProductId = int64(from.Edges.Products.ID)
 	}
 	if from.Edges.ThirdPartyPrices != nil {
-		p.ThirdPartyPriceId = int32(from.Edges.ThirdPartyPrices.ID)
+		p.ThirdPartyPriceId = int64(from.Edges.ThirdPartyPrices.ID)
 	}
 	return p
 }

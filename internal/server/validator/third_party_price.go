@@ -61,6 +61,6 @@ func (v ThirdPartyServerValidator) EndThirdParty(params *thirdpartyprice.EndThir
 	return nil
 }
 
-func (v ThirdPartyServerValidator) GetThirdParties(params *thirdpartyprice.GetThirdPartiesParams) error {
+func (v ThirdPartyServerValidator) GetThirdPartyPrices(params *thirdpartyprice.GetThirdPartyPricesParams) error {
 	return nil
 }

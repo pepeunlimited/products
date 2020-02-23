@@ -17,7 +17,7 @@ func TestThirdPartyServer_CreateThirdParty(t *testing.T) {
 	party, err := server.CreateThirdPartyPrice(ctx, &thirdpartyprice.CreateThirdPartyPriceParams{
 		InAppPurchaseSku: "sku",
 		StartAtMonth:2,
-		StartAtDay:25,
+		StartAtDay:12,
 		Type:			  "NON_RENEWING_SUBSCRIPTIONS",
 	})
 	if err != nil {
@@ -135,8 +135,8 @@ func TestThirdPartyServer_GetThirdParties(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	now = now.Add(-24 * time.Hour)
-	_, err = server.EndThirdParty(ctx, &thirdpartyprice.EndThirdPartyPriceParams{
+	now = now.Add(-48 * time.Hour)
+	_, err = server.EndThirdPartyPrice(ctx, &thirdpartyprice.EndThirdPartyPriceParams{
 		Params: &thirdpartyprice.GetThirdPartyPriceParams{
 			ThirdPartyPriceId: sku1.Id,
 		},
@@ -148,17 +148,20 @@ func TestThirdPartyServer_GetThirdParties(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	_, err = server.thirdpartyprice.GetThirdPartyPrices(ctx)
+	_, err = server.thirdpartyprice.GetThirdPartyPrices(ctx, "NON_RENEWING_SUBSCRIPTIONS")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
-	fromServer, err := server.GetThirdPartyPrices(ctx, &thirdpartyprice.GetThirdPartiesParams{})
+	fromServer, err := server.GetThirdPartyPrices(ctx, &thirdpartyprice.GetThirdPartyPricesParams{
+		Type: "NON_RENEWING_SUBSCRIPTIONS",
+	})
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
 	if len(fromServer.ThirdPartyPrices) != 3 {
+		t.Log(len(fromServer.ThirdPartyPrices))
 		t.FailNow()
 	}
 }
