@@ -40,7 +40,7 @@ func TestPrice3rd_Create(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	sources, err := repo.GetThirdPartyPrices(ctx)
+	sources, err := repo.GetThirdPartyPrices(ctx, "")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -53,7 +53,7 @@ func TestPrice3rd_Create(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	sources, err = repo.GetThirdPartyPrices(ctx)
+	sources, err = repo.GetThirdPartyPrices(ctx, "")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
