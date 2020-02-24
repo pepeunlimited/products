@@ -14,6 +14,7 @@ var (
 	ErrThirdPartyPriceNotExist      = errors.New("third-party-price: not exist")
 	ErrInAppPurchaseSkuExist        = errors.New("third-party-price: in-app-purchase sku exist")
 	ErrGoogleBillingServiceSkuExist = errors.New("third-party-price: google-billing-service sku exist")
+	ErrInvalidEndAt 				= errors.New("third-party-price: invalid endAt")
 )
 
 type ThirdPartyPriceRepository interface {
@@ -25,8 +26,6 @@ type ThirdPartyPriceRepository interface {
 	EndAt(ctx context.Context, month time.Month, day int, id int)								(*ent.ThirdPartyPrice, error)
 	GetThirdPartyPrices(ctx context.Context, types string) 										([]*ent.ThirdPartyPrice, error)
 	GetThirdPartyPricesByTime(ctx context.Context, types string, now time.Time) 				([]*ent.ThirdPartyPrice, error)
-
-
 
 	Wipe(ctx context.Context)
 }
@@ -123,6 +122,9 @@ func (mysql price3rd) EndAt(ctx context.Context, month time.Month, day int, id i
 		return nil, err
 	}
 	endAt, err := clock.ToMonthDate(month, day)
+	if sources.StartAt.Add(-1 * time.Second).Equal(endAt) { // do not allow same date
+		return nil, ErrInvalidEndAt
+	}
 	if err != nil {
 		return nil, err
 	}

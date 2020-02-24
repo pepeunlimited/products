@@ -14,6 +14,8 @@ func ThirdParty(err error) error {
 		return twirp.NewError(twirp.AlreadyExists, "google_billing_service_sku_already_exist")
 	case thirdpartyprice.ErrInAppPurchaseSkuExist:
 		return twirp.NewError(twirp.AlreadyExists, "in_app_purchase_sku_already_exist")
+	case thirdpartyprice.ErrInvalidEndAt:
+		return twirp.InvalidArgumentError("end_at", "invalid_end_at")
 	}
 	log.Print("third-party-service: unknown error: "+err.Error())
 	return twirp.InternalErrorWith(err)

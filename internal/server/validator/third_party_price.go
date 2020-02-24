@@ -21,12 +21,6 @@ func (ThirdPartyServerValidator) CreateThirdParty(params *thirdpartyprice.Create
 	if validator.IsEmpty(params.InAppPurchaseSku) {
 		return twirp.RequiredArgumentError("in_app_purchase_sku")
 	}
-	if params.StartAtDay > 31 || params.StartAtDay < 0 {
-		return twirp.InvalidArgumentError("start_at_day", "invalid start_at_day")
-	}
-	if params.StartAtMonth > 12 || params.StartAtMonth < 0 {
-		return twirp.InvalidArgumentError("start_at_month", "invalid start_at_month")
-	}
 	if validator.IsEmpty(params.Type) {
 		return twirp.RequiredArgumentError("type")
 	}
