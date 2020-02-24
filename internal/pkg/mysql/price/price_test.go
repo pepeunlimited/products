@@ -56,14 +56,14 @@ func TestPriceMySQL_GetPricesByProductID(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	initial, err := pricerepo.CreateNewPrice(ctx, uint16(3), uint16(3), product.ID, nil)
+	initial, err := pricerepo.CreateNewPrice(ctx, int64(3), int64(3), product.ID, nil)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
 	}
 	pricerepo.EndAt(ctx, 2, 14, initial.ID)
 	startAt,_ := clock.ToMonthDate(2, 14)
-	createCurrent, err := pricerepo.CreatePrice(ctx, uint16(5), uint16(5), product.ID, startAt, clock.InfinityAt(), nil)
+	createCurrent, err := pricerepo.CreatePrice(ctx, int64(5), int64(5), product.ID, startAt, clock.InfinityAt(), nil)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

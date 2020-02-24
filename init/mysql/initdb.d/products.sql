@@ -30,8 +30,8 @@ CREATE TABLE plans (
    title_i18n_id     BIGINT      NOT NULL,
    start_at          DATETIME(3) NOT NULL,
    end_at            DATETIME(3) NOT NULL,
-   price             MEDIUMINT   UNSIGNED DEFAULT 0,
-   discount          MEDIUMINT   UNSIGNED DEFAULT 0,
+   price             BIGINT      DEFAULT 0,
+   discount          BIGINT      DEFAULT 0,
    length            TINYINT     UNSIGNED NOT NULL,
    unit              CHAR(7)     NOT NULL, # days, weeks, months
    product_plans     BIGINT      NOT NULL, # product whose pricing this plan determines.
@@ -56,11 +56,11 @@ CREATE TABLE prices (
     id                           BIGINT      NOT NULL AUTO_INCREMENT,
     start_at                     DATETIME(3) NOT NULL,
     end_at                       DATETIME(3) NOT NULL,
-    price                        MEDIUMINT   UNSIGNED DEFAULT 0,
-    discount                     MEDIUMINT   UNSIGNED DEFAULT 0,
+    price                        BIGINT      UNSIGNED DEFAULT 0,
+    discount                     BIGINT      UNSIGNED DEFAULT 0,
     product_prices               BIGINT      NOT NULL, # product whose pricing this determines.
-    third_party_price_prices     BIGINT     NULL,     # if price has option to use in-app-purchase
-    FOREIGN KEY (third_party_price_prices)  REFERENCES  third_party_prices (id),
+    third_party_price_prices     BIGINT      NULL,     # if price has option to use in-app-purchase
+    FOREIGN KEY (third_party_price_prices)   REFERENCES  third_party_prices (id),
     FOREIGN KEY (product_prices) REFERENCES  products (id),
     PRIMARY KEY (id)
 );

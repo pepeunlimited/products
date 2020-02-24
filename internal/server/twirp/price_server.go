@@ -76,7 +76,7 @@ func (server PriceServer) CreatePrice(ctx context.Context, params *price.CreateP
 			return nil, errorz.ThirdParty(err)
 		}
 	}
-	price, err := server.prices.CreatePrice(ctx, uint16(params.Price), uint16(params.Discount), int(params.ProductId), startAt, endAt, &thirdPartyId)
+	price, err := server.prices.CreatePrice(ctx, params.Price, params.Discount, int(params.ProductId), startAt, endAt, &thirdPartyId)
 	if err != nil {
 		return nil, errorz.Price(err)
 	}

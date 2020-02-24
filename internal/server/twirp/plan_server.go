@@ -69,7 +69,7 @@ func (server PlanServer) CreatePlan(ctx context.Context, params *plan.CreatePlan
 		}
 	}
 	thirdpartypriceId := int(params.ThirdPartyPriceId)
-	plan, err := server.plans.CreatePlan(ctx, params.TitleI18NId, uint8(params.Length), planrepo.PlanUnitFromString(params.Unit), uint16(params.Price), uint16(params.Discount), int(params.ProductId), startAt, endAt, &thirdpartypriceId)
+	plan, err := server.plans.CreatePlan(ctx, params.TitleI18NId, uint8(params.Length), planrepo.PlanUnitFromString(params.Unit), params.Price, params.Discount, int(params.ProductId), startAt, endAt, &thirdpartypriceId)
 	if err != nil {
 		return nil, errorz.Plan(err)
 	}

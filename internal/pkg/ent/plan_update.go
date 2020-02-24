@@ -27,10 +27,10 @@ type PlanUpdate struct {
 	addlength               *uint8
 	start_at                *time.Time
 	end_at                  *time.Time
-	price                   *uint16
-	addprice                *uint16
-	discount                *uint16
-	adddiscount             *uint16
+	price                   *int64
+	addprice                *int64
+	discount                *int64
+	adddiscount             *int64
 	unit                    *string
 	subscriptions           map[int]struct{}
 	products                map[int]struct{}
@@ -94,35 +94,35 @@ func (pu *PlanUpdate) SetEndAt(t time.Time) *PlanUpdate {
 }
 
 // SetPrice sets the price field.
-func (pu *PlanUpdate) SetPrice(u uint16) *PlanUpdate {
-	pu.price = &u
+func (pu *PlanUpdate) SetPrice(i int64) *PlanUpdate {
+	pu.price = &i
 	pu.addprice = nil
 	return pu
 }
 
-// AddPrice adds u to price.
-func (pu *PlanUpdate) AddPrice(u uint16) *PlanUpdate {
+// AddPrice adds i to price.
+func (pu *PlanUpdate) AddPrice(i int64) *PlanUpdate {
 	if pu.addprice == nil {
-		pu.addprice = &u
+		pu.addprice = &i
 	} else {
-		*pu.addprice += u
+		*pu.addprice += i
 	}
 	return pu
 }
 
 // SetDiscount sets the discount field.
-func (pu *PlanUpdate) SetDiscount(u uint16) *PlanUpdate {
-	pu.discount = &u
+func (pu *PlanUpdate) SetDiscount(i int64) *PlanUpdate {
+	pu.discount = &i
 	pu.adddiscount = nil
 	return pu
 }
 
-// AddDiscount adds u to discount.
-func (pu *PlanUpdate) AddDiscount(u uint16) *PlanUpdate {
+// AddDiscount adds i to discount.
+func (pu *PlanUpdate) AddDiscount(i int64) *PlanUpdate {
 	if pu.adddiscount == nil {
-		pu.adddiscount = &u
+		pu.adddiscount = &i
 	} else {
-		*pu.adddiscount += u
+		*pu.adddiscount += i
 	}
 	return pu
 }
@@ -329,28 +329,28 @@ func (pu *PlanUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value := pu.price; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint16,
+			Type:   field.TypeInt64,
 			Value:  *value,
 			Column: plan.FieldPrice,
 		})
 	}
 	if value := pu.addprice; value != nil {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint16,
+			Type:   field.TypeInt64,
 			Value:  *value,
 			Column: plan.FieldPrice,
 		})
 	}
 	if value := pu.discount; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint16,
+			Type:   field.TypeInt64,
 			Value:  *value,
 			Column: plan.FieldDiscount,
 		})
 	}
 	if value := pu.adddiscount; value != nil {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint16,
+			Type:   field.TypeInt64,
 			Value:  *value,
 			Column: plan.FieldDiscount,
 		})
@@ -489,10 +489,10 @@ type PlanUpdateOne struct {
 	addlength               *uint8
 	start_at                *time.Time
 	end_at                  *time.Time
-	price                   *uint16
-	addprice                *uint16
-	discount                *uint16
-	adddiscount             *uint16
+	price                   *int64
+	addprice                *int64
+	discount                *int64
+	adddiscount             *int64
 	unit                    *string
 	subscriptions           map[int]struct{}
 	products                map[int]struct{}
@@ -549,35 +549,35 @@ func (puo *PlanUpdateOne) SetEndAt(t time.Time) *PlanUpdateOne {
 }
 
 // SetPrice sets the price field.
-func (puo *PlanUpdateOne) SetPrice(u uint16) *PlanUpdateOne {
-	puo.price = &u
+func (puo *PlanUpdateOne) SetPrice(i int64) *PlanUpdateOne {
+	puo.price = &i
 	puo.addprice = nil
 	return puo
 }
 
-// AddPrice adds u to price.
-func (puo *PlanUpdateOne) AddPrice(u uint16) *PlanUpdateOne {
+// AddPrice adds i to price.
+func (puo *PlanUpdateOne) AddPrice(i int64) *PlanUpdateOne {
 	if puo.addprice == nil {
-		puo.addprice = &u
+		puo.addprice = &i
 	} else {
-		*puo.addprice += u
+		*puo.addprice += i
 	}
 	return puo
 }
 
 // SetDiscount sets the discount field.
-func (puo *PlanUpdateOne) SetDiscount(u uint16) *PlanUpdateOne {
-	puo.discount = &u
+func (puo *PlanUpdateOne) SetDiscount(i int64) *PlanUpdateOne {
+	puo.discount = &i
 	puo.adddiscount = nil
 	return puo
 }
 
-// AddDiscount adds u to discount.
-func (puo *PlanUpdateOne) AddDiscount(u uint16) *PlanUpdateOne {
+// AddDiscount adds i to discount.
+func (puo *PlanUpdateOne) AddDiscount(i int64) *PlanUpdateOne {
 	if puo.adddiscount == nil {
-		puo.adddiscount = &u
+		puo.adddiscount = &i
 	} else {
-		*puo.adddiscount += u
+		*puo.adddiscount += i
 	}
 	return puo
 }
@@ -778,28 +778,28 @@ func (puo *PlanUpdateOne) sqlSave(ctx context.Context) (pl *Plan, err error) {
 	}
 	if value := puo.price; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint16,
+			Type:   field.TypeInt64,
 			Value:  *value,
 			Column: plan.FieldPrice,
 		})
 	}
 	if value := puo.addprice; value != nil {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint16,
+			Type:   field.TypeInt64,
 			Value:  *value,
 			Column: plan.FieldPrice,
 		})
 	}
 	if value := puo.discount; value != nil {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint16,
+			Type:   field.TypeInt64,
 			Value:  *value,
 			Column: plan.FieldDiscount,
 		})
 	}
 	if value := puo.adddiscount; value != nil {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint16,
+			Type:   field.TypeInt64,
 			Value:  *value,
 			Column: plan.FieldDiscount,
 		})

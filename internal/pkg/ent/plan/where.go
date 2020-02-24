@@ -122,14 +122,14 @@ func EndAt(v time.Time) predicate.Plan {
 }
 
 // Price applies equality check predicate on the "price" field. It's identical to PriceEQ.
-func Price(v uint16) predicate.Plan {
+func Price(v int64) predicate.Plan {
 	return predicate.Plan(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldPrice), v))
 	})
 }
 
 // Discount applies equality check predicate on the "discount" field. It's identical to DiscountEQ.
-func Discount(v uint16) predicate.Plan {
+func Discount(v int64) predicate.Plan {
 	return predicate.Plan(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldDiscount), v))
 	})
@@ -447,21 +447,21 @@ func EndAtLTE(v time.Time) predicate.Plan {
 }
 
 // PriceEQ applies the EQ predicate on the "price" field.
-func PriceEQ(v uint16) predicate.Plan {
+func PriceEQ(v int64) predicate.Plan {
 	return predicate.Plan(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldPrice), v))
 	})
 }
 
 // PriceNEQ applies the NEQ predicate on the "price" field.
-func PriceNEQ(v uint16) predicate.Plan {
+func PriceNEQ(v int64) predicate.Plan {
 	return predicate.Plan(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldPrice), v))
 	})
 }
 
 // PriceIn applies the In predicate on the "price" field.
-func PriceIn(vs ...uint16) predicate.Plan {
+func PriceIn(vs ...int64) predicate.Plan {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -478,7 +478,7 @@ func PriceIn(vs ...uint16) predicate.Plan {
 }
 
 // PriceNotIn applies the NotIn predicate on the "price" field.
-func PriceNotIn(vs ...uint16) predicate.Plan {
+func PriceNotIn(vs ...int64) predicate.Plan {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -495,49 +495,49 @@ func PriceNotIn(vs ...uint16) predicate.Plan {
 }
 
 // PriceGT applies the GT predicate on the "price" field.
-func PriceGT(v uint16) predicate.Plan {
+func PriceGT(v int64) predicate.Plan {
 	return predicate.Plan(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldPrice), v))
 	})
 }
 
 // PriceGTE applies the GTE predicate on the "price" field.
-func PriceGTE(v uint16) predicate.Plan {
+func PriceGTE(v int64) predicate.Plan {
 	return predicate.Plan(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldPrice), v))
 	})
 }
 
 // PriceLT applies the LT predicate on the "price" field.
-func PriceLT(v uint16) predicate.Plan {
+func PriceLT(v int64) predicate.Plan {
 	return predicate.Plan(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldPrice), v))
 	})
 }
 
 // PriceLTE applies the LTE predicate on the "price" field.
-func PriceLTE(v uint16) predicate.Plan {
+func PriceLTE(v int64) predicate.Plan {
 	return predicate.Plan(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldPrice), v))
 	})
 }
 
 // DiscountEQ applies the EQ predicate on the "discount" field.
-func DiscountEQ(v uint16) predicate.Plan {
+func DiscountEQ(v int64) predicate.Plan {
 	return predicate.Plan(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldDiscount), v))
 	})
 }
 
 // DiscountNEQ applies the NEQ predicate on the "discount" field.
-func DiscountNEQ(v uint16) predicate.Plan {
+func DiscountNEQ(v int64) predicate.Plan {
 	return predicate.Plan(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldDiscount), v))
 	})
 }
 
 // DiscountIn applies the In predicate on the "discount" field.
-func DiscountIn(vs ...uint16) predicate.Plan {
+func DiscountIn(vs ...int64) predicate.Plan {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -554,7 +554,7 @@ func DiscountIn(vs ...uint16) predicate.Plan {
 }
 
 // DiscountNotIn applies the NotIn predicate on the "discount" field.
-func DiscountNotIn(vs ...uint16) predicate.Plan {
+func DiscountNotIn(vs ...int64) predicate.Plan {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -571,28 +571,28 @@ func DiscountNotIn(vs ...uint16) predicate.Plan {
 }
 
 // DiscountGT applies the GT predicate on the "discount" field.
-func DiscountGT(v uint16) predicate.Plan {
+func DiscountGT(v int64) predicate.Plan {
 	return predicate.Plan(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldDiscount), v))
 	})
 }
 
 // DiscountGTE applies the GTE predicate on the "discount" field.
-func DiscountGTE(v uint16) predicate.Plan {
+func DiscountGTE(v int64) predicate.Plan {
 	return predicate.Plan(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldDiscount), v))
 	})
 }
 
 // DiscountLT applies the LT predicate on the "discount" field.
-func DiscountLT(v uint16) predicate.Plan {
+func DiscountLT(v int64) predicate.Plan {
 	return predicate.Plan(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldDiscount), v))
 	})
 }
 
 // DiscountLTE applies the LTE predicate on the "discount" field.
-func DiscountLTE(v uint16) predicate.Plan {
+func DiscountLTE(v int64) predicate.Plan {
 	return predicate.Plan(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldDiscount), v))
 	})

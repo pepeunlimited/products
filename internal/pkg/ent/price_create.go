@@ -19,8 +19,8 @@ type PriceCreate struct {
 	config
 	start_at           *time.Time
 	end_at             *time.Time
-	price              *uint16
-	discount           *uint16
+	price              *int64
+	discount           *int64
 	products           map[int]struct{}
 	third_party_prices map[int]struct{}
 }
@@ -38,14 +38,14 @@ func (pc *PriceCreate) SetEndAt(t time.Time) *PriceCreate {
 }
 
 // SetPrice sets the price field.
-func (pc *PriceCreate) SetPrice(u uint16) *PriceCreate {
-	pc.price = &u
+func (pc *PriceCreate) SetPrice(i int64) *PriceCreate {
+	pc.price = &i
 	return pc
 }
 
 // SetDiscount sets the discount field.
-func (pc *PriceCreate) SetDiscount(u uint16) *PriceCreate {
-	pc.discount = &u
+func (pc *PriceCreate) SetDiscount(i int64) *PriceCreate {
+	pc.discount = &i
 	return pc
 }
 
@@ -154,7 +154,7 @@ func (pc *PriceCreate) sqlSave(ctx context.Context) (*Price, error) {
 	}
 	if value := pc.price; value != nil {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint16,
+			Type:   field.TypeInt64,
 			Value:  *value,
 			Column: price.FieldPrice,
 		})
@@ -162,7 +162,7 @@ func (pc *PriceCreate) sqlSave(ctx context.Context) (*Price, error) {
 	}
 	if value := pc.discount; value != nil {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint16,
+			Type:   field.TypeInt64,
 			Value:  *value,
 			Column: price.FieldDiscount,
 		})

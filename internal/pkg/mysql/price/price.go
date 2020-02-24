@@ -26,8 +26,8 @@ type PriceRepository interface {
 	GetPriceByProductIDAndTime(ctx context.Context, productId int, now time.Time, withProduct bool, withThirdParty bool) (*ent.Price, error)
 	GetPricesByProductID(ctx context.Context, productId int, isSequence bool) ([]*ent.Price, error)
 	GetPriceByID(ctx context.Context, id int, withProduct bool, withThirdParty bool) (*ent.Price, error)
-	CreateNewPrice(ctx context.Context, price uint16, discount uint16, productId int, thirdPartyID *int) (*ent.Price, error)
-	CreatePrice(ctx context.Context, price uint16, discount uint16, productId int, startAt time.Time, endAt time.Time, thirdPartyID *int) (*ent.Price, error)
+	CreateNewPrice(ctx context.Context, price int64, discount int64, productId int, thirdPartyID *int) (*ent.Price, error)
+	CreatePrice(ctx context.Context, price int64, discount int64, productId int, startAt time.Time, endAt time.Time, thirdPartyID *int) (*ent.Price, error)
 
 	EndAt(ctx context.Context, month time.Month, day int, priceId int) (*ent.Price, error)
 	Wipe(ctx context.Context)
@@ -95,7 +95,7 @@ func (mysql priceMySQL) GetPriceByProductIDAndTime(ctx context.Context, productI
 
 //1   |    Jan 1, 1970, 00:00:00 |  Dec 20, 2011, 00:00:00  |   10$ |   10$
 //1   |   Dec 20, 2011, 00:00:01 |  Dec 26, 2011, 00:00:00  |  	10$ |   10$
-func (mysql priceMySQL) CreatePrice(ctx context.Context, price uint16, discount uint16, productId int, startAt time.Time, endAt time.Time, thirdPartyID *int) (*ent.Price, error) {
+func (mysql priceMySQL) CreatePrice(ctx context.Context, price int64, discount int64, productId int, startAt time.Time, endAt time.Time, thirdPartyID *int) (*ent.Price, error) {
 	if startAt.Equal(endAt) {
 		return nil, ErrInvalidStartAtEndAt
 	}
@@ -211,7 +211,7 @@ func (mysql priceMySQL) Wipe(ctx context.Context) {
 	mysql.client.Product.Delete().ExecX(ctx)
 }
 
-func (mysql priceMySQL) CreateNewPrice(ctx context.Context, price uint16, discount uint16, productId int, iapSourceId *int) (*ent.Price, error) {
+func (mysql priceMySQL) CreateNewPrice(ctx context.Context, price int64, discount int64, productId int, iapSourceId *int) (*ent.Price, error) {
 	return mysql.CreatePrice(ctx, price, discount, productId, clock.ZeroAt().UTC(), clock.InfinityAt().UTC(), iapSourceId)
 }
 

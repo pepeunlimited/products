@@ -21,8 +21,8 @@ func (Plan) Fields() []ent.Field {
 		field.Uint8("length"),
 		field.Time("start_at"),
 		field.Time("end_at"),
-		field.Uint16("price"),
-		field.Uint16("discount"),
+		field.Int64("price"),
+		field.Int64("discount"),
 		field.String("unit").MaxLen(7),
 	}
 }

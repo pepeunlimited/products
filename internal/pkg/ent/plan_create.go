@@ -23,8 +23,8 @@ type PlanCreate struct {
 	length             *uint8
 	start_at           *time.Time
 	end_at             *time.Time
-	price              *uint16
-	discount           *uint16
+	price              *int64
+	discount           *int64
 	unit               *string
 	subscriptions      map[int]struct{}
 	products           map[int]struct{}
@@ -56,14 +56,14 @@ func (pc *PlanCreate) SetEndAt(t time.Time) *PlanCreate {
 }
 
 // SetPrice sets the price field.
-func (pc *PlanCreate) SetPrice(u uint16) *PlanCreate {
-	pc.price = &u
+func (pc *PlanCreate) SetPrice(i int64) *PlanCreate {
+	pc.price = &i
 	return pc
 }
 
 // SetDiscount sets the discount field.
-func (pc *PlanCreate) SetDiscount(u uint16) *PlanCreate {
-	pc.discount = &u
+func (pc *PlanCreate) SetDiscount(i int64) *PlanCreate {
+	pc.discount = &i
 	return pc
 }
 
@@ -226,7 +226,7 @@ func (pc *PlanCreate) sqlSave(ctx context.Context) (*Plan, error) {
 	}
 	if value := pc.price; value != nil {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint16,
+			Type:   field.TypeInt64,
 			Value:  *value,
 			Column: plan.FieldPrice,
 		})
@@ -234,7 +234,7 @@ func (pc *PlanCreate) sqlSave(ctx context.Context) (*Plan, error) {
 	}
 	if value := pc.discount; value != nil {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint16,
+			Type:   field.TypeInt64,
 			Value:  *value,
 			Column: plan.FieldDiscount,
 		})

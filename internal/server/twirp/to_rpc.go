@@ -31,8 +31,8 @@ func ToThirdParties(from []*ent.ThirdPartyPrice) []*thirdpartyprice.ThirdPartyPr
 func ToPrice(from *ent.Price) *price.Price {
 	p := &price.Price{
 		Id:       int64(from.ID),
-		Price:    uint32(from.Price),
-		Discount: uint32(from.Discount),
+		Price:    from.Price,
+		Discount: from.Discount,
 		StartAt:  from.StartAt.Format(time.RFC3339),
 		EndAt:    from.EndAt.Format(time.RFC3339),
 	}
@@ -59,8 +59,8 @@ func ToPlan(from *ent.Plan) *plan.Plan {
 		TitleI18NId:       from.TitleI18nID,
 		Unit:              from.Unit,
 		Length:            int32(from.Length),
-		Price:             uint32(from.Price),
-		Discount:          uint32(from.Discount),
+		Price:             from.Price,
+		Discount:          from.Discount,
 		StartAt:           from.StartAt.Format(time.RFC3339),
 		EndAt:             from.EndAt.Format(time.RFC3339),
 	}

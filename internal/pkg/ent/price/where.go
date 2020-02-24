@@ -108,14 +108,14 @@ func EndAt(v time.Time) predicate.Price {
 }
 
 // Price applies equality check predicate on the "price" field. It's identical to PriceEQ.
-func Price(v uint16) predicate.Price {
+func Price(v int64) predicate.Price {
 	return predicate.Price(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldPrice), v))
 	})
 }
 
 // Discount applies equality check predicate on the "discount" field. It's identical to DiscountEQ.
-func Discount(v uint16) predicate.Price {
+func Discount(v int64) predicate.Price {
 	return predicate.Price(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldDiscount), v))
 	})
@@ -274,21 +274,21 @@ func EndAtLTE(v time.Time) predicate.Price {
 }
 
 // PriceEQ applies the EQ predicate on the "price" field.
-func PriceEQ(v uint16) predicate.Price {
+func PriceEQ(v int64) predicate.Price {
 	return predicate.Price(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldPrice), v))
 	})
 }
 
 // PriceNEQ applies the NEQ predicate on the "price" field.
-func PriceNEQ(v uint16) predicate.Price {
+func PriceNEQ(v int64) predicate.Price {
 	return predicate.Price(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldPrice), v))
 	})
 }
 
 // PriceIn applies the In predicate on the "price" field.
-func PriceIn(vs ...uint16) predicate.Price {
+func PriceIn(vs ...int64) predicate.Price {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -305,7 +305,7 @@ func PriceIn(vs ...uint16) predicate.Price {
 }
 
 // PriceNotIn applies the NotIn predicate on the "price" field.
-func PriceNotIn(vs ...uint16) predicate.Price {
+func PriceNotIn(vs ...int64) predicate.Price {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -322,49 +322,49 @@ func PriceNotIn(vs ...uint16) predicate.Price {
 }
 
 // PriceGT applies the GT predicate on the "price" field.
-func PriceGT(v uint16) predicate.Price {
+func PriceGT(v int64) predicate.Price {
 	return predicate.Price(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldPrice), v))
 	})
 }
 
 // PriceGTE applies the GTE predicate on the "price" field.
-func PriceGTE(v uint16) predicate.Price {
+func PriceGTE(v int64) predicate.Price {
 	return predicate.Price(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldPrice), v))
 	})
 }
 
 // PriceLT applies the LT predicate on the "price" field.
-func PriceLT(v uint16) predicate.Price {
+func PriceLT(v int64) predicate.Price {
 	return predicate.Price(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldPrice), v))
 	})
 }
 
 // PriceLTE applies the LTE predicate on the "price" field.
-func PriceLTE(v uint16) predicate.Price {
+func PriceLTE(v int64) predicate.Price {
 	return predicate.Price(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldPrice), v))
 	})
 }
 
 // DiscountEQ applies the EQ predicate on the "discount" field.
-func DiscountEQ(v uint16) predicate.Price {
+func DiscountEQ(v int64) predicate.Price {
 	return predicate.Price(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldDiscount), v))
 	})
 }
 
 // DiscountNEQ applies the NEQ predicate on the "discount" field.
-func DiscountNEQ(v uint16) predicate.Price {
+func DiscountNEQ(v int64) predicate.Price {
 	return predicate.Price(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldDiscount), v))
 	})
 }
 
 // DiscountIn applies the In predicate on the "discount" field.
-func DiscountIn(vs ...uint16) predicate.Price {
+func DiscountIn(vs ...int64) predicate.Price {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -381,7 +381,7 @@ func DiscountIn(vs ...uint16) predicate.Price {
 }
 
 // DiscountNotIn applies the NotIn predicate on the "discount" field.
-func DiscountNotIn(vs ...uint16) predicate.Price {
+func DiscountNotIn(vs ...int64) predicate.Price {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -398,28 +398,28 @@ func DiscountNotIn(vs ...uint16) predicate.Price {
 }
 
 // DiscountGT applies the GT predicate on the "discount" field.
-func DiscountGT(v uint16) predicate.Price {
+func DiscountGT(v int64) predicate.Price {
 	return predicate.Price(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldDiscount), v))
 	})
 }
 
 // DiscountGTE applies the GTE predicate on the "discount" field.
-func DiscountGTE(v uint16) predicate.Price {
+func DiscountGTE(v int64) predicate.Price {
 	return predicate.Price(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldDiscount), v))
 	})
 }
 
 // DiscountLT applies the LT predicate on the "discount" field.
-func DiscountLT(v uint16) predicate.Price {
+func DiscountLT(v int64) predicate.Price {
 	return predicate.Price(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldDiscount), v))
 	})
 }
 
 // DiscountLTE applies the LTE predicate on the "discount" field.
-func DiscountLTE(v uint16) predicate.Price {
+func DiscountLTE(v int64) predicate.Price {
 	return predicate.Price(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldDiscount), v))
 	})

@@ -223,7 +223,7 @@ func TestPriceServer_GetPriceByProductId(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	if fromDB.Price != uint16(fromServer.Price) {
+	if fromDB.Price != fromServer.Price {
 		t.FailNow()
 	}
 	fromServer, err = server.GetPrice(ctx, &price.GetPriceParams{
@@ -238,7 +238,7 @@ func TestPriceServer_GetPriceByProductId(t *testing.T) {
 		t.Error(err)
 		t.FailNow()
 	}
-	if fromDB.Price != uint16(fromServer.Price) {
+	if fromDB.Price != fromServer.Price {
 		t.FailNow()
 	}
 }

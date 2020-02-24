@@ -27,9 +27,9 @@ type Plan struct {
 	// EndAt holds the value of the "end_at" field.
 	EndAt time.Time `json:"end_at,omitempty"`
 	// Price holds the value of the "price" field.
-	Price uint16 `json:"price,omitempty"`
+	Price int64 `json:"price,omitempty"`
 	// Discount holds the value of the "discount" field.
-	Discount uint16 `json:"discount,omitempty"`
+	Discount int64 `json:"discount,omitempty"`
 	// Unit holds the value of the "unit" field.
 	Unit string `json:"unit,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -146,12 +146,12 @@ func (pl *Plan) assignValues(values ...interface{}) error {
 	if value, ok := values[4].(*sql.NullInt64); !ok {
 		return fmt.Errorf("unexpected type %T for field price", values[4])
 	} else if value.Valid {
-		pl.Price = uint16(value.Int64)
+		pl.Price = value.Int64
 	}
 	if value, ok := values[5].(*sql.NullInt64); !ok {
 		return fmt.Errorf("unexpected type %T for field discount", values[5])
 	} else if value.Valid {
-		pl.Discount = uint16(value.Int64)
+		pl.Discount = value.Int64
 	}
 	if value, ok := values[6].(*sql.NullString); !ok {
 		return fmt.Errorf("unexpected type %T for field unit", values[6])

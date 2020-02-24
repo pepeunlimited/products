@@ -18,8 +18,8 @@ func (Price) Fields() []ent.Field {
 	return []ent.Field {
 		field.Time("start_at"),
 		field.Time("end_at"),
-		field.Uint16("price"),
-		field.Uint16("discount"),
+		field.Int64("price"),
+		field.Int64("discount"),
 	}
 }
 

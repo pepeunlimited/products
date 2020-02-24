@@ -19,8 +19,8 @@ var (
 )
 
 type PlanRepository interface {
-	CreatePlan(ctx context.Context, i18nId int64, length uint8, unit Unit, price uint16, discount uint16, productId int, startAt time.Time, endAt time.Time, price3rdId *int) (*ent.Plan, error)
-	CreateNewPlan(ctx context.Context, i18nId int64, length uint8, unit Unit, price uint16, discount uint16, productId int, price3rdId *int) (*ent.Plan, error)
+	CreatePlan(ctx context.Context, i18nId int64, length uint8, unit Unit, price int64, discount int64, productId int, startAt time.Time, endAt time.Time, price3rdId *int) (*ent.Plan, error)
+	CreateNewPlan(ctx context.Context, i18nId int64, length uint8, unit Unit, price int64, discount int64, productId int, price3rdId *int) (*ent.Plan, error)
 	EndPlanAt(ctx context.Context, month time.Month, day int, planId int) (*ent.Plan, error)
 
 	GetPlanByID(ctx context.Context, planId int) (*ent.Plan, error)
@@ -85,7 +85,7 @@ func (mysql planMySQL) GetPlansByProductId(ctx context.Context, productId int) (
 	return mysql.GetPlansByProductIdAndTime(ctx, productId, now)
 }
 
-func (mysql planMySQL) CreateNewPlan(ctx context.Context, i18nId int64, length uint8, unit Unit, price uint16, discount uint16, productId int, price3rdId *int) (*ent.Plan, error) {
+func (mysql planMySQL) CreateNewPlan(ctx context.Context, i18nId int64, length uint8, unit Unit, price int64, discount int64, productId int, price3rdId *int) (*ent.Plan, error) {
 	startAt := clock.ZeroAt()
 	endAt   := clock.InfinityAt()
 	return mysql.CreatePlan(ctx, i18nId, length, unit, price, discount, productId, startAt, endAt, price3rdId)
@@ -120,7 +120,7 @@ func (mysql planMySQL) Wipe(ctx context.Context) {
 	mysql.client.Product.Delete().ExecX(ctx)
 }
 
-func (mysql planMySQL) CreatePlan(ctx context.Context, i18nId int64, length uint8, unit Unit, price uint16, discount uint16, productId int, startAt time.Time, endAt time.Time, price3rdId *int) (*ent.Plan, error) {
+func (mysql planMySQL) CreatePlan(ctx context.Context, i18nId int64, length uint8, unit Unit, price int64, discount int64, productId int, startAt time.Time, endAt time.Time, price3rdId *int) (*ent.Plan, error) {
 	if endAt.Equal(startAt) {
 		return nil, ErrInvalidStartAtEndAt
 	}
