@@ -47,6 +47,9 @@ func (mysql planMySQL) EndPlanAt(ctx context.Context, month time.Month, day int,
 	if err != nil {
 		return nil, err
 	}
+	if plan.StartAt.Add(-1 * time.Second).Equal(endAt) { // do not allow same date
+		return nil, ErrInvalidEndAt
+	}
 	save, err := plan.Update().SetEndAt(endAt).Save(ctx)
 	if err != nil {
 		return nil, err

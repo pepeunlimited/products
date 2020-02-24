@@ -5,6 +5,7 @@ import (
 	"github.com/pepeunlimited/products/internal/pkg/ent"
 	"github.com/pepeunlimited/products/pkg/rpc/price"
 	"github.com/pepeunlimited/products/pkg/rpc/thirdpartyprice"
+	"github.com/twitchtv/twirp"
 	"testing"
 	"time"
 )
@@ -30,6 +31,65 @@ func TestPriceServer_GetPrice(t *testing.T) {
 		t.FailNow()
 	}
 	if price.ProductId == 0 {
+		t.FailNow()
+	}
+}
+
+func TestPriceServer_CreatePrice2(t *testing.T) {
+	ctx := context.TODO()
+	server := NewPriceServer(ent.NewEntClient())
+	server.products.Wipe(ctx)
+	product, err := server.products.CreateProduct(ctx, "sku")
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	fromServer, err := server.CreatePrice(ctx, &price.CreatePriceParams{
+		StartAtDay:   1,
+		StartAtMonth: 1,
+		EndAtDay:     4,
+		EndAtMonth:   1,
+		Price:        3,
+		Discount:     3,
+		ProductId:    int64(product.ID),
+		ThirdPartyId: 0,
+	})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	_, err = server.EndPriceAt(ctx, &price.EndPriceAtParams{
+		Params:     &price.GetPriceParams{PriceId: fromServer.Id},
+		EndAtDay:   1,
+		EndAtMonth: 1,
+	})
+	if err == nil {
+		t.FailNow()
+	}
+	if err.(twirp.Error).Code() != twirp.InvalidArgument {
+		t.FailNow()
+	}
+	_, err = server.EndPriceAt(ctx, &price.EndPriceAtParams{
+		Params:     &price.GetPriceParams{PriceId: fromServer.Id},
+		EndAtDay:   3,
+		EndAtMonth: 1,
+	})
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	_, err = server.CreatePrice(ctx, &price.CreatePriceParams{
+		StartAtDay:   3,
+		StartAtMonth: 1,
+		EndAtDay:     5,
+		EndAtMonth:   1,
+		Price:        3,
+		Discount:     3,
+		ProductId:    int64(product.ID),
+		ThirdPartyId: 0,
+	})
+	if err != nil {
+		t.Error(err)
 		t.FailNow()
 	}
 }

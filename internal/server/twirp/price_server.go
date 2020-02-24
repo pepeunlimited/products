@@ -33,6 +33,9 @@ func (server PriceServer) EndPriceAt(ctx context.Context, params *price.EndPrice
 		return nil, err
 	}
 	at, err := server.prices.EndAt(ctx, time.Month(params.EndAtMonth), int(params.EndAtDay), int(price.Id))
+	if err != nil {
+		return nil, errorz.Price(err)
+	}
 	return ToPrice(at), nil
 }
 

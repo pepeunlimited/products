@@ -190,6 +190,9 @@ func (mysql priceMySQL) EndAt(ctx context.Context, month time.Month, day int, pr
 		return nil, err
 	}
 	entAt, err := clock.ToMonthDate(month, day)
+	if prices.StartAt.Add(-1 * time.Second).Equal(entAt) { // do not allow same date
+		return nil, ErrInvalidEndAt
+	}
 	if err != nil {
 		return nil, err
 	}
